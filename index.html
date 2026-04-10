@@ -1,0 +1,1264 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scenario Log</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <style>
+        [x-cloak] { display: none !important; }
+        .no-select {
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -khtml-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #030712; }
+        ::-webkit-scrollbar-thumb { background: #1f2937; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #374151; }
+    </style>
+</head>
+<body class="bg-gray-950 text-green-50 min-h-screen relative transition-all duration-300">
+
+    <input type="file" id="importFile" accept=".json" class="hidden" onchange="window.handleImport(event)">
+
+    <div id="app" class="p-4 md:p-8 pb-32">
+        <!-- Der Inhalt wird per JavaScript geladen -->
+    </div>
+
+    <!-- 1. Modal für Event-Details (Ansicht) -->
+    <div id="eventModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-300">
+        <div class="bg-gray-900 border border-green-500/50 rounded-lg max-w-2xl w-full mx-4 shadow-2xl shadow-green-900/20 max-h-[90vh] flex flex-col">
+            <div class="p-4 border-b border-gray-800 flex justify-between items-center bg-gray-950/50 rounded-t-lg shrink-0">
+                <h3 id="modalTitle" class="text-xl font-bold text-green-400 uppercase tracking-wider"></h3>
+                <button onclick="window.closeModal('eventModal')" class="text-gray-500 hover:text-red-500 transition-colors p-1">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <div class="p-6 overflow-y-auto space-y-6 flex-1">
+                
+                <!-- Fluff-Text Block -->
+                <div id="modalFluffContainer" class="hidden">
+                    <h4 class="text-gray-500 text-sm uppercase tracking-wider mb-2 border-b border-gray-800 pb-1">Vorlesetext</h4>
+                    <div class="bg-gray-950/80 border-l-4 border-blue-500/70 p-4 rounded text-blue-200/90 italic shadow-inner text-sm leading-relaxed">
+                        <p id="modalFluff"></p>
+                    </div>
+                </div>
+
+                <div>
+                    <h4 class="text-gray-500 text-sm uppercase tracking-wider mb-2 border-b border-gray-800 pb-1">GM Informationen</h4>
+                    <p id="modalDesc" class="text-gray-300 leading-relaxed text-sm"></p>
+                </div>
+                <div>
+                    <h4 class="text-gray-500 text-sm uppercase tracking-wider mb-2 border-b border-gray-800 pb-1">Mögliche Schauplätze</h4>
+                    <p id="modalLocations" class="text-gray-400 text-sm"></p>
+                </div>
+                <div>
+                    <h4 class="text-gray-500 text-sm uppercase tracking-wider mb-2 border-b border-gray-800 pb-1">Relevante Figuren in dieser Szene</h4>
+                    <ul id="modalFigures" class="text-gray-400 text-sm space-y-2 list-none pl-0"></ul>
+                </div>
+                <div>
+                    <h4 class="text-gray-500 text-sm uppercase tracking-wider mb-2 border-b border-gray-800 pb-1">SL Notizen</h4>
+                    <textarea id="modalNotes" class="w-full bg-gray-950/50 border border-gray-700 rounded p-3 text-gray-300 focus:border-green-500 focus:ring-1 focus:ring-green-500 outline-none transition-colors min-h-[200px] resize-y" placeholder="Eigene Notizen, improvisierte Details oder Konsequenzen zu diesem Ereignis hier eintragen..."></textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. Modal für Akt-Details (Motivationen) -->
+    <div id="actModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-300">
+        <div class="bg-gray-900 border border-purple-500/50 rounded-lg max-w-2xl w-full mx-4 shadow-2xl shadow-purple-900/20 max-h-[90vh] flex flex-col">
+            <div class="p-4 border-b border-gray-800 flex justify-between items-center bg-gray-950/50 rounded-t-lg shrink-0">
+                <h3 id="actModalTitle" class="text-xl font-bold text-purple-400 uppercase tracking-wider"></h3>
+                <button onclick="window.closeModal('actModal')" class="text-gray-500 hover:text-red-500 transition-colors p-1">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <div class="p-6 overflow-y-auto space-y-6 flex-1">
+                <div>
+                    <h4 class="text-gray-500 text-sm uppercase tracking-wider mb-4 border-b border-gray-800 pb-1">Motivationen & Ziele der Figuren</h4>
+                    <ul id="actModalMotivations" class="text-gray-300 text-sm space-y-3 list-none pl-0"></ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. Editor Modal (Ereignisse bearbeiten/erstellen) -->
+    <div id="editModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-md opacity-0 pointer-events-none transition-opacity duration-300">
+        <div class="bg-gray-900 border border-blue-500/50 rounded-lg max-w-3xl w-full mx-4 shadow-2xl shadow-blue-900/20 max-h-[95vh] flex flex-col">
+            <div class="p-4 border-b border-gray-800 flex justify-between items-center bg-gray-950/80 rounded-t-lg shrink-0">
+                <h3 id="editModalHeader" class="text-xl font-bold text-blue-400 uppercase tracking-wider flex items-center gap-2">
+                    <span id="editModalTitle">Ereignis bearbeiten</span>
+                </h3>
+                <button onclick="window.closeModal('editModal')" class="text-gray-500 hover:text-red-500 transition-colors p-1">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <div class="p-6 overflow-y-auto space-y-5 flex-1 text-sm">
+                <input type="hidden" id="editId">
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div>
+                        <label class="block text-gray-400 uppercase tracking-wider text-xs mb-1">Zugehöriger Akt</label>
+                        <input type="text" id="editAct" list="actDatalist" class="w-full bg-gray-950 border border-gray-700 rounded p-2 text-gray-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none" placeholder="Neuer oder bestehender Akt...">
+                        <datalist id="actDatalist"></datalist>
+                    </div>
+                    <div>
+                        <label class="block text-gray-400 uppercase tracking-wider text-xs mb-1">Titel des Ereignisses</label>
+                        <input type="text" id="editTitle" class="w-full bg-gray-950 border border-gray-700 rounded p-2 text-gray-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none" placeholder="Titel...">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5 items-center">
+                    <div>
+                        <label class="flex items-center gap-3 cursor-pointer group w-max">
+                            <div class="relative flex items-center justify-center w-6 h-6 border-2 border-gray-600 bg-gray-950 rounded group-hover:border-blue-500 transition-colors">
+                                <input type="checkbox" id="editTypeCheckbox" class="peer absolute opacity-0 w-full h-full cursor-pointer">
+                                <svg class="w-4 h-4 text-blue-500 opacity-0 peer-checked:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                            </div>
+                            <div>
+                                <span class="block text-gray-200 text-sm font-bold">Notwendiges Ereignis</span>
+                                <span class="block text-gray-500 text-xs mt-0.5">Ohne Haken = Optionales Event</span>
+                            </div>
+                        </label>
+                    </div>
+                    <div>
+                        <label class="block text-gray-400 uppercase tracking-wider text-xs mb-2">Icon auswählen</label>
+                        <div class="flex flex-wrap gap-2" id="iconSelectionContainer">
+                            <!-- Wird per JS befüllt -->
+                        </div>
+                        <input type="hidden" id="editIcon" value="Rocket">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-blue-400/80 uppercase tracking-wider text-xs mb-1">Vorlesetext (Optional)</label>
+                    <textarea id="editFluff" class="w-full bg-gray-950 border border-gray-700 rounded p-2 text-blue-200 italic focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none min-h-[150px] resize-y" placeholder="Text, den du den Spielern stimmungsvoll vorlesen kannst..."></textarea>
+                </div>
+
+                <div>
+                    <label class="block text-gray-400 uppercase tracking-wider text-xs mb-1">GM Beschreibung / Was passiert?</label>
+                    <textarea id="editDesc" class="w-full bg-gray-950 border border-gray-700 rounded p-2 text-gray-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none min-h-[250px] resize-y" placeholder="Die harten Fakten für dich als SL..."></textarea>
+                </div>
+
+                <div>
+                    <label class="block text-gray-400 uppercase tracking-wider text-xs mb-1">Mögliche Schauplätze</label>
+                    <input type="text" id="editLocations" class="w-full bg-gray-950 border border-gray-700 rounded p-2 text-gray-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none" placeholder="z.B. Brücke, Reaktorraum, Kantine...">
+                </div>
+
+                <div>
+                    <label class="block text-gray-400 uppercase tracking-wider text-xs mb-1">Relevante Figuren (Kommagetrennt)</label>
+                    <input type="text" id="editFigures" class="w-full bg-gray-950 border border-gray-700 rounded p-2 text-gray-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none" placeholder="z.B. Dr. Vane, Kaelen, O.S.C.A.R.">
+                    <p class="text-xs text-gray-600 mt-1">Namen exakt wie im Fraktions-System schreiben, um Badges zu erhalten.</p>
+                </div>
+            </div>
+            
+            <div class="p-4 border-t border-gray-800 bg-gray-950/80 rounded-b-lg shrink-0 flex justify-between items-center">
+                <button id="btnDeleteEvent" onclick="window.deleteEvent()" class="px-4 py-2 bg-red-900/30 hover:bg-red-800/60 border border-red-800/50 rounded text-red-400 transition-colors flex items-center gap-2">
+                    <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                    Löschen
+                </button>
+                <div class="flex gap-3">
+                    <button onclick="window.closeModal('editModal')" class="px-4 py-2 bg-gray-800 hover:bg-gray-700 border border-gray-600 rounded text-gray-300 transition-colors">Abbrechen</button>
+                    <button onclick="window.saveEvent()" class="px-6 py-2 bg-blue-600 hover:bg-blue-500 rounded font-bold text-white shadow-lg shadow-blue-900/50 transition-all">Speichern</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. Fraktionen Editor Modal -->
+    <div id="factionModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-md opacity-0 pointer-events-none transition-opacity duration-300">
+        <div class="bg-gray-900 border border-orange-500/50 rounded-lg max-w-2xl w-full mx-4 shadow-2xl shadow-orange-900/20 max-h-[90vh] flex flex-col">
+            <div class="p-4 border-b border-gray-800 flex justify-between items-center bg-gray-950/80 rounded-t-lg shrink-0">
+                <h3 class="text-xl font-bold text-orange-400 uppercase tracking-wider flex items-center gap-2">Fraktionen verwalten</h3>
+                <button onclick="window.closeModal('factionModal')" class="text-gray-500 hover:text-red-500 transition-colors p-1">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <div class="p-6 overflow-y-auto flex-1">
+                <div class="grid grid-cols-12 gap-2 font-bold text-gray-400 text-xs uppercase tracking-wider mb-3">
+                    <div class="col-span-5 pl-2">Name der Figur</div>
+                    <div class="col-span-6 pl-2">Fraktions-Badge</div>
+                    <div class="col-span-1"></div>
+                </div>
+                <div id="factionList" class="space-y-2">
+                    <!-- Wird per JS befüllt -->
+                </div>
+                <button onclick="window.addFactionRow()" class="mt-5 px-4 py-2 bg-gray-800 hover:bg-gray-700 border border-gray-600 text-sm rounded text-gray-200 transition-colors">
+                    + Neue Figur hinzufügen
+                </button>
+            </div>
+            <div class="p-4 border-t border-gray-800 bg-gray-950/80 rounded-b-lg shrink-0 flex justify-end gap-3">
+                <button onclick="window.closeModal('factionModal')" class="px-4 py-2 bg-gray-800 hover:bg-gray-700 border border-gray-600 rounded text-gray-300 transition-colors">Abbrechen</button>
+                <button onclick="window.saveFactions()" class="px-6 py-2 bg-orange-600 hover:bg-orange-500 rounded font-bold text-white shadow-lg shadow-orange-900/50 transition-all">Speichern</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 5. Header / Titel Editor Modal -->
+    <div id="headerModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-md opacity-0 pointer-events-none transition-opacity duration-300">
+        <div class="bg-gray-900 border border-green-500/50 rounded-lg max-w-xl w-full mx-4 shadow-2xl shadow-green-900/20 max-h-[90vh] flex flex-col">
+            <div class="p-4 border-b border-gray-800 flex justify-between items-center bg-gray-950/80 rounded-t-lg shrink-0">
+                <h3 class="text-xl font-bold text-green-400 uppercase tracking-wider">Titel & Design anpassen</h3>
+                <button onclick="window.closeModal('headerModal')" class="text-gray-500 hover:text-red-500 transition-colors p-1">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <div class="p-6 overflow-y-auto space-y-5 flex-1">
+                <div>
+                    <label class="block text-gray-400 uppercase tracking-wider text-xs mb-1">Haupttitel</label>
+                    <input type="text" id="editAppTitle" class="w-full bg-gray-950 border border-gray-700 rounded p-2 text-gray-200 focus:border-green-500 focus:ring-1 focus:ring-green-500 outline-none font-bold">
+                </div>
+                <div>
+                    <label class="block text-gray-400 uppercase tracking-wider text-xs mb-1">Untertitel</label>
+                    <input type="text" id="editAppSubtitle" class="w-full bg-gray-950 border border-gray-700 rounded p-2 text-gray-200 focus:border-green-500 focus:ring-1 focus:ring-green-500 outline-none">
+                </div>
+                
+                <div class="border-t border-gray-800 pt-5 mt-5 grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-gray-400 uppercase tracking-wider text-xs mb-1">Schriftart (Überschriften)</label>
+                        <select id="editAppFontHeading" class="w-full bg-gray-950 border border-gray-700 rounded p-2 text-gray-200 focus:border-green-500 focus:ring-1 focus:ring-green-500 outline-none">
+                            <option value="Orbitron">Orbitron (Futuristisch)</option>
+                            <option value="Space Mono">Space Mono (Terminal)</option>
+                            <option value="Rajdhani">Rajdhani (Sci-Fi Tech)</option>
+                            <option value="Exo 2">Exo 2 (Modern Tech)</option>
+                            <option value="Special Elite">Special Elite (Akte)</option>
+                            <option value="Cinzel">Cinzel (Episch)</option>
+                            <option value="Inter">Inter (Klar)</option>
+                            <option value="Roboto">Roboto (Standard)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-gray-400 uppercase tracking-wider text-xs mb-1">Schriftart (Fließtext)</label>
+                        <select id="editAppFontBody" class="w-full bg-gray-950 border border-gray-700 rounded p-2 text-gray-200 focus:border-green-500 focus:ring-1 focus:ring-green-500 outline-none">
+                            <option value="Inter">Inter (Klar & Modern)</option>
+                            <option value="Space Mono">Space Mono (Terminal)</option>
+                            <option value="Roboto">Roboto (Standard)</option>
+                            <option value="Special Elite">Special Elite (Akte)</option>
+                            <option value="Rajdhani">Rajdhani (Sci-Fi Tech)</option>
+                            <option value="Exo 2">Exo 2 (Modern Tech)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="p-4 border-t border-gray-800 bg-gray-950/80 rounded-b-lg shrink-0 flex justify-end gap-3">
+                <button onclick="window.closeModal('headerModal')" class="px-4 py-2 bg-gray-800 hover:bg-gray-700 border border-gray-600 rounded text-gray-300 transition-colors">Abbrechen</button>
+                <button onclick="window.saveHeader()" class="px-6 py-2 bg-green-600 hover:bg-green-500 rounded font-bold text-white shadow-lg shadow-green-900/50 transition-all">Speichern</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 6. Export Modal -->
+    <div id="exportModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-md opacity-0 pointer-events-none transition-opacity duration-300">
+        <div class="bg-gray-900 border border-gray-500/50 rounded-lg max-w-2xl w-full mx-4 shadow-2xl max-h-[90vh] flex flex-col">
+            <div class="p-4 border-b border-gray-800 flex justify-between items-center bg-gray-950/80 rounded-t-lg shrink-0">
+                <h3 class="text-xl font-bold text-gray-300 uppercase tracking-wider flex items-center gap-2">Daten exportieren</h3>
+                <button onclick="window.closeModal('exportModal')" class="text-gray-500 hover:text-red-500 transition-colors p-1">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <div class="p-6 overflow-y-auto flex-1 flex flex-col gap-4">
+                <p class="text-sm text-gray-400">Falls der direkte Download blockiert wird, kannst du den Code hier kopieren und in eine Textdatei (z.B. <code class="text-green-400">savegame.json</code>) einfügen.</p>
+                <textarea id="exportTextarea" readonly class="w-full h-48 bg-gray-950 border border-gray-700 rounded p-3 text-xs text-green-500/80 font-mono outline-none resize-y"></textarea>
+                <div id="copySuccessMsg" class="text-green-400 text-sm font-bold opacity-0 transition-opacity">Erfolgreich kopiert!</div>
+            </div>
+            <div class="p-4 border-t border-gray-800 bg-gray-950/80 rounded-b-lg shrink-0 flex flex-wrap justify-end gap-3">
+                <button onclick="window.closeModal('exportModal')" class="px-4 py-2 bg-gray-800 hover:bg-gray-700 border border-gray-600 rounded text-gray-300 transition-colors">Schließen</button>
+                <button onclick="window.copyExportToClipboard()" class="px-6 py-2 bg-gray-700 hover:bg-gray-600 border border-gray-500 rounded font-bold text-white transition-all flex items-center gap-2">
+                    <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                    Code Kopieren
+                </button>
+                <button onclick="window.triggerDownloadFile()" class="px-6 py-2 bg-green-600 hover:bg-green-500 rounded font-bold text-white shadow-lg shadow-green-900/50 transition-all flex items-center gap-2">
+                    <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg> 
+                    Datei Download
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 7. Import Modal -->
+    <div id="importModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-md opacity-0 pointer-events-none transition-opacity duration-300">
+        <div class="bg-gray-900 border border-blue-500/50 rounded-lg max-w-xl w-full mx-4 shadow-2xl flex flex-col max-h-[90vh]">
+            <div class="p-4 border-b border-gray-800 flex justify-between items-center bg-gray-950/80 rounded-t-lg shrink-0">
+                <h3 class="text-xl font-bold text-gray-300 uppercase tracking-wider flex items-center gap-2">Daten importieren</h3>
+                <button onclick="window.closeModal('importModal')" class="text-gray-500 hover:text-red-500 transition-colors p-1">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <div class="p-6 space-y-8 flex-1 overflow-y-auto">
+                
+                <!-- Option 1: File Upload -->
+                <div>
+                    <h4 class="text-gray-400 text-sm font-bold uppercase tracking-wider mb-3">1. Aus lokaler Datei</h4>
+                    <button onclick="document.getElementById('importFile').click()" class="w-full flex justify-center items-center gap-2 px-4 py-4 bg-gray-800 hover:bg-gray-700 border border-gray-600 rounded text-gray-200 transition-colors shadow-inner">
+                        <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                        Savegame-Datei (.json) auswählen
+                    </button>
+                </div>
+
+                <div class="flex items-center gap-4 opacity-50">
+                    <div class="h-px bg-gray-600 flex-1"></div>
+                    <span class="text-gray-400 text-xs font-bold uppercase">ODER</span>
+                    <div class="h-px bg-gray-600 flex-1"></div>
+                </div>
+
+                <!-- Option 2: Predefined Scenarios -->
+                <div>
+                    <h4 class="text-gray-400 text-sm font-bold uppercase tracking-wider mb-3">2. Vorgefertigtes Szenario laden</h4>
+                    <div class="grid grid-cols-1 gap-2" id="predefinedScenariosContainer">
+                        <!-- Wird per JS befüllt -->
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-4 opacity-50">
+                    <div class="h-px bg-gray-600 flex-1"></div>
+                    <span class="text-gray-400 text-xs font-bold uppercase">ODER</span>
+                    <div class="h-px bg-gray-600 flex-1"></div>
+                </div>
+
+                <!-- Option 3: URL Import -->
+                <div>
+                    <h4 class="text-gray-400 text-sm font-bold uppercase tracking-wider mb-3">3. Von einer eigenen URL laden</h4>
+                    <div class="flex flex-col sm:flex-row gap-2">
+                        <input type="text" id="importUrlInput" class="flex-1 bg-gray-950 border border-gray-700 rounded p-3 text-sm text-gray-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none" placeholder="https://beispiel.de/savegame.json">
+                        <button onclick="window.importFromUrl()" id="btnUrlImport" class="px-6 py-3 bg-blue-900/40 hover:bg-blue-800/60 border border-blue-700 rounded text-blue-400 font-bold transition-colors whitespace-nowrap flex items-center justify-center gap-2">
+                            <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+                            Laden
+                        </button>
+                    </div>
+                    <p id="importUrlError" class="text-red-400 text-xs mt-2 hidden"></p>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- PREDEFINED SCENARIOS ---
+        // Hier kannst du die URLs für deine vorgefertigten Szenarien hinterlegen.
+        const predefinedScenariosList = [
+            { id: 'demo1', name: 'Demo Szenario 1: Echoes', url: 'https://raw.githubusercontent.com/DeinUser/DeinRepo/main/echoes.json' },
+            { id: 'demo2', name: 'Demo Szenario 2: Der Schwarze Regen', url: 'https://raw.githubusercontent.com/DeinUser/DeinRepo/main/regen.json' },
+            { id: 'demo3', name: 'Demo Szenario 3: Terminal Velocity', url: 'https://raw.githubusercontent.com/DeinUser/DeinRepo/main/velocity.json' }
+        ];
+
+        // --- ICON LIBRARY ---
+        const icons = {
+            Rocket: `<svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"></path><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"></path><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"></path><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"></path></svg>`,
+            Radio: `<svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.9 19.1C1 15.2 1 8.8 4.9 4.9"></path><path d="M7.8 16.2c-2.3-2.3-2.3-6.1 0-8.5"></path><circle cx="12" cy="12" r="2"></circle><path d="M16.2 7.8c2.3 2.3 2.3 6.1 0 8.5"></path><path d="M19.1 4.9C23 8.8 23 15.1 19.1 19"></path></svg>`,
+            AlertCircle: `<svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>`,
+            ShieldAlert: `<svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><path d="M12 8v4"></path><path d="M12 16h.01"></path></svg>`,
+            Crosshair: `<svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="22" y1="12" x2="18" y2="12"></line><line x1="6" y1="12" x2="2" y2="12"></line><line x1="12" y1="6" x2="12" y2="2"></line><line x1="12" y1="22" x2="12" y2="18"></line></svg>`,
+            Skull: `<svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="12" r="1"></circle><circle cx="15" cy="12" r="1"></circle><path d="M8 20v2h8v-2"></path><path d="m12.5 17-.5-1-.5 1h1z"></path><path d="M16 20a2 2 0 0 0 1.56-3.25 8 8 0 1 0-11.12 0A2 2 0 0 0 8 20"></path></svg>`,
+            CheckSquare: `<svg class="w-5 h-5 text-green-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"></polyline><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>`,
+            Square: `<svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"></rect></svg>`,
+            ChevronDown: `<svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"></path></svg>`,
+            ChevronUp: `<svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"></path></svg>`,
+            ChevronRight: `<svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"></path></svg>`,
+            Upload: `<svg class="w-4 h-4 md:w-5 md:h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>`,
+            Download: `<svg class="w-4 h-4 md:w-5 md:h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>`,
+            Plus: `<svg class="w-4 h-4 md:w-5 md:h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>`,
+            Pencil: `<svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>`,
+            Users: `<svg class="w-4 h-4 md:w-5 md:h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>`,
+            Trash: `<svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>`,
+            Book: `<svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"></path></svg>`,
+            Reset: `<svg class="w-4 h-4 md:w-5 md:h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg>`
+        };
+
+        const availableIcons = [
+            { id: 'Rocket', title: 'Rakete (Start/Flucht)' },
+            { id: 'Radio', title: 'Funk (Signale/Infos)' },
+            { id: 'AlertCircle', title: 'Alarm (Gefahr/Eskalation)' },
+            { id: 'ShieldAlert', title: 'Schild (Konzern/Sicherheit)' },
+            { id: 'Crosshair', title: 'Fadenkreuz (Kampf/Meuterei)' },
+            { id: 'Skull', title: 'Totenkopf (Aliens/Tod)' }
+        ];
+
+        // --- APP STATE ---
+        let appTitle = "Station Kappa-7";
+        let appSubtitle = "MINENKOLONIE // VORFALL-PROTOKOLL (DEMO)";
+        let appFontHeading = "Orbitron"; 
+        let appFontBody = "Inter";
+
+        let expandedId = null;
+        let checkedIds = new Set();
+        let collapsedActs = new Set();
+        let clickTimers = {};
+        let eventNotes = {};
+        let currentOpenEventId = null;
+
+        // --- INITIAL DATA (DEMO SZENARIO) ---
+        let factions = {
+            "Kaelen": "Minengewerkschaft",
+            "Dr. Vane": "Weyland-Yutani",
+            "Sgt. Rourke": "Stationssicherheit",
+            "O.S.C.A.R. (KI)": "System",
+            "Die Parasiten": "Alien Bedrohung"
+        };
+
+        let actData = {
+            "Akt I: Das Flüstern im Eis": [
+                "Kaelen (Minenarbeiter): Will einfach nur seine Schicht beenden und unverletzt bleiben. Hasst den Konzern.",
+                "Dr. Vane (Forschung): Ist fasziniert von den ungewöhnlichen Energiewerten unter dem Eis. Will den Fund vor der Security verbergen.",
+                "Sgt. Rourke (Sicherheit): Verzweifelt bemüht, die Disziplin unter den unruhigen und müden Minenarbeitern aufrechtzuerhalten."
+            ],
+            "Akt II: Dunkelheit fällt": [
+                "Dr. Vane: Will unbedingt einen lebenden Parasiten für die Konzernforschung isolieren. Ignoriert dabei sämtliche Sicherheitsbedenken.",
+                "Sgt. Rourke: Erkennt die tödliche Gefahr. Will Sektor C hermetisch abriegeln, auch wenn noch ahnungslose Arbeiter dort festsitzen.",
+                "Kaelen: Versucht seine verschollene Crew aus der Quarantänezone zu retten, bevor die Schotten endgültig fallen."
+            ],
+            "Akt III: Letzter Ausweg": [
+                "O.S.C.A.R. (KI): Hat die unumstößliche Direktive erhalten, eine biologische Kontamination des Restsystems zu verhindern. Leitet den Reaktor-Overload ein.",
+                "Kaelen & Rourke: Müssen widerwillig zusammenarbeiten, um sich den Weg zum einzigen verbliebenen Frachtshuttle freizuschießen.",
+                "Dr. Vane: Würde eher die gesamte Station und alle Überlebenden opfern, als ihre gesammelten Datenblätter und Proben zurückzulassen."
+            ]
+        };
+
+        let events = [
+            { id: 1, act: "Akt I: Das Flüstern im Eis", title: "Seismische Anomalie", type: "Notwendig", description: "Die Bohrköpfe in Sektor C sind auf eine unnatürliche, uralte Eishöhle gestoßen. Der Kontakt zum 4er-Bohrteam ist unvermittelt abgerissen. Die Spieler müssen nach dem Rechten sehen.", fluff: "Ein tiefes Grollen durchzieht das Metall der Station. Staub rieselt aus den rostigen Lüftungsschächten auf eure Schultern. Dann: Stille. Zu viel Stille für eine aktive Minenanlage.", icon: "AlertCircle", locations: "Sektor C, Bohrschacht 4", figures: ["Kaelen", "Sgt. Rourke"] },
+            { id: 2, act: "Akt I: Das Flüstern im Eis", title: "Funkspruch aus der Tiefe", type: "Optional", description: "Ein Kollege funkt um Hilfe. Doch wer genau hinhört (Sensorik/Comtech-Wurf), merkt, dass seine Stimme verzerrt ist und er die SC absichtlich in einen toten Winkel locken will.", fluff: "Das Funkgerät an Kaelens Gürtel rauscht knisternd auf. Zwischen der Statik hört ihr ein feuchtes, unregelmäßiges Atmen. '...brauchen... Hilfe... Schacht vier...'", icon: "Radio", locations: "Aufzugsanlage, Ebene -2", figures: ["Kaelen"] },
+            { id: 3, act: "Akt I: Das Flüstern im Eis", title: "Geheimniskrämerei", type: "Optional", description: "Dr. Vane wird erwischt, wie sie verschlüsselte Daten an ein unbekanntes Konzern-Relais sendet. Rourke oder Kaelen werden misstrauisch. Guter Moment, um Paranoia innerhalb der Gruppe aufzubauen.", fluff: "Grüne Zeilen rattern über den Bildschirm im Labor. Als sich die Tür öffnet, schlägt Dr. Vane hastig auf die Tastatur. 'Nur Routineberichte', sagt sie, aber der Schweiß auf ihrer Stirn lügt.", icon: "Radio", locations: "MedLab 1, Kommunikationsrelais", figures: ["Dr. Vane", "Sgt. Rourke"] },
+            { id: 4, act: "Akt II: Dunkelheit fällt", title: "Quarantäne-Protokoll Alpha", type: "Notwendig", description: "Die Stations-KI O.S.C.A.R. registriert Fremdorganismen. Sie riegelt Sektor C rigoros ab. Die Gruppe wird entweder getrennt oder muss einen lebensgefährlichen Weg durch die schmalen Wartungsschächte finden. Erste direkte Konfrontation mit den Parasiten.", fluff: "Schwere Stahlschotts rammen sich mit einem ohrenbetäubenden Knall in den Boden. Rotes Notlicht taucht die engen Gänge in ein blutiges Dämmerlicht. Ihr seid eingesperrt.", icon: "ShieldAlert", locations: "Sektor C Luftschleusen, Wartungsschächte", figures: ["Sgt. Rourke", "O.S.C.A.R. (KI)", "Die Parasiten"] },
+            { id: 5, act: "Akt II: Dunkelheit fällt", title: "Meuterei der Schicht 3", type: "Notwendig", description: "Die eingeschlossenen Minenarbeiter geraten in Panik. Sie bewaffnen sich mit Bergbauwerkzeugen und wollen Rourkes Barrikade durchbrechen, unwissend, dass sie damit die Quarantäne aufheben würden.", fluff: "Das dumpfe Schlagen von schweren Plasmaschneidern gegen die Sicherheitstür dröhnt in euren Ohren. 'Lasst uns raus, Rourke! Wir wissen, dass ihr uns hier unten verrecken lassen wollt!'", icon: "Crosshair", locations: "Kantine Sektor C, Hauptkorridor", figures: ["Sgt. Rourke", "Kaelen"] },
+            { id: 6, act: "Akt II: Dunkelheit fällt", title: "Sabotage im MedLab", type: "Optional", description: "Dr. Vane hat heimlich eine infizierte Gewebeprobe entwendet. Dabei hat sie den Hauptverteilerkasten zerstört, um Spuren zu verwischen, was den Strom auf der halben Ebene ausfallen lässt.", fluff: "Die medizinischen Monitore sind zerschmettert. Glassplitter knirschen unter euren Stiefeln, und der einzige intakte Probenbehälter auf dem Tisch ist verheerend leer.", icon: "AlertCircle", locations: "MedLab 1", figures: ["Dr. Vane"] },
+            { id: 7, act: "Akt II: Dunkelheit fällt", title: "Durchbruch", type: "Notwendig", description: "Die Parasiten haben einen Weg durch die Lüftung gefunden. Der erste direkte, unerbittliche Angriff auf die isolierte Gruppe. Jemand wird infiziert oder schwer verletzt.", fluff: "Das Gitter über euch wölbt sich kreischend nach unten. Erst bricht eine Niete, dann die nächste. Etwas Großes, Schweres drängt sich durch den engen Schacht...", icon: "Skull", locations: "Überall (Korridore, Wartungsschächte)", figures: ["Die Parasiten"] },
+            { id: 8, act: "Akt III: Letzter Ausweg", title: "Der Countdown läuft", type: "Notwendig", description: "O.S.C.A.R. sieht keine andere Lösung mehr und leitet die Selbstzerstörung der Station ein. Alle Türen zum Hangar sind verriegelt und müssen unter Zeitdruck manuell und mit roher Gewalt (oder Comtech) geöffnet werden.", fluff: "Eine ruhige, synthetische Stimme hallt aus den Deckenlautsprechern: 'Kritische Kontamination bestätigt. Reaktorkern-Kompression in T-Minus 15 Minuten. Wir wünschen einen angenehmen Tag.'", icon: "Rocket", locations: "Reaktorraum, Hauptkorridor zum Hangar", figures: ["O.S.C.A.R. (KI)", "Kaelen", "Sgt. Rourke", "Dr. Vane"] },
+            { id: 9, act: "Akt III: Letzter Ausweg", title: "Konzern-Direktive 104", type: "Notwendig", description: "Dr. Vane offenbart ihre wahren Prioritäten. Sie schließt die Gruppe im Reaktorraum ein, um ungestört mit den gesicherten Proben zum Shuttle zu gelangen. Klassischer PvP-Moment.", fluff: "'Es tut mir leid, Kaelen', hallt Vanes kühle Stimme aus dem Intercom. 'Aber die Biomasse ist unbezahlbar. Ihr seid leider... entbehrlich. Weyland-Yutani dankt euch für euren Einsatz.'", icon: "ShieldAlert", locations: "Reaktorraum, Flur zum Hangar", figures: ["Dr. Vane", "Kaelen", "Sgt. Rourke"] },
+            { id: 10, act: "Akt III: Letzter Ausweg", title: "O.S.C.A.R.s Gnade", type: "Optional", description: "Kaelen oder Rourke können O.S.C.A.R. mit einem schweren Comtech-Wurf davon überzeugen, dass Vane die eigentliche Kontaminationsgefahr ist. O.S.C.A.R. wendet sich daraufhin gegen Vane.", fluff: "Die KI schweigt für einen endlos wirkenden Moment. Dann leuchtet das Terminal grün auf. 'Logik akzeptiert. Subjekt Vane stellt primären Vektor dar. Neutralisierung eingeleitet.'", icon: "AlertCircle", locations: "KI-Kern, Hangar", figures: ["O.S.C.A.R. (KI)", "Dr. Vane"] },
+            { id: 11, act: "Akt III: Letzter Ausweg", title: "Blutiger Zoll", type: "Notwendig", description: "Das Frachtshuttle ist startklar. Doch der massive Alpha-Parasit blockiert die Laderampe. Ein letzter, harter Kampf entbrennt. Möglicherweise muss sich jemand opfern, damit der Rest entkommen kann.", fluff: "Das Shuttle wartet. Freiheit. Doch die Rampe wird von einer schattigen, pechschwarzen Masse blockiert, die sich im flackernden Notlicht windet und euch mit leeren Augen anstarrt...", icon: "Skull", locations: "Hangar Bay 2, Frachtshuttle", figures: ["Die Parasiten", "Dr. Vane", "Kaelen", "Sgt. Rourke"] }
+        ];
+
+        // --- HELPER FUNCTIONS ---
+        const getActColor = (act) => {
+            if (act.includes("Akt I")) return { text: "text-blue-400", border: "border-blue-500", bg: "bg-blue-900/20" };
+            if (act.includes("Akt II")) return { text: "text-purple-400", border: "border-purple-500", bg: "bg-purple-900/20" };
+            if (act.includes("Akt III")) return { text: "text-red-400", border: "border-red-500", bg: "bg-red-900/20" };
+            return { text: "text-green-400", border: "border-green-500", bg: "bg-gray-800" };
+        };
+
+        const safeActId = (name) => name.replace(/[^a-zA-Z0-9]/g, '-');
+
+        // --- FONT LOGIC ---
+        function applyFonts(headingFont, bodyFont) {
+            if (!headingFont || !bodyFont) return;
+            
+            document.querySelectorAll('.dynamic-font').forEach(el => el.remove());
+            
+            let families = new Set([headingFont, bodyFont]);
+            let familyQuery = Array.from(families).map(f => `family=${f.replace(/ /g, '+')}:wght@400;700`).join('&');
+            
+            const link = document.createElement('link');
+            link.rel = 'stylesheet';
+            link.className = 'dynamic-font';
+            link.href = `https://fonts.googleapis.com/css2?${familyQuery}&display=swap`;
+            document.head.appendChild(link);
+            
+            const style = document.createElement('style');
+            style.className = 'dynamic-font';
+            style.textContent = `
+                body, input, textarea, select, button { 
+                    font-family: "${bodyFont}", monospace, sans-serif !important; 
+                }
+                h1, h2, h3, h4, h5, h6, .font-heading { 
+                    font-family: "${headingFont}", sans-serif !important; 
+                }
+            `;
+            document.head.appendChild(style);
+        }
+
+        // --- EXPORT & IMPORT LOGIC ---
+        function getExportDataString() {
+            const dataToSave = {
+                appTitle: appTitle,
+                appSubtitle: appSubtitle,
+                appFontHeading: appFontHeading,
+                appFontBody: appFontBody,
+                checkedIds: Array.from(checkedIds),
+                collapsedActs: Array.from(collapsedActs),
+                eventNotes: eventNotes,
+                actData: actData,
+                events: events,
+                factions: factions
+            };
+            return JSON.stringify(dataToSave, null, 2);
+        }
+
+        window.openExportModal = function() {
+            const jsonStr = getExportDataString();
+            document.getElementById('exportTextarea').value = jsonStr;
+            document.getElementById('copySuccessMsg').classList.add('opacity-0');
+            document.getElementById('exportModal').classList.remove('opacity-0', 'pointer-events-none');
+        };
+
+        window.copyExportToClipboard = function() {
+            const textarea = document.getElementById('exportTextarea');
+            textarea.select();
+            textarea.setSelectionRange(0, 99999); 
+            try {
+                document.execCommand('copy');
+                const msg = document.getElementById('copySuccessMsg');
+                msg.classList.remove('opacity-0');
+                setTimeout(() => msg.classList.add('opacity-0'), 3000);
+            } catch (err) {
+                alert("Kopieren fehlgeschlagen. Bitte markiere den Text manuell und drücke Strg+C.");
+            }
+        };
+
+        window.triggerDownloadFile = function() {
+            const dataStr = getExportDataString();
+            const blob = new Blob([dataStr], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = "scenario-log-save.json";
+            a.target = "_blank";
+            document.body.appendChild(a);
+            
+            try {
+                a.click();
+            } catch(e) {
+                console.error("Download blocked", e);
+                alert("Download wurde blockiert. Bitte benutze den 'Code Kopieren' Button.");
+            }
+            
+            setTimeout(() => {
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            }, 100);
+        };
+
+        function applyImportedData(data) {
+            if (data.appTitle) appTitle = data.appTitle;
+            if (data.appSubtitle) appSubtitle = data.appSubtitle;
+            
+            if (data.appFontHeading) {
+                appFontHeading = data.appFontHeading;
+                appFontBody = data.appFontBody || "Inter";
+            } else if (data.appFont) {
+                appFontHeading = data.appFont;
+                appFontBody = data.appFont;
+            }
+            applyFonts(appFontHeading, appFontBody);
+            
+            checkedIds = new Set(data.checkedIds || []);
+            collapsedActs = new Set(data.collapsedActs || []);
+            eventNotes = data.eventNotes || {};
+            actData = data.actData || {};
+            events = data.events || [];
+            factions = data.factions || {};
+            
+            document.title = appTitle || "Scenario Log";
+            
+            window.closeModal('eventModal');
+            window.closeModal('actModal');
+            window.closeModal('editModal');
+            window.closeModal('factionModal');
+            window.closeModal('headerModal');
+            window.closeModal('exportModal');
+            window.closeModal('importModal');
+            renderApp();
+        }
+
+        window.handleImport = function(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    applyImportedData(data);
+                } catch (err) {
+                    alert("Fehler beim Lesen der Datei. Ist es ein gültiges JSON-Savegame?");
+                }
+                event.target.value = '';
+            };
+            reader.readAsText(file);
+        };
+
+        window.fetchAndApplyUrl = async function(url, btnElement, errorElement) {
+            if (!url) {
+                errorElement.textContent = "Bitte eine gültige URL angeben.";
+                errorElement.classList.remove('hidden');
+                return;
+            }
+
+            const originalContent = btnElement.innerHTML;
+
+            try {
+                errorElement.classList.add('hidden');
+                btnElement.innerHTML = `<svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-current" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Lädt...`;
+                btnElement.disabled = true;
+
+                const response = await fetch(url);
+                if (!response.ok) throw new Error(`HTTP Fehler: ${response.status}`);
+                
+                const data = await response.json();
+                applyImportedData(data);
+                
+                if (document.getElementById('importUrlInput')) {
+                    document.getElementById('importUrlInput').value = ''; 
+                }
+                
+            } catch (err) {
+                errorElement.textContent = "Fehler beim Laden: " + err.message + " (Ggf. blockiert der Server CORS-Anfragen oder die URL ist ungültig.)";
+                errorElement.classList.remove('hidden');
+            } finally {
+                btnElement.innerHTML = originalContent;
+                btnElement.disabled = false;
+            }
+        };
+
+        window.importFromUrl = function() {
+            const url = document.getElementById('importUrlInput').value.trim();
+            const btn = document.getElementById('btnUrlImport');
+            const err = document.getElementById('importUrlError');
+            window.fetchAndApplyUrl(url, btn, err);
+        };
+
+        window.loadPredefinedScenario = function(url, btnId) {
+            const btn = document.getElementById(btnId);
+            const err = document.getElementById('importUrlError'); 
+            window.fetchAndApplyUrl(url, btn, err);
+        };
+
+        // --- RESET LOGIC ---
+        window.resetApp = function() {
+            if(confirm("ACHTUNG: Willst du wirklich das komplette Log leeren? Alle Ereignisse, Notizen und Fraktionen werden gelöscht. Das kann nicht rückgängig gemacht werden!")) {
+                appTitle = "Neues Szenario";
+                appSubtitle = "LOGBUCH // LEER";
+                appFontHeading = "Orbitron";
+                appFontBody = "Inter";
+                
+                events = [];
+                actData = {};
+                factions = {};
+                eventNotes = {};
+                checkedIds.clear();
+                collapsedActs.clear();
+                expandedId = null;
+                
+                applyFonts(appFontHeading, appFontBody);
+                renderApp();
+            }
+        };
+
+        // --- HEADER EDIT LOGIC ---
+        window.openHeaderModal = function() {
+            document.getElementById('editAppTitle').value = appTitle;
+            document.getElementById('editAppSubtitle').value = appSubtitle;
+            document.getElementById('editAppFontHeading').value = appFontHeading;
+            document.getElementById('editAppFontBody').value = appFontBody;
+            document.getElementById('headerModal').classList.remove('opacity-0', 'pointer-events-none');
+        };
+
+        window.saveHeader = function() {
+            appTitle = document.getElementById('editAppTitle').value.trim() || 'Scenario Log';
+            appSubtitle = document.getElementById('editAppSubtitle').value.trim();
+            appFontHeading = document.getElementById('editAppFontHeading').value;
+            appFontBody = document.getElementById('editAppFontBody').value;
+            
+            document.title = appTitle;
+            applyFonts(appFontHeading, appFontBody);
+            
+            window.closeModal('headerModal');
+            renderApp();
+        };
+
+        // --- EDITOR LOGIC (EREIGNISSE) ---
+        window.renderIconSelection = function(selectedIconId) {
+            const container = document.getElementById('iconSelectionContainer');
+            container.innerHTML = availableIcons.map(icon => `
+                <button type="button" onclick="window.selectIcon('${icon.id}')"
+                    class="p-2 rounded border transition-all ${selectedIconId === icon.id ? 'border-blue-500 bg-blue-900/30 text-blue-400 shadow-[0_0_10px_rgba(59,130,246,0.3)] scale-110' : 'border-gray-700 bg-gray-950 text-gray-500 hover:border-gray-500 hover:text-gray-300'}"
+                    title="${icon.title}">
+                    ${icons[icon.id]}
+                </button>
+            `).join('');
+            document.getElementById('editIcon').value = selectedIconId || 'Rocket';
+        };
+
+        window.selectIcon = function(iconId) {
+            window.renderIconSelection(iconId);
+        };
+
+        window.openEditModal = function(id = null) {
+            const actDatalist = document.getElementById('actDatalist');
+            actDatalist.innerHTML = Object.keys(actData).map(act => `<option value="${act}">`).join('');
+
+            const modal = document.getElementById('editModal');
+            document.getElementById('editId').value = id || '';
+
+            if (id) {
+                const e = events.find(ev => ev.id === id);
+                document.getElementById('editModalTitle').textContent = "Ereignis bearbeiten";
+                document.getElementById('btnDeleteEvent').style.display = 'flex';
+                
+                document.getElementById('editAct').value = e.act;
+                document.getElementById('editTitle').value = e.title;
+                document.getElementById('editTypeCheckbox').checked = (e.type === "Notwendig");
+                window.renderIconSelection(e.icon); 
+                
+                document.getElementById('editFluff').value = e.fluff || '';
+                document.getElementById('editDesc').value = e.description;
+                document.getElementById('editLocations').value = e.locations || '';
+                document.getElementById('editFigures').value = e.figures ? e.figures.join(', ') : '';
+            } else {
+                document.getElementById('editModalTitle').textContent = "Neues Ereignis erstellen";
+                document.getElementById('btnDeleteEvent').style.display = 'none';
+                
+                document.getElementById('editAct').value = Object.keys(actData)[0] || '';
+                document.getElementById('editTitle').value = '';
+                document.getElementById('editTypeCheckbox').checked = true; 
+                window.renderIconSelection('Rocket'); 
+                
+                document.getElementById('editFluff').value = '';
+                document.getElementById('editDesc').value = '';
+                document.getElementById('editLocations').value = '';
+                document.getElementById('editFigures').value = '';
+            }
+
+            modal.classList.remove('opacity-0', 'pointer-events-none');
+        };
+
+        window.saveEvent = function() {
+            const idVal = document.getElementById('editId').value;
+            const isNew = !idVal;
+            const id = isNew ? (Math.max(0, ...events.map(e => e.id)) + 1) : parseInt(idVal);
+
+            const actName = document.getElementById('editAct').value.trim() || 'Unbenannter Akt';
+            const figuresStr = document.getElementById('editFigures').value;
+            const figuresArr = figuresStr.split(',').map(s => s.trim()).filter(s => s.length > 0);
+
+            if (!actData[actName]) {
+                actData[actName] = ["(Neue Fraktionen und Motivationen für diesen Akt können hier später ergänzt werden)"];
+            }
+
+            const newEventData = {
+                id: id,
+                act: actName,
+                title: document.getElementById('editTitle').value.trim() || 'Neues Ereignis',
+                type: document.getElementById('editTypeCheckbox').checked ? "Notwendig" : "Optional",
+                icon: document.getElementById('editIcon').value,
+                fluff: document.getElementById('editFluff').value.trim(),
+                description: document.getElementById('editDesc').value.trim(),
+                locations: document.getElementById('editLocations').value.trim(),
+                figures: figuresArr
+            };
+
+            if (isNew) {
+                const actIndex = events.map(e => e.act).lastIndexOf(actName);
+                if(actIndex !== -1) {
+                    events.splice(actIndex + 1, 0, newEventData);
+                } else {
+                    events.push(newEventData);
+                }
+            } else {
+                const idx = events.findIndex(e => e.id === id);
+                if (idx !== -1) events[idx] = newEventData;
+            }
+
+            window.closeModal('editModal');
+            renderApp();
+        };
+
+        window.deleteEvent = function() {
+            const idVal = document.getElementById('editId').value;
+            if(!idVal) return;
+            
+            if(confirm("Bist du sicher, dass du dieses Ereignis löschen möchtest?")) {
+                const id = parseInt(idVal);
+                events = events.filter(e => e.id !== id);
+                delete eventNotes[id];
+                checkedIds.delete(id);
+                window.closeModal('editModal');
+                renderApp();
+            }
+        };
+
+        // --- EDITOR LOGIC (FRAKTIONEN) ---
+        window.openFactionModal = function() {
+            const list = document.getElementById('factionList');
+            list.innerHTML = '';
+            for (const [name, fac] of Object.entries(factions)) {
+                list.insertAdjacentHTML('beforeend', window.createFactionRow(name, fac));
+            }
+            document.getElementById('factionModal').classList.remove('opacity-0', 'pointer-events-none');
+        };
+
+        window.createFactionRow = function(name = '', fac = '') {
+            return `
+                <div class="faction-row grid grid-cols-12 gap-2 items-center">
+                    <input type="text" class="faction-name col-span-5 bg-gray-950 border border-gray-700 rounded p-2 text-gray-200 focus:border-orange-500 focus:ring-1 outline-none text-sm" value="${name}" placeholder="z.B. Amanda Ripley">
+                    <input type="text" class="faction-value col-span-6 bg-gray-950 border border-gray-700 rounded p-2 text-gray-200 focus:border-orange-500 focus:ring-1 outline-none text-sm" value="${fac}" placeholder="z.B. Weyland-Yutani">
+                    <button onclick="this.closest('.faction-row').remove()" class="col-span-1 text-gray-500 hover:text-red-500 p-2 flex justify-center transition-colors" title="Löschen">
+                        ${icons.Trash}
+                    </button>
+                </div>
+            `;
+        };
+
+        window.addFactionRow = function() {
+            document.getElementById('factionList').insertAdjacentHTML('beforeend', window.createFactionRow());
+        };
+
+        window.saveFactions = function() {
+            const newFactions = {};
+            document.querySelectorAll('.faction-row').forEach(row => {
+                const name = row.querySelector('.faction-name').value.trim();
+                const fac = row.querySelector('.faction-value').value.trim();
+                if (name) newFactions[name] = fac;
+            });
+            factions = newFactions;
+            window.closeModal('factionModal');
+            renderApp();
+        };
+
+        // --- DRAG & DROP LOGIC ---
+        window.dragStart = function(e, id) {
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/plain', id);
+            setTimeout(() => e.target.classList.add('opacity-40', 'scale-[0.98]'), 0);
+        };
+
+        window.dragOver = function(e) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+            const btn = e.target.closest('.event-card-btn');
+            if(btn) btn.classList.add('ring-2', 'ring-blue-500', 'shadow-lg');
+        };
+
+        window.dragLeave = function(e) {
+            const btn = e.target.closest('.event-card-btn');
+            if(btn) btn.classList.remove('ring-2', 'ring-blue-500', 'shadow-lg');
+        };
+
+        window.drop = function(e, targetId) {
+            e.preventDefault();
+            const btn = e.target.closest('.event-card-btn');
+            if(btn) btn.classList.remove('ring-2', 'ring-blue-500', 'shadow-lg');
+            
+            const draggedId = parseInt(e.dataTransfer.getData('text/plain'));
+            if (draggedId === targetId || isNaN(draggedId)) return;
+
+            const draggedIndex = events.findIndex(ev => ev.id === draggedId);
+            const targetIndex = events.findIndex(ev => ev.id === targetId);
+
+            if (draggedIndex > -1 && targetIndex > -1) {
+                events[draggedIndex].act = events[targetIndex].act;
+                const [draggedEvent] = events.splice(draggedIndex, 1);
+                const newTargetIndex = events.findIndex(ev => ev.id === targetId);
+                events.splice(newTargetIndex, 0, draggedEvent);
+                renderApp();
+            }
+        };
+
+        window.dragEnd = function(e) {
+            e.target.classList.remove('opacity-40', 'scale-[0.98]');
+            document.querySelectorAll('.event-card-btn').forEach(el => el.classList.remove('ring-2', 'ring-blue-500', 'shadow-lg'));
+        };
+
+        // --- RENDER LOGIC ---
+        function renderPredefinedScenarios() {
+            const container = document.getElementById('predefinedScenariosContainer');
+            if (!container) return;
+            
+            if (predefinedScenariosList.length === 0) {
+                container.innerHTML = `<p class="text-xs text-gray-500 italic">Noch keine Szenarien hinterlegt.</p>`;
+                return;
+            }
+
+            container.innerHTML = predefinedScenariosList.map((scenario, index) => `
+                <button id="btn-predef-${index}" onclick="window.loadPredefinedScenario('${scenario.url}', 'btn-predef-${index}')" class="w-full flex items-center justify-between p-3 bg-blue-900/20 hover:bg-blue-800/40 border border-blue-800/50 rounded transition-colors text-blue-300 text-left">
+                    <span class="flex items-center gap-3">
+                        <span class="text-blue-500">${icons.Book}</span>
+                        <span class="font-bold">${scenario.name}</span>
+                    </span>
+                    <span class="text-xs text-blue-400/50 uppercase tracking-wider font-mono">Laden</span>
+                </button>
+            `).join('');
+        }
+
+        function renderApp() {
+            const appDiv = document.getElementById('app');
+            document.title = appTitle || "Scenario Log";
+            
+            const groupedEvents = events.reduce((acc, event) => {
+                if (!acc[event.act]) acc[event.act] = [];
+                acc[event.act].push(event);
+                return acc;
+            }, {});
+
+            let html = `
+                <div class="max-w-4xl mx-auto">
+                    <header class="mb-12 border-b border-green-800/50 pb-6">
+                        <div class="flex justify-between items-start md:items-center flex-col md:flex-row gap-4">
+                            <div class="text-left">
+                                <h1 onclick="window.openHeaderModal()" class="text-3xl md:text-5xl font-bold text-green-500 mb-2 tracking-tighter uppercase cursor-pointer group flex items-center gap-3 font-heading">
+                                    ${appTitle}
+                                    <span class="opacity-0 group-hover:opacity-100 text-gray-500 transition-opacity" title="Titel bearbeiten">${icons.Pencil}</span>
+                                </h1>
+                                <p onclick="window.openHeaderModal()" class="text-gray-400 text-sm md:text-base cursor-pointer group flex items-center gap-2">
+                                    ${appSubtitle}
+                                </p>
+                            </div>
+                            <div class="flex flex-wrap gap-2 md:gap-3">
+                                <button onclick="window.openFactionModal()" class="flex items-center gap-1 md:gap-2 px-3 py-2 bg-orange-900/30 hover:bg-orange-800/60 border border-orange-700/50 rounded transition-colors text-xs md:text-sm font-bold text-orange-400">
+                                    ${icons.Users} Fraktionen
+                                </button>
+                                <button onclick="window.openEditModal()" class="flex items-center gap-1 md:gap-2 px-3 py-2 bg-blue-900/40 hover:bg-blue-800 border border-blue-700 rounded transition-colors text-xs md:text-sm font-bold text-blue-400">
+                                    ${icons.Plus} Neu
+                                </button>
+                                <button onclick="document.getElementById('importModal').classList.remove('opacity-0', 'pointer-events-none')" class="flex items-center gap-1 md:gap-2 px-3 py-2 bg-gray-900 hover:bg-gray-800 border border-gray-700 rounded transition-colors text-xs md:text-sm font-bold text-gray-300">
+                                    ${icons.Upload} Import
+                                </button>
+                                <button onclick="window.openExportModal()" class="flex items-center gap-1 md:gap-2 px-3 py-2 bg-green-900/40 hover:bg-green-800/60 border border-green-700 rounded transition-colors text-xs md:text-sm font-bold text-green-400">
+                                    ${icons.Download} Export
+                                </button>
+                                <button onclick="window.resetApp()" class="flex items-center gap-1 md:gap-2 px-3 py-2 bg-red-900/30 hover:bg-red-800/60 border border-red-800/50 rounded transition-colors text-xs md:text-sm font-bold text-red-400 ml-auto md:ml-0" title="Alles löschen">
+                                    ${icons.Reset} Reset
+                                </button>
+                            </div>
+                        </div>
+                    </header>
+                    <div class="space-y-12">
+            `;
+
+            if (Object.keys(groupedEvents).length === 0) {
+                html += `
+                    <div class="text-center text-gray-500 py-12 border border-dashed border-gray-800 rounded-lg">
+                        <p class="mb-4 text-gray-400">Das Logbuch ist leer.</p>
+                        <button onclick="window.openEditModal()" class="px-4 py-2 bg-blue-900/40 border border-blue-700 rounded text-blue-400 font-bold transition-colors">
+                            Erstes Ereignis anlegen
+                        </button>
+                    </div>
+                `;
+            }
+
+            for (const [actName, actEvents] of Object.entries(groupedEvents)) {
+                const colors = getActColor(actName);
+                const aId = safeActId(actName);
+                const isCollapsed = collapsedActs.has(actName);
+                
+                html += `
+                    <div class="relative">
+                        <div onclick="window.handleActInteraction('${actName}')" class="sticky top-0 z-10 bg-gray-950/90 backdrop-blur py-4 mb-6 cursor-pointer group no-select flex justify-between items-center" title="1 Klick: Ein-/Ausklappen | Doppelklick: Fraktionen & Motivationen">
+                            <div class="flex items-center gap-3">
+                                <div id="act-chevron-${aId}" class="text-gray-500 group-hover:text-purple-400 transition-colors">
+                                    ${isCollapsed ? icons.ChevronRight : icons.ChevronDown}
+                                </div>
+                                <h2 class="text-2xl font-bold uppercase border-l-4 pl-4 ${colors.text} ${colors.border} transition-colors group-hover:text-purple-400 font-heading">
+                                    ${actName}
+                                </h2>
+                                <span class="text-xs text-purple-500/70 opacity-0 group-hover:opacity-100 transition-opacity bg-purple-900/20 px-2 py-1 rounded hidden md:block">
+                                    (Doppelklick für Fraktionen)
+                                </span>
+                            </div>
+                        </div>
+
+                        <div id="act-content-${aId}" class="relative border-l-2 border-gray-800 ml-4 md:ml-8 space-y-6 ${isCollapsed ? 'hidden' : ''}">
+                `;
+
+                actEvents.forEach(event => {
+                    const actColors = getActColor(event.act);
+                    const isOptional = event.type === 'Optional';
+                    
+                    const nodeClass = isOptional 
+                        ? 'border-dashed border-gray-500 text-gray-500' 
+                        : `${actColors.text} ${actColors.border}`;
+                        
+                    const btnBorder = isOptional 
+                        ? 'border-dashed border-gray-700 hover:border-gray-500' 
+                        : 'border-gray-800 hover:border-green-500/50';
+
+                    const badgeClass = isOptional
+                        ? 'bg-gray-800 text-gray-400'
+                        : 'bg-green-900/30 text-green-400';
+
+                    html += `
+                        <div id="event-container-${event.id}" class="relative pl-8 md:pl-12 transition-all duration-300">
+                            <div class="absolute -left-[17px] top-4 w-8 h-8 rounded-full border-2 flex items-center justify-center bg-gray-950 ${nodeClass}">
+                                ${icons[event.icon] || icons.Square}
+                            </div>
+
+                            <button 
+                                draggable="true"
+                                ondragstart="window.dragStart(event, ${event.id})"
+                                ondragover="window.dragOver(event)"
+                                ondragleave="window.dragLeave(event)"
+                                ondrop="window.drop(event, ${event.id})"
+                                ondragend="window.dragEnd(event)"
+                                onclick="window.handleInteraction(event, ${event.id})" 
+                                class="event-card-btn w-full text-left p-4 rounded-lg border transition-all duration-200 ${actColors.bg} ${btnBorder} no-select group relative"
+                            >
+                                <div class="flex justify-between items-start gap-4">
+                                    <div class="flex items-start gap-3 w-full">
+                                        <div onclick="window.toggleCheckbox(event, ${event.id}, ${isOptional})" class="mt-1 cursor-pointer text-gray-400 hover:text-green-400 transition-colors shrink-0 btn-ignore" id="check-wrap-${event.id}">
+                                            ${checkedIds.has(event.id) ? icons.CheckSquare : icons.Square}
+                                        </div>
+
+                                        <div class="flex-1">
+                                            <div class="flex flex-wrap items-center gap-3 mb-1">
+                                                <h3 id="title-${event.id}" class="text-lg font-bold pr-16 font-heading ${checkedIds.has(event.id) ? 'line-through text-gray-500' : (isOptional ? 'text-gray-400' : 'text-gray-100')} group-hover:text-green-300 transition-colors">
+                                                    ${event.title}
+                                                </h3>
+                                                <span class="text-xs px-2 py-1 rounded uppercase tracking-wider ${badgeClass}">
+                                                    ${event.type}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="flex items-center gap-2 mt-1 shrink-0">
+                                        <div onclick="window.openEditModal(${event.id}); event.stopPropagation();" class="text-gray-600 hover:text-blue-400 transition-colors cursor-pointer p-1 rounded hover:bg-blue-900/30 btn-ignore z-10" title="Ereignis bearbeiten">
+                                            ${icons.Pencil}
+                                        </div>
+                                        <div id="chevron-${event.id}" class="text-gray-500 pointer-events-none">
+                                            ${expandedId === event.id ? icons.ChevronUp : icons.ChevronDown}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div id="content-${event.id}" class="overflow-hidden transition-all duration-300 ${expandedId === event.id ? 'max-h-96 opacity-100 mt-4' : 'max-h-0 opacity-0'} pointer-events-none">
+                                    <p id="desc-${event.id}" class="border-t border-gray-800 pt-4 leading-relaxed ${checkedIds.has(event.id) ? 'text-gray-500' : 'text-gray-300'} pointer-events-none">
+                                        ${event.description}
+                                    </p>
+                                    ${eventNotes[event.id] ? `<p class="mt-3 text-xs text-green-500/70 italic pointer-events-none">📝 Notizen vorhanden</p>` : ''}
+                                </div>
+                            </button>
+                        </div>
+                    `;
+                });
+
+                html += `
+                        </div>
+                    </div>
+                `;
+            }
+
+            html += `
+                    </div>
+                </div>
+            `;
+
+            appDiv.innerHTML = html;
+            renderPredefinedScenarios();
+        }
+
+        // --- INTERACTION LOGIC ---
+        window.handleInteraction = function(e, id) {
+            if (e.target.closest('.btn-ignore') || e.target.closest('[id^="check-wrap"]')) return;
+
+            const currentTime = new Date().getTime();
+            const lastClickTime = clickTimers[id] || 0;
+
+            if (currentTime - lastClickTime < 300) {
+                clearTimeout(clickTimers[`timeout-${id}`]);
+                clickTimers[id] = 0;
+                window.openEventModal(id);
+            } else {
+                clickTimers[id] = currentTime;
+                clickTimers[`timeout-${id}`] = setTimeout(() => {
+                    window.toggleAccordion(id);
+                    clickTimers[id] = 0;
+                }, 300);
+            }
+        };
+
+        window.handleActInteraction = function(actName) {
+            const currentTime = new Date().getTime();
+            const lastClickTime = clickTimers[actName] || 0;
+
+            if (currentTime - lastClickTime < 300) {
+                clearTimeout(clickTimers[`timeout-${actName}`]);
+                clickTimers[actName] = 0;
+                window.openActModal(actName);
+            } else {
+                clickTimers[actName] = currentTime;
+                clickTimers[`timeout-${actName}`] = setTimeout(() => {
+                    window.toggleAct(actName);
+                    clickTimers[actName] = 0;
+                }, 300);
+            }
+        };
+
+        window.toggleAct = function(actName) {
+            const aId = safeActId(actName);
+            const content = document.getElementById(`act-content-${aId}`);
+            const chevron = document.getElementById(`act-chevron-${aId}`);
+            
+            if (collapsedActs.has(actName)) {
+                collapsedActs.delete(actName);
+                content.classList.remove('hidden');
+                chevron.innerHTML = icons.ChevronDown;
+            } else {
+                collapsedActs.add(actName);
+                content.classList.add('hidden');
+                chevron.innerHTML = icons.ChevronRight;
+            }
+        };
+        
+        window.toggleAccordion = function(id) {
+            const currentContent = document.getElementById(`content-${id}`);
+            const currentChevron = document.getElementById(`chevron-${id}`);
+
+            if (expandedId === id) {
+                currentContent.classList.remove('max-h-96', 'opacity-100', 'mt-4');
+                currentContent.classList.add('max-h-0', 'opacity-0');
+                currentChevron.innerHTML = icons.ChevronDown;
+                expandedId = null;
+                renderApp(); 
+            } else {
+                if (expandedId !== null) {
+                    const oldContent = document.getElementById(`content-${expandedId}`);
+                    const oldChevron = document.getElementById(`chevron-${expandedId}`);
+                    if (oldContent) {
+                        oldContent.classList.remove('max-h-96', 'opacity-100', 'mt-4');
+                        oldContent.classList.add('max-h-0', 'opacity-0');
+                        oldChevron.innerHTML = icons.ChevronDown;
+                    }
+                }
+                currentContent.classList.remove('max-h-0', 'opacity-0');
+                currentContent.classList.add('max-h-96', 'opacity-100', 'mt-4');
+                currentChevron.innerHTML = icons.ChevronUp;
+                expandedId = id;
+            }
+        };
+
+        window.toggleCheckbox = function(e, id, isOptional) {
+            e.stopPropagation();
+            const container = document.getElementById(`event-container-${id}`);
+            const checkWrap = document.getElementById(`check-wrap-${id}`);
+            const title = document.getElementById(`title-${id}`);
+            const desc = document.getElementById(`desc-${id}`);
+
+            if (checkedIds.has(id)) {
+                checkedIds.delete(id);
+                container.classList.remove('opacity-50', 'grayscale');
+                title.classList.remove('line-through', 'text-gray-500');
+                title.classList.add(isOptional ? 'text-gray-400' : 'text-gray-100');
+                desc.classList.remove('text-gray-500');
+                desc.classList.add('text-gray-300');
+                checkWrap.innerHTML = icons.Square;
+            } else {
+                checkedIds.add(id);
+                container.classList.add('opacity-50', 'grayscale');
+                title.classList.remove(isOptional ? 'text-gray-400' : 'text-gray-100');
+                title.classList.add('line-through', 'text-gray-500');
+                desc.classList.remove('text-gray-300');
+                desc.classList.add('text-gray-500');
+                checkWrap.innerHTML = icons.CheckSquare;
+            }
+        };
+
+        // --- VIEW MODALS ---
+        window.openEventModal = function(id) {
+            const eventData = events.find(e => e.id === id);
+            if (!eventData) return;
+            currentOpenEventId = id;
+
+            document.getElementById('modalTitle').textContent = eventData.title;
+            document.getElementById('modalDesc').textContent = eventData.description;
+            document.getElementById('modalLocations').textContent = eventData.locations || "Orte nicht spezifiziert.";
+            
+            const fluffContainer = document.getElementById('modalFluffContainer');
+            if (eventData.fluff) {
+                document.getElementById('modalFluff').textContent = `» ${eventData.fluff} «`;
+                fluffContainer.classList.remove('hidden');
+            } else {
+                fluffContainer.classList.add('hidden');
+            }
+            
+            const notesArea = document.getElementById('modalNotes');
+            notesArea.value = eventNotes[id] || "";
+            
+            const figuresList = document.getElementById('modalFigures');
+            figuresList.innerHTML = '';
+            
+            if (eventData.figures && eventData.figures.length > 0) {
+                eventData.figures.forEach(figure => {
+                    const li = document.createElement('li');
+                    li.className = "flex items-center justify-between border-b border-gray-800/50 pb-1 mb-1 last:border-0";
+                    
+                    const faction = factions[figure];
+                    const factionHtml = faction 
+                        ? `<span class="text-[10px] bg-gray-800 text-gray-400 px-2 py-0.5 rounded border border-gray-700 tracking-wider uppercase font-heading">${faction}</span>` 
+                        : '';
+                        
+                    li.innerHTML = `<span class="text-green-300 font-semibold">${figure}</span> ${factionHtml}`;
+                    figuresList.appendChild(li);
+                });
+            } else {
+                const li = document.createElement('li');
+                li.textContent = "Keine speziellen Figuren hinterlegt.";
+                li.className = "text-gray-500 italic";
+                figuresList.appendChild(li);
+            }
+
+            const modal = document.getElementById('eventModal');
+            modal.classList.remove('opacity-0', 'pointer-events-none');
+        };
+
+        window.openActModal = function(actName) {
+            const actMotivations = actData[actName];
+            if (!actMotivations) return;
+
+            document.getElementById('actModalTitle').textContent = "Motivationen: " + actName;
+            const motivationsList = document.getElementById('actModalMotivations');
+            motivationsList.innerHTML = '';
+            
+            actMotivations.forEach(m => {
+                const li = document.createElement('li');
+                li.className = "bg-gray-950/50 p-3 rounded border border-gray-800";
+                
+                const colonIndex = m.indexOf(':');
+                if(colonIndex > -1) {
+                    const name = m.substring(0, colonIndex);
+                    const desc = m.substring(colonIndex + 1);
+                    li.innerHTML = `<span class="text-purple-400 font-bold block mb-1 font-heading">${name}</span><span class="text-gray-400 leading-relaxed">${desc}</span>`;
+                } else {
+                    li.textContent = m;
+                }
+                motivationsList.appendChild(li);
+            });
+
+            const modal = document.getElementById('actModal');
+            modal.classList.remove('opacity-0', 'pointer-events-none');
+        };
+
+        window.closeModal = function(modalId) {
+            const modal = document.getElementById(modalId);
+            modal.classList.add('opacity-0', 'pointer-events-none');
+            
+            if (modalId === 'eventModal') {
+                currentOpenEventId = null;
+                renderApp();
+            }
+        };
+
+        // --- EVENT LISTENERS ---
+        document.getElementById('modalNotes').addEventListener('input', (e) => {
+            if (currentOpenEventId !== null) {
+                eventNotes[currentOpenEventId] = e.target.value;
+            }
+        });
+
+        // Close Modals on background click
+        ['eventModal', 'actModal', 'editModal', 'factionModal', 'headerModal', 'exportModal', 'importModal'].forEach(id => {
+            document.getElementById(id).addEventListener('click', (e) => {
+                if (e.target.id === id) window.closeModal(id);
+            });
+        });
+
+        // Initialize App & Font
+        applyFonts(appFontHeading, appFontBody);
+        renderApp();
+    </script>
+</body>
+</html>
