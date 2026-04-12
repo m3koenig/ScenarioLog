@@ -294,49 +294,62 @@
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
             </div>
-            <div class="p-6 space-y-8 flex-1 overflow-y-auto">
+            <div class="p-6 space-y-6 flex-1 overflow-y-auto">
                 
                 <!-- Option 1: File Upload -->
                 <div>
-                    <h4 class="text-gray-400 text-sm font-bold uppercase tracking-wider mb-3">1. Aus lokaler Datei</h4>
-                    <button onclick="document.getElementById('importFile').click()" class="w-full flex justify-center items-center gap-2 px-4 py-4 bg-gray-800 hover:bg-gray-700 border border-gray-600 rounded text-gray-200 transition-colors shadow-inner">
+                    <h4 class="text-gray-400 text-sm font-bold uppercase tracking-wider mb-2">1. Aus lokaler Datei</h4>
+                    <button onclick="document.getElementById('importFile').click()" class="w-full flex justify-center items-center gap-2 px-4 py-3 bg-gray-800 hover:bg-gray-700 border border-gray-600 rounded text-gray-200 transition-colors shadow-inner">
                         <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
                         Savegame-Datei (.json) auswählen
                     </button>
                 </div>
 
-                <div class="flex items-center gap-4 opacity-50">
-                    <div class="h-px bg-gray-600 flex-1"></div>
-                    <span class="text-gray-400 text-xs font-bold uppercase">ODER</span>
-                    <div class="h-px bg-gray-600 flex-1"></div>
-                </div>
+                <div class="h-px bg-gray-800 w-full"></div>
 
                 <!-- Option 2: Predefined Scenarios -->
                 <div>
-                    <h4 class="text-gray-400 text-sm font-bold uppercase tracking-wider mb-3">2. Vorgefertigtes Szenario laden</h4>
+                    <h4 class="text-gray-400 text-sm font-bold uppercase tracking-wider mb-2">2. Vorgefertigtes Szenario laden</h4>
                     <div class="grid grid-cols-1 gap-2" id="predefinedScenariosContainer">
                         <!-- Wird per JS befüllt -->
                     </div>
                 </div>
 
-                <div class="flex items-center gap-4 opacity-50">
-                    <div class="h-px bg-gray-600 flex-1"></div>
-                    <span class="text-gray-400 text-xs font-bold uppercase">ODER</span>
-                    <div class="h-px bg-gray-600 flex-1"></div>
-                </div>
+                <div class="h-px bg-gray-800 w-full"></div>
 
                 <!-- Option 3: URL Import -->
                 <div>
-                    <h4 class="text-gray-400 text-sm font-bold uppercase tracking-wider mb-3">3. Von einer eigenen URL laden</h4>
+                    <h4 class="text-gray-400 text-sm font-bold uppercase tracking-wider mb-2">3. Von einer eigenen URL laden</h4>
                     <div class="flex flex-col sm:flex-row gap-2">
                         <input type="text" id="importUrlInput" class="flex-1 bg-gray-950 border border-gray-700 rounded p-3 text-sm text-gray-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none" placeholder="https://beispiel.de/savegame.json">
                         <button onclick="window.importFromUrl()" id="btnUrlImport" class="px-6 py-3 bg-blue-900/40 hover:bg-blue-800/60 border border-blue-700 rounded text-blue-400 font-bold transition-colors whitespace-nowrap flex items-center justify-center gap-2">
-                            <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
                             Laden
                         </button>
                     </div>
-                    <p id="importUrlError" class="text-red-400 text-xs mt-2 hidden"></p>
                 </div>
+
+                <div class="h-px bg-gray-800 w-full"></div>
+
+                <!-- Option 4: Text Fields (NEW in 1.2.0) -->
+                <div>
+                    <h4 class="text-gray-400 text-sm font-bold uppercase tracking-wider mb-3">4. Aus Text oder Share-Seed</h4>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-gray-500 text-[10px] uppercase mb-1">Szenario Share-Seed (Base64)</label>
+                            <div class="flex gap-2">
+                                <input type="text" id="importSeedInput" class="flex-1 bg-gray-950 border border-gray-700 rounded p-2 text-xs text-purple-400 font-mono focus:border-purple-500 focus:ring-1 focus:ring-purple-500 outline-none" placeholder="Hier Seed einfügen...">
+                                <button onclick="window.importFromSeedText()" class="px-4 py-2 bg-purple-900/40 hover:bg-purple-800/60 border border-purple-700 rounded text-purple-300 font-bold text-xs transition-colors">Laden</button>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-gray-500 text-[10px] uppercase mb-1">Rohdaten (JSON Code)</label>
+                            <textarea id="importJsonInput" class="w-full h-24 bg-gray-950 border border-gray-700 rounded p-2 text-xs text-green-500/70 font-mono focus:border-green-500 focus:ring-1 focus:ring-green-500 outline-none resize-none" placeholder='{"appTitle": "..."}'></textarea>
+                            <button onclick="window.importFromJsonText()" class="w-full mt-2 py-2 bg-gray-800 hover:bg-gray-700 border border-gray-600 rounded text-gray-300 font-bold text-xs transition-colors">JSON laden</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <p id="importUrlError" class="text-red-400 text-xs mt-2 hidden"></p>
 
             </div>
         </div>
@@ -385,7 +398,6 @@
         };
 
         // --- SEED / SHARE LOGIC ---
-        // Helper to encode UTF-8 correctly into Base64 for URL
         function encodeScenario(str) {
             return btoa(unescape(encodeURIComponent(str)));
         }
@@ -400,7 +412,6 @@
                 const seed = encodeScenario(dataStr);
                 const url = window.location.origin + window.location.pathname + '?scenario=' + seed;
                 
-                // Copy to clipboard
                 const dummy = document.createElement("input");
                 document.body.appendChild(dummy);
                 dummy.value = url;
@@ -415,6 +426,32 @@
             } catch (e) {
                 console.error("Sharing failed", e);
                 window.customAlert("Fehler beim Generieren des Links. Das Szenario ist eventuell zu groß für eine URL.");
+            }
+        };
+
+        // --- IMPORT LOGIC (NEW 1.2.0) ---
+        window.importFromSeedText = function() {
+            const seed = document.getElementById('importSeedInput').value.trim();
+            if(!seed) return;
+            try {
+                const decoded = decodeScenario(seed);
+                const data = JSON.parse(decoded);
+                applyImportedData(data);
+                document.getElementById('importSeedInput').value = '';
+            } catch(e) {
+                window.customAlert("Ungültiger Seed! Bitte kopiere den Share-Link oder den Base64-Code korrekt.");
+            }
+        };
+
+        window.importFromJsonText = function() {
+            const jsonStr = document.getElementById('importJsonInput').value.trim();
+            if(!jsonStr) return;
+            try {
+                const data = JSON.parse(jsonStr);
+                applyImportedData(data);
+                document.getElementById('importJsonInput').value = '';
+            } catch(e) {
+                window.customAlert("Fehler im JSON Format! Bitte stelle sicher, dass es sich um eine gültige Scenario Log Datei handelt.");
             }
         };
 
@@ -1323,14 +1360,12 @@
         };
 
         // --- GLOBAL LISTENERS ---
-        // Escape key to close modals
         window.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
                 window.closeAllModals();
             }
         });
 
-        // Seed check on load
         window.addEventListener('load', () => {
             const params = new URLSearchParams(window.location.search);
             const seed = params.get('scenario');
@@ -1339,7 +1374,6 @@
                     const decoded = decodeScenario(seed);
                     const data = JSON.parse(decoded);
                     applyImportedData(data);
-                    // Clear the URL to avoid reloading the seed over and over
                     window.history.replaceState({}, document.title, window.location.pathname);
                 } catch(e) { 
                     console.error("Seed error", e); 
@@ -1354,25 +1388,22 @@
             }
         });
 
-        // Close Modals on background click
         ['eventModal', 'actModal', 'editModal', 'factionModal', 'headerModal', 'exportModal', 'importModal', 'dialogModal'].forEach(id => {
             document.getElementById(id).addEventListener('click', (e) => {
                 if (e.target.id === id) window.closeModal(id);
             });
         });
 
-        // Initialize App & Font
         applyFonts(appFontHeading, appFontBody);
         renderApp();
 
         /**
          * CHANGE LOG
-         * * Version 1.1.0
-         * - NEU: Escape-Taste schließt nun alle Modals.
-         * - NEU: Share-Link Funktion ("Seed") implementiert. Szenarien können per URL geteilt werden.
-         * - NEU: Automatischer Import von Szenarien über den "scenario" URL-Parameter.
-         * - UI: "Share-Link kopieren" Button im Export-Modal hinzugefügt.
-         * - Refactoring: closeAllModals Helfer für bessere State-Kontrolle.
+         * * Version 1.2.0
+         * - NEU: Import-Option für Szenario-Seeds (Base64-Code) direkt im Modal hinzugefügt.
+         * - NEU: Import-Option für Raw-JSON Code (Einfügen von Code-Blöcken) hinzugefügt.
+         * - UI: Strukturierung des Import-Modals für bessere Übersichtlichkeit der verschiedenen Importwege.
+         * - Validierung: Fehlermeldungen bei ungültigem Seed- oder JSON-Format hinzugefügt.
          */
     </script>
 </body>
