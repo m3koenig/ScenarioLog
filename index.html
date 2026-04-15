@@ -21,6 +21,9 @@
         ::-webkit-scrollbar-track { background: #030712; }
         ::-webkit-scrollbar-thumb { background: #1f2937; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #374151; }
+        
+        .drag-over { border-top: 4px solid #22c55e !important; }
+        .dragging { opacity: 0.5; }
     </style>
 </head>
 <body class="bg-gray-950 text-green-50 min-h-screen relative transition-all duration-300">
@@ -143,23 +146,33 @@
 
                 <div>
                     <label class="block text-gray-400 uppercase tracking-wider text-xs mb-1">GM Beschreibung / Was passiert?</label>
-                    <textarea id="editDesc" class="w-full bg-gray-950 border border-gray-700 rounded p-2 text-gray-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none min-h-[250px] resize-y" placeholder="Die harten Fakten für dich als SL..."></textarea>
+                    <textarea id="editDesc" class="w-full bg-gray-950 border border-gray-700 rounded p-2 text-gray-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none min-h-[200px] resize-y" placeholder="Die harten Fakten für dich als SL..."></textarea>
                 </div>
 
-                <div>
-                    <label class="block text-gray-400 uppercase tracking-wider text-xs mb-1">Mögliche Schauplätze</label>
-                    <input type="text" id="editLocations" class="w-full bg-gray-950 border border-gray-700 rounded p-2 text-gray-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none" placeholder="z.B. Brücke, Reaktorraum, Kantine...">
-                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div>
+                        <label class="block text-gray-400 uppercase tracking-wider text-xs mb-1">Mögliche Schauplätze</label>
+                        <div class="flex gap-2 mb-2">
+                            <input type="text" id="tagInputLocations" class="flex-1 bg-gray-950 border border-gray-700 rounded p-2 text-gray-200 focus:border-blue-500 outline-none" placeholder="Ort eingeben...">
+                            <button onclick="window.addTag('Locations')" class="px-3 bg-gray-800 rounded text-gray-300">+</button>
+                        </div>
+                        <div id="tagListLocations" class="flex flex-wrap gap-2"></div>
+                    </div>
 
-                <div>
-                    <label class="block text-gray-400 uppercase tracking-wider text-xs mb-1">Relevante Figuren (Kommagetrennt)</label>
-                    <input type="text" id="editFigures" class="w-full bg-gray-950 border border-gray-700 rounded p-2 text-gray-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none" placeholder="z.B. Dr. Vane, Kaelen, O.S.C.A.R.">
-                    <p class="text-xs text-gray-600 mt-1">Namen exakt wie im Fraktions-System schreiben, um Badges zu erhalten.</p>
+                    <div>
+                        <label class="block text-gray-400 uppercase tracking-wider text-xs mb-1">Relevante Figuren</label>
+                        <div class="flex gap-2 mb-2">
+                            <input type="text" id="tagInputFigures" list="factionsDatalist" class="flex-1 bg-gray-950 border border-gray-700 rounded p-2 text-gray-200 focus:border-blue-500 outline-none" placeholder="Name eingeben...">
+                            <button onclick="window.addTag('Figures')" class="px-3 bg-gray-800 rounded text-gray-300">+</button>
+                        </div>
+                        <datalist id="factionsDatalist"></datalist>
+                        <div id="tagListFigures" class="flex flex-wrap gap-2"></div>
+                    </div>
                 </div>
             </div>
             
             <div class="p-4 border-t border-gray-800 bg-gray-950/80 rounded-b-lg shrink-0 flex justify-between items-center">
-                <button id="btnDeleteEvent" onclick="window.deleteEvent()" class="px-4 py-2 bg-red-900/30 hover:bg-red-800/60 border border-red-800/50 rounded text-red-400 transition-colors flex items-center gap-2">
+                <button id="btnDeleteEvent" onclick="window.confirmDeleteEvent()" class="px-4 py-2 bg-red-900/30 hover:bg-red-800/60 border border-red-800/50 rounded text-red-400 transition-colors flex items-center gap-2">
                     <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                     Löschen
                 </button>
@@ -422,84 +435,6 @@
             return decodeURIComponent(escape(atob(b64)));
         }
 
-        window.generateAndCopyShareLink = function() {
-            try {
-                const dataStr = getExportDataString();
-                const seed = encodeScenario(dataStr);
-                const url = window.location.origin + window.location.pathname + '?scenario=' + seed;
-                
-                const dummy = document.createElement("input");
-                document.body.appendChild(dummy);
-                dummy.value = url;
-                dummy.select();
-                document.execCommand("copy");
-                document.body.removeChild(dummy);
-
-                const msg = document.getElementById('copySuccessMsg');
-                msg.textContent = "Share-Link kopiert!";
-                msg.classList.remove('opacity-0');
-                setTimeout(() => msg.classList.add('opacity-0'), 3000);
-            } catch (e) {
-                console.error("Sharing failed", e);
-                window.customAlert("Fehler beim Generieren des Links. Das Szenario ist eventuell zu groß für eine URL.");
-            }
-        };
-
-        // NEW in 1.3.0: Copy only the seed
-        window.copySeedToClipboard = function() {
-            try {
-                const dataStr = getExportDataString();
-                const seed = encodeScenario(dataStr);
-                
-                const dummy = document.createElement("input");
-                document.body.appendChild(dummy);
-                dummy.value = seed;
-                dummy.select();
-                document.execCommand("copy");
-                document.body.removeChild(dummy);
-
-                const msg = document.getElementById('copySuccessMsg');
-                msg.textContent = "Seed kopiert!";
-                msg.classList.remove('opacity-0');
-                setTimeout(() => msg.classList.add('opacity-0'), 3000);
-            } catch (e) {
-                window.customAlert("Fehler beim Kopieren des Seeds.");
-            }
-        };
-
-        // --- IMPORT LOGIC ---
-        window.importFromSeedText = function() {
-            const seed = document.getElementById('importSeedInput').value.trim();
-            if(!seed) return;
-            try {
-                const decoded = decodeScenario(seed);
-                const data = JSON.parse(decoded);
-                applyImportedData(data);
-                document.getElementById('importSeedInput').value = '';
-            } catch(e) {
-                window.customAlert("Ungültiger Seed! Bitte kopiere den Share-Link oder den Base64-Code korrekt.");
-            }
-        };
-
-        window.importFromJsonText = function() {
-            const jsonStr = document.getElementById('importJsonInput').value.trim();
-            if(!jsonStr) return;
-            try {
-                const data = JSON.parse(jsonStr);
-                applyImportedData(data);
-                document.getElementById('importJsonInput').value = '';
-            } catch(e) {
-                window.customAlert("Fehler im JSON Format! Bitte stelle sicher, dass es sich um eine gültige Scenario Log Datei handelt.");
-            }
-        };
-
-        // --- PREDEFINED SCENARIOS ---
-        const predefinedScenariosList = [
-            { id: 'demo1', name: 'Demo Szenario 1: Echoes', url: 'https://raw.githubusercontent.com/DeinUser/DeinRepo/main/echoes.json' },
-            { id: 'demo2', name: 'Demo Szenario 2: Der Schwarze Regen', url: 'https://raw.githubusercontent.com/DeinUser/DeinRepo/main/regen.json' },
-            { id: 'demo3', name: 'Demo Szenario 3: Terminal Velocity', url: 'https://raw.githubusercontent.com/DeinUser/DeinRepo/main/velocity.json' }
-        ];
-
         // --- ICON LIBRARY ---
         const icons = {
             Rocket: `<svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"></path><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"></path><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"></path><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"></path></svg>`,
@@ -508,6 +443,11 @@
             ShieldAlert: `<svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><path d="M12 8v4"></path><path d="M12 16h.01"></path></svg>`,
             Crosshair: `<svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="22" y1="12" x2="18" y2="12"></line><line x1="6" y1="12" x2="2" y2="12"></line><line x1="12" y1="6" x2="12" y2="2"></line><line x1="12" y1="22" x2="12" y2="18"></line></svg>`,
             Skull: `<svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="12" r="1"></circle><circle cx="15" cy="12" r="1"></circle><path d="M8 20v2h8v-2"></path><path d="m12.5 17-.5-1-.5 1h1z"></path><path d="M16 20a2 2 0 0 0 1.56-3.25 8 8 0 1 0-11.12 0A2 2 0 0 0 8 20"></path></svg>`,
+            Eye: `<svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>`,
+            Zap: `<svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>`,
+            Database: `<svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path></svg>`,
+            Terminal: `<svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>`,
+            Search: `<svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>`,
             CheckSquare: `<svg class="w-5 h-5 text-green-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"></polyline><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>`,
             Square: `<svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"></rect></svg>`,
             ChevronDown: `<svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"></path></svg>`,
@@ -524,12 +464,17 @@
         };
 
         const availableIcons = [
-            { id: 'Rocket', title: 'Rakete (Start/Flucht)' },
-            { id: 'Radio', title: 'Funk (Signale/Infos)' },
-            { id: 'AlertCircle', title: 'Alarm (Gefahr/Eskalation)' },
-            { id: 'ShieldAlert', title: 'Schild (Konzern/Sicherheit)' },
-            { id: 'Crosshair', title: 'Fadenkreuz (Kampf/Meuterei)' },
-            { id: 'Skull', title: 'Totenkopf (Aliens/Tod)' }
+            { id: 'Rocket', title: 'Rakete' },
+            { id: 'Radio', title: 'Funk' },
+            { id: 'AlertCircle', title: 'Alarm' },
+            { id: 'ShieldAlert', title: 'Schild' },
+            { id: 'Crosshair', title: 'Kampf' },
+            { id: 'Skull', title: 'Tod' },
+            { id: 'Eye', title: 'Sichtung' },
+            { id: 'Zap', title: 'Energie' },
+            { id: 'Database', title: 'Daten' },
+            { id: 'Terminal', title: 'Konsole' },
+            { id: 'Search', title: 'Suche' }
         ];
 
         // --- APP STATE ---
@@ -544,6 +489,9 @@
         let clickTimers = {};
         let eventNotes = {};
         let currentOpenEventId = null;
+
+        // Tags in Editing State
+        let currentEditingTags = { Locations: [], Figures: [] };
 
         // --- DATA STRUCTURES ---
         let factions = {
@@ -573,17 +521,17 @@
         };
 
         let events = [
-            { id: 1, act: "Akt I: Das Flüstern im Eis", title: "Seismische Anomalie", type: "Notwendig", description: "Die Bohrköpfe in Sektor C sind auf eine unnatürliche, uralte Eishöhle gestoßen. Der Kontakt zum 4er-Bohrteam ist unvermittelt abgerissen. Die Spieler müssen nach dem Rechten sehen.", fluff: "Ein tiefes Grollen durchzieht das Metall der Station. Staub rieselt aus den rostigen Lüftungsschächten auf eure Schultern. Dann: Stille. Zu viel Stille für eine aktive Minenanlage.", icon: "AlertCircle", locations: "Sektor C, Bohrschacht 4", figures: ["Kaelen", "Sgt. Rourke"] },
-            { id: 2, act: "Akt I: Das Flüstern im Eis", title: "Funkspruch aus der Tiefe", type: "Optional", description: "Ein Kollege funkt um Hilfe. Doch wer genau hinhört (Sensorik/Comtech-Wurf), merkt, dass seine Stimme verzerrt ist und er die SC absichtlich in einen toten Winkel locken will.", fluff: "Das Funkgerät an Kaelens Gürtel rauscht knisternd auf. Zwischen der Statik hört ihr ein feuchtes, unregelmäßiges Atmen. '...brauchen... Hilfe... Schacht vier...'", icon: "Radio", locations: "Aufzugsanlage, Ebene -2", figures: ["Kaelen"] },
-            { id: 3, act: "Akt I: Das Flüstern im Eis", title: "Geheimniskrämerei", type: "Optional", description: "Dr. Vane wird erwischt, wie sie verschlüsselte Daten an ein unbekanntes Konzern-Relais sendet. Rourke oder Kaelen werden misstrauisch. Guter Moment, um Paranoia innerhalb der Gruppe aufzubauen.", fluff: "Grüne Zeilen rattern über den Bildschirm im Labor. Als sich die Tür öffnet, schlägt Dr. Vane hastig auf die Tastatur. 'Nur Routineberichte', sagt sie, aber der Schweiß auf ihrer Stirn lügt.", icon: "Radio", locations: "MedLab 1, Kommunikationsrelais", figures: ["Dr. Vane", "Sgt. Rourke"] },
-            { id: 4, act: "Akt II: Dunkelheit fällt", title: "Quarantäne-Protokoll Alpha", type: "Notwendig", description: "Die Stations-KI O.S.C.A.R. registriert Fremdorganismen. Sie riegelt Sektor C rigoros ab. Die Gruppe wird entweder getrennt oder muss einen lebensgefährlichen Weg durch die schmalen Wartungsschächte finden. Erste direkte Konfrontation mit den Parasiten.", fluff: "Schwere Stahlschotts rammen sich mit einem ohrenbetäubenden Knall in den Boden. Rotes Notlicht taucht die engen Gänge in ein blutiges Dämmerlicht. Ihr seid eingesperrt.", icon: "ShieldAlert", locations: "Sektor C Luftschleusen, Wartungsschächte", figures: ["Sgt. Rourke", "O.S.C.A.R. (KI)", "Die Parasiten"] },
-            { id: 5, act: "Akt II: Dunkelheit fällt", title: "Meuterei der Schicht 3", type: "Notwendig", description: "Die eingeschlossenen Minenarbeiter geraten in Panik. Sie bewaffnen sich mit Bergbauwerkzeugen und wollen Rourkes Barrikade durchbrechen, unwissend, dass sie damit die Quarantäne aufheben würden.", fluff: "Das dumpfe Schlagen von schweren Plasmaschneidern gegen die Sicherheitstür dröhnt in euren Ohren. 'Lasst uns raus, Rourke! Wir wissen, dass ihr uns hier unten verrecken lassen wollt!'", icon: "Crosshair", locations: "Kantine Sektor C, Hauptkorridor", figures: ["Sgt. Rourke", "Kaelen"] },
-            { id: 6, act: "Akt II: Dunkelheit fällt", title: "Sabotage im MedLab", type: "Optional", description: "Dr. Vane hat heimlich eine infizierte Gewebeprobe entwendet. Dabei hat sie den Hauptverteilerkasten zerstört, um Spuren zu verwischen, was den Strom auf der halben Ebene ausfallen lässt.", fluff: "Die medizinischen Monitore sind zerschmettert. Glassplitter knirschen unter euren Stiefeln, und der einzige intakte Probenbehälter auf dem Tisch ist verheerend leer.", icon: "AlertCircle", locations: "MedLab 1", figures: ["Dr. Vane"] },
-            { id: 7, act: "Akt II: Dunkelheit fällt", title: "Durchbruch", type: "Notwendig", description: "Die Parasiten haben einen Weg durch die Lüftung gefunden. Der erste direkte, unerbittliche Angriff auf die isolierte Gruppe. Jemand wird infiziert oder schwer verletzt.", fluff: "Das Gitter über euch wölbt sich kreischend nach unten. Erst bricht eine Niete, dann die nächste. Etwas Großes, Schweres drängt sich durch den engen Schacht...", icon: "Skull", locations: "Überall (Korridore, Wartungsschächte)", figures: ["Die Parasiten"] },
-            { id: 8, act: "Akt III: Letzter Ausweg", title: "Der Countdown läuft", type: "Notwendig", description: "O.S.C.A.R. sieht keine andere Lösung mehr und leitet die Selbstzerstörung der Station ein. Alle Türen zum Hangar sind verriegelt und müssen unter Zeitdruck manuell und mit roher Gewalt (oder Comtech) geöffnet werden.", fluff: "Eine ruhige, synthetische Stimme hallt aus den Deckenlautsprechern: 'Kritische Kontamination bestätigt. Reaktorkern-Kompression in T-Minus 15 Minuten. Wir wünschen einen angenehmen Tag.'", icon: "Rocket", locations: "Reaktorraum, Hauptkorridor zum Hangar", figures: ["O.S.C.A.R. (KI)", "Kaelen", "Sgt. Rourke", "Dr. Vane"] },
-            { id: 9, act: "Akt III: Letzter Ausweg", title: "Konzern-Direktive 104", type: "Notwendig", description: "Dr. Vane offenbart ihre wahren Prioritäten. Sie schließt die Gruppe im Reaktorraum ein, um ungestört mit den gesicherten Proben zum Shuttle zu gelangen. Klassischer PvP-Moment.", fluff: "'Es tut mir leid, Kaelen', hallt Vanes kühle Stimme aus dem Intercom. 'Aber die Biomasse ist unbezahlbar. Ihr seid leider... entbehrlich. Weyland-Yutani dankt euch für euren Einsatz.'", icon: "ShieldAlert", locations: "Reaktorraum, Flur zum Hangar", figures: ["Dr. Vane", "Kaelen", "Sgt. Rourke"] },
-            { id: 10, act: "Akt III: Letzter Ausweg", title: "O.S.C.A.R.s Gnade", type: "Optional", description: "Kaelen oder Rourke können O.S.C.A.R. mit einem schweren Comtech-Wurf davon überzeugen, dass Vane die eigentliche Kontaminationsgefahr ist. O.S.C.A.R. wendet sich daraufhin gegen Vane.", fluff: "Die KI schweigt für einen endlos wirkenden Moment. Dann leuchtet das Terminal grün auf. 'Logik akzeptiert. Subjekt Vane stellt primären Vektor dar. Neutralisierung eingeleitet.'", icon: "AlertCircle", locations: "KI-Kern, Hangar", figures: ["O.S.C.A.R. (KI)", "Dr. Vane"] },
-            { id: 11, act: "Akt III: Letzter Ausweg", title: "Blutiger Zoll", type: "Notwendig", description: "Das Frachtshuttle ist startklar. Doch der massive Alpha-Parasit blockiert die Laderampe. Ein letzter, harter Kampf entbrennt. Möglicherweise muss sich jemand opfern, damit der Rest entkommen kann.", fluff: "Das Shuttle wartet. Freiheit. Doch die Rampe wird von einer schattigen, pechschwarzen Masse blockiert, die sich im flackernden Notlicht windet und euch mit leeren Augen anstarrt...", icon: "Skull", locations: "Hangar Bay 2, Frachtshuttle", figures: ["Die Parasiten", "Dr. Vane", "Kaelen", "Sgt. Rourke"] }
+            { id: 1, act: "Akt I: Das Flüstern im Eis", title: "Seismische Anomalie", type: "Notwendig", description: "Die Bohrköpfe in Sektor C sind auf eine unnatürliche, uralte Eishöhle gestoßen. Der Kontakt zum 4er-Bohrteam ist unvermittelt abgerissen. Die Spieler müssen nach dem Rechten sehen.", fluff: "Ein tiefes Grollen durchzieht das Metall der Station. Staub rieselt aus den rostigen Lüftungsschächten auf eure Schultern. Dann: Stille. Zu viel Stille für eine aktive Minenanlage.", icon: "AlertCircle", locations: ["Sektor C", "Bohrschacht 4"], figures: ["Kaelen", "Sgt. Rourke"] },
+            { id: 2, act: "Akt I: Das Flüstern im Eis", title: "Funkspruch aus der Tiefe", type: "Optional", description: "Ein Kollege funkt um Hilfe. Doch wer genau hinhört (Sensorik/Comtech-Wurf), merkt, dass seine Stimme verzerrt ist und er die SC absichtlich in einen toten Winkel locken will.", fluff: "Das Funkgerät an Kaelens Gürtel rauscht knisternd auf. Zwischen der Statik hört ihr ein feuchtes, unregelmäßiges Atmen. '...brauchen... Hilfe... Schacht vier...'", icon: "Radio", locations: ["Aufzugsanlage", "Ebene -2"], figures: ["Kaelen"] },
+            { id: 3, act: "Akt I: Das Flüstern im Eis", title: "Geheimniskrämerei", type: "Optional", description: "Dr. Vane wird erwischt, wie sie verschlüsselte Daten an ein unbekanntes Konzern-Relais sendet. Rourke oder Kaelen werden misstrauisch. Guter Moment, um Paranoia innerhalb der Gruppe aufzubauen.", fluff: "Grüne Zeilen rattern über den Bildschirm im Labor. Als sich die Tür öffnet, schlägt Dr. Vane hastig auf die Tastatur. 'Nur Routineberichte', sagt sie, aber der Schweiß auf ihrer Stirn lügt.", icon: "Radio", locations: ["MedLab 1", "Kommunikationsrelais"], figures: ["Dr. Vane", "Sgt. Rourke"] },
+            { id: 4, act: "Akt II: Dunkelheit fällt", title: "Quarantäne-Protokoll Alpha", type: "Notwendig", description: "Die Stations-KI O.S.C.A.R. registriert Fremdorganismen. Sie riegelt Sektor C rigoros ab. Die Gruppe wird entweder getrennt oder muss einen lebensgefährlichen Weg durch die schmalen Wartungsschächte finden. Erste direkte Konfrontation mit den Parasiten.", fluff: "Schwere Stahlschotts rammen sich mit einem ohrenbetäubenden Knall in den Boden. Rotes Notlicht taucht die engen Gänge in ein blutiges Dämmerlicht. Ihr seid eingesperrt.", icon: "ShieldAlert", locations: ["Sektor C Luftschleusen", "Wartungsschächte"], figures: ["Sgt. Rourke", "O.S.C.A.R. (KI)", "Die Parasiten"] },
+            { id: 5, act: "Akt II: Dunkelheit fällt", title: "Meuterei der Schicht 3", type: "Notwendig", description: "Die eingeschlossenen Minenarbeiter geraten in Panik. Sie bewaffnen sich mit Bergbauwerkzeugen und wollen Rourkes Barrikade durchbrechen, unwissend, dass sie damit die Quarantäne aufheben würden.", fluff: "Das dumpfe Schlagen von schweren Plasmaschneidern gegen die Sicherheitstür dröhnt in euren Ohren. 'Lasst uns raus, Rourke! Wir wissen, dass ihr uns hier unten verrecken lassen wollt!'", icon: "Crosshair", locations: ["Kantine Sektor C", "Hauptkorridor"], figures: ["Sgt. Rourke", "Kaelen"] },
+            { id: 6, act: "Akt II: Dunkelheit fällt", title: "Sabotage im MedLab", type: "Optional", description: "Dr. Vane hat heimlich eine infizierte Gewebeprobe entwendet. Dabei hat sie den Hauptverteilerkasten zerstört, um Spuren zu verwischen, was den Strom auf der halben Ebene ausfallen lässt.", fluff: "Die medizinischen Monitore sind zerschmettert. Glassplitter knirschen unter euren Stiefeln, und der einzige intakte Probenbehälter auf dem Tisch ist verheerend leer.", icon: "AlertCircle", locations: ["MedLab 1"], figures: ["Dr. Vane"] },
+            { id: 7, act: "Akt II: Dunkelheit fällt", title: "Durchbruch", type: "Notwendig", description: "Die Parasiten haben einen Weg durch die Lüftung gefunden. Der erste direkte, unerbittliche Angriff auf die isolierte Gruppe. Jemand wird infiziert oder schwer verletzt.", fluff: "Das Gitter über euch wölbt sich kreischend nach unten. Erst bricht eine Niete, dann die nächste. Etwas Großes, Schweres drängt sich durch den engen Schacht...", icon: "Skull", locations: ["Korridore", "Wartungsschächte"], figures: ["Die Parasiten"] },
+            { id: 8, act: "Akt III: Letzter Ausweg", title: "Der Countdown läuft", type: "Notwendig", description: "O.S.C.A.R. sieht keine andere Lösung mehr und leitet die Selbstzerstörung der Station ein. Alle Türen zum Hangar sind verriegelt und müssen unter Zeitdruck manuell und mit roher Gewalt (oder Comtech) geöffnet werden.", fluff: "Eine ruhige, synthetische Stimme hallt aus den Deckenlautsprechern: 'Kritische Kontamination bestätigt. Reaktorkern-Kompression in T-Minus 15 Minuten. Wir wünschen einen angenehmen Tag.'", icon: "Rocket", locations: ["Reaktorraum", "Hauptkorridor", "Hangar"], figures: ["O.S.C.A.R. (KI)", "Kaelen", "Sgt. Rourke", "Dr. Vane"] },
+            { id: 9, act: "Akt III: Letzter Ausweg", title: "Konzern-Direktive 104", type: "Notwendig", description: "Dr. Vane offenbart ihre wahren Prioritäten. Sie schließt die Gruppe im Reaktorraum ein, um ungestört mit den gesicherten Proben zum Shuttle zu gelangen. Klassischer PvP-Moment.", fluff: "'Es tut mir leid, Kaelen', hallt Vanes kühle Stimme aus dem Intercom. 'Aber die Biomasse ist unbezahlbar. Ihr seid leider... entbehrlich. Weyland-Yutani dankt euch für euren Einsatz.'", icon: "ShieldAlert", locations: ["Reaktorraum", "Flur zum Hangar"], figures: ["Dr. Vane", "Kaelen", "Sgt. Rourke"] },
+            { id: 10, act: "Akt III: Letzter Ausweg", title: "O.S.C.A.R.s Gnade", type: "Optional", description: "Kaelen oder Rourke können O.S.C.A.R. mit einem schweren Comtech-Wurf davon überzeugen, dass Vane die eigentliche Kontaminationsgefahr ist. O.S.C.A.R. wendet sich daraufhin gegen Vane.", fluff: "Die KI schweigt für einen endlos wirkenden Moment. Dann leuchtet das Terminal grün auf. 'Logik akzeptiert. Subjekt Vane stellt primären Vektor dar. Neutralisierung eingeleitet.'", icon: "AlertCircle", locations: ["KI-Kern", "Hangar"], figures: ["O.S.C.A.R. (KI)", "Dr. Vane"] },
+            { id: 11, act: "Akt III: Letzter Ausweg", title: "Blutiger Zoll", type: "Notwendig", description: "Das Frachtshuttle ist startklar. Doch der massive Alpha-Parasit blockiert die Laderampe. Ein letzter, harter Kampf entbrennt. Möglicherweise muss sich jemand opfern, damit der Rest entkommen kann.", fluff: "Das Shuttle wartet. Freiheit. Doch die Rampe wird von einer schattigen, pechschwarzen Masse blockiert, die sich im flackernden Notlicht windet und euch mit leeren Augen anstarrt...", icon: "Skull", locations: ["Hangar Bay 2", "Frachtshuttle"], figures: ["Die Parasiten", "Dr. Vane", "Kaelen", "Sgt. Rourke"] }
         ];
 
         // --- HELPER FUNCTIONS ---
@@ -602,13 +550,10 @@
             document.querySelectorAll('.dynamic-font').forEach(el => el.remove());
             let families = new Set([headingFont, bodyFont]);
             let familyQuery = Array.from(families).map(f => `family=${f.replace(/ /g, '+')}:wght@400;700`).join('&');
-            const link = document.createElement('link');
-            link.rel = 'stylesheet';
-            link.className = 'dynamic-font';
+            const link = document.createElement('link'); link.rel = 'stylesheet'; link.className = 'dynamic-font';
             link.href = `https://fonts.googleapis.com/css2?${familyQuery}&display=swap`;
             document.head.appendChild(link);
-            const style = document.createElement('style');
-            style.className = 'dynamic-font';
+            const style = document.createElement('style'); style.className = 'dynamic-font';
             style.textContent = `
                 body, input, textarea, select, button { font-family: "${bodyFont}", monospace, sans-serif !important; }
                 h1, h2, h3, h4, h5, h6, .font-heading { font-family: "${headingFont}", sans-serif !important; }
@@ -616,92 +561,55 @@
             document.head.appendChild(style);
         }
 
-        // --- EXPORT & IMPORT LOGIC ---
+        // --- EXPORT & IMPORT ---
         function getExportDataString() {
             return JSON.stringify({
                 appTitle, appSubtitle, appFontHeading, appFontBody,
-                checkedIds: Array.from(checkedIds),
-                collapsedActs: Array.from(collapsedActs),
+                checkedIds: Array.from(checkedIds), collapsedActs: Array.from(collapsedActs),
                 eventNotes, actData, events, factions
             }, null, 2);
         }
 
-        function encodeScenario(str) {
-            return btoa(unescape(encodeURIComponent(str)));
-        }
-
-        function decodeScenario(b64) {
-            return decodeURIComponent(escape(atob(b64)));
-        }
-
         window.openExportModal = function() {
             document.getElementById('exportTextarea').value = getExportDataString();
-            document.getElementById('copySuccessMsg').classList.add('opacity-0');
             document.getElementById('exportModal').classList.remove('opacity-0', 'pointer-events-none');
         };
 
         window.copyExportToClipboard = function() {
             const textarea = document.getElementById('exportTextarea');
-            textarea.select();
-            document.execCommand('copy');
+            textarea.select(); document.execCommand('copy');
             showCopySuccess("JSON kopiert!");
         };
 
         window.generateAndCopyShareLink = function() {
-            try {
-                const seed = encodeScenario(getExportDataString());
-                const url = window.location.origin + window.location.pathname + '?scenario=' + seed;
-                copyToClipboard(url);
-                showCopySuccess("Share-Link kopiert!");
-            } catch (e) {
-                window.customAlert("Fehler beim Generieren des Links.");
-            }
+            const seed = encodeScenario(getExportDataString());
+            const url = window.location.origin + window.location.pathname + '?scenario=' + seed;
+            copyToClipboard(url); showCopySuccess("Share-Link kopiert!");
         };
 
-        // NEW in 1.3.0
         window.copySeedToClipboard = function() {
-            try {
-                const seed = encodeScenario(getExportDataString());
-                copyToClipboard(seed);
-                showCopySuccess("Seed kopiert!");
-            } catch (e) {
-                window.customAlert("Fehler beim Kopieren des Seeds.");
-            }
+            const seed = encodeScenario(getExportDataString());
+            copyToClipboard(seed); showCopySuccess("Seed kopiert!");
         };
 
         function copyToClipboard(text) {
-            const dummy = document.createElement("input");
-            document.body.appendChild(dummy);
-            dummy.value = text;
-            dummy.select();
-            document.execCommand("copy");
+            const dummy = document.createElement("input"); document.body.appendChild(dummy);
+            dummy.value = text; dummy.select(); document.execCommand("copy");
             document.body.removeChild(dummy);
         }
 
         function showCopySuccess(msgText) {
             const msg = document.getElementById('copySuccessMsg');
-            msg.textContent = msgText;
-            msg.classList.remove('opacity-0');
+            msg.textContent = msgText; msg.classList.remove('opacity-0');
             setTimeout(() => msg.classList.add('opacity-0'), 3000);
         }
-
-        window.triggerDownloadFile = function() {
-            const blob = new Blob([getExportDataString()], { type: "application/json" });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = "scenario-log.json";
-            document.body.appendChild(a);
-            a.click();
-            setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 100);
-        };
 
         function applyImportedData(data) {
             if (!data) return;
             appTitle = data.appTitle || appTitle;
             appSubtitle = data.appSubtitle || appSubtitle;
-            appFontHeading = data.appFontHeading || data.appFont || appFontHeading;
-            appFontBody = data.appFontBody || data.appFont || appFontBody;
+            appFontHeading = data.appFontHeading || appFontHeading;
+            appFontBody = data.appFontBody || appFontBody;
             applyFonts(appFontHeading, appFontBody);
             checkedIds = new Set(data.checkedIds || []);
             collapsedActs = new Set(data.collapsedActs || []);
@@ -709,34 +617,91 @@
             actData = data.actData || {};
             events = data.events || [];
             factions = data.factions || {};
-            window.closeAllModals();
             renderApp();
         }
 
         window.handleImport = function(event) {
-            const file = event.target.files[0];
-            if (!file) return;
+            const file = event.target.files[0]; if (!file) return;
             const reader = new FileReader();
             reader.onload = (e) => {
                 try { applyImportedData(JSON.parse(e.target.result)); } 
-                catch (err) { window.customAlert("Ungültiges Dateiformat."); }
-                event.target.value = '';
+                catch (err) { window.customAlert("Fehler beim Import."); }
             };
             reader.readAsText(file);
         };
 
-        window.importFromSeedText = function() {
-            const seed = document.getElementById('importSeedInput').value.trim();
-            if(!seed) return;
-            try { applyImportedData(JSON.parse(decodeScenario(seed))); document.getElementById('importSeedInput').value = ''; } 
-            catch(e) { window.customAlert("Ungültiger Seed!"); }
+        // --- TAG SYSTEM LOGIC ---
+        window.addTag = (type) => {
+            const input = document.getElementById(`tagInput${type}`);
+            const val = input.value.trim();
+            if(val && !currentEditingTags[type].includes(val)) {
+                currentEditingTags[type].push(val);
+                input.value = "";
+                window.renderEditTags(type);
+            }
         };
 
-        window.importFromJsonText = function() {
-            const jsonStr = document.getElementById('importJsonInput').value.trim();
-            if(!jsonStr) return;
-            try { applyImportedData(JSON.parse(jsonStr)); document.getElementById('importJsonInput').value = ''; } 
-            catch(e) { window.customAlert("Ungültiges JSON!"); }
+        window.removeTag = (type, index) => {
+            currentEditingTags[type].splice(index, 1);
+            window.renderEditTags(type);
+        };
+
+        window.renderEditTags = (type) => {
+            const list = document.getElementById(`tagList${type}`);
+            list.innerHTML = currentEditingTags[type].map((tag, i) => `
+                <span class="bg-blue-900/40 border border-blue-700/50 text-blue-300 px-2 py-1 rounded text-xs flex items-center gap-2">
+                    ${tag}
+                    <button onclick="window.removeTag('${type}', ${i})" class="text-blue-500 hover:text-red-400 font-bold">×</button>
+                </span>
+            `).join('');
+        };
+
+        // --- DRAG & DROP LOGIC ---
+        window.handleDragStart = (e, id) => {
+            e.dataTransfer.setData("eventId", id);
+            e.currentTarget.classList.add('dragging');
+        };
+
+        window.handleDragEnd = (e) => {
+            e.currentTarget.classList.remove('dragging');
+            document.querySelectorAll('.event-container').forEach(el => el.classList.remove('drag-over'));
+        };
+
+        window.handleDragOver = (e) => {
+            e.preventDefault();
+            const el = e.currentTarget;
+            if (el.classList.contains('event-container')) el.classList.add('drag-over');
+        };
+
+        window.handleDragLeave = (e) => {
+            e.currentTarget.classList.remove('drag-over');
+        };
+
+        window.handleDrop = (e, targetId) => {
+            e.preventDefault();
+            const sourceId = parseInt(e.dataTransfer.getData("eventId"));
+            if (sourceId === targetId) return;
+
+            const sourceIdx = events.findIndex(ev => ev.id === sourceId);
+            const targetIdx = events.findIndex(ev => ev.id === targetId);
+            
+            // Move item in array
+            const [movedItem] = events.splice(sourceIdx, 1);
+            movedItem.act = events[targetIdx].act;
+            events.splice(targetIdx, 0, movedItem);
+
+            renderApp();
+        };
+
+        // --- DELETE LOGIC ---
+        window.confirmDeleteEvent = () => {
+            const id = parseInt(document.getElementById('editId').value);
+            if(!id) return;
+            window.customConfirm("Möchtest du dieses Ereignis wirklich unwiderruflich löschen?", () => {
+                events = events.filter(e => e.id !== id);
+                window.closeModal('editModal');
+                renderApp();
+            });
         };
 
         // --- RENDER LOGIC ---
@@ -748,14 +713,19 @@
                 return acc;
             }, {});
 
+            const actDatalist = document.getElementById('actDatalist');
+            actDatalist.innerHTML = Object.keys(groupedEvents).map(a => `<option value="${a}">`).join('');
+
+            const factionsDatalist = document.getElementById('factionsDatalist');
+            factionsDatalist.innerHTML = Object.keys(factions).map(f => `<option value="${f}">`).join('');
+
             let html = `
                 <div class="max-w-4xl mx-auto">
                     <header class="mb-12 border-b border-green-800/50 pb-6">
                         <div class="flex justify-between items-start md:items-center flex-col md:flex-row gap-4">
                             <div class="text-left">
                                 <h1 onclick="window.openHeaderModal()" class="text-3xl md:text-5xl font-bold text-green-500 mb-2 tracking-tighter uppercase cursor-pointer group flex items-center gap-3 font-heading">
-                                    ${appTitle}
-                                    <span class="opacity-0 group-hover:opacity-100 text-gray-500 transition-opacity">${icons.Pencil}</span>
+                                    ${appTitle} <span class="opacity-0 group-hover:opacity-100 text-gray-500 transition-opacity">${icons.Pencil}</span>
                                 </h1>
                                 <p onclick="window.openHeaderModal()" class="text-gray-400 text-sm md:text-base cursor-pointer group flex items-center gap-2">
                                     ${appSubtitle}
@@ -796,12 +766,18 @@
                     const btnBorder = isOptional ? 'border-dashed border-gray-700' : 'border-gray-800 hover:border-green-500/50';
 
                     html += `
-                        <div class="relative pl-8 md:pl-12">
-                            <div class="absolute -left-[17px] top-4 w-8 h-8 rounded-full border-2 flex items-center justify-center bg-gray-950 ${nodeClass}">${icons[event.icon] || icons.Square}</div>
+                        <div class="event-container relative pl-8 md:pl-12 transition-all" 
+                             draggable="true" 
+                             ondragstart="window.handleDragStart(event, ${event.id})" 
+                             ondragend="window.handleDragEnd(event)" 
+                             ondragover="window.handleDragOver(event)" 
+                             ondragleave="window.handleDragLeave(event)" 
+                             ondrop="window.handleDrop(event, ${event.id})">
+                            <div class="absolute -left-[17px] top-4 w-8 h-8 rounded-full border-2 flex items-center justify-center bg-gray-950 cursor-grab active:cursor-grabbing ${nodeClass}">${icons[event.icon] || icons.Square}</div>
                             <button onclick="window.handleInteraction(event, ${event.id})" class="event-card-btn w-full text-left p-4 rounded-lg border transition-all ${actColors.bg} ${btnBorder} group no-select">
                                 <div class="flex justify-between gap-4">
                                     <div class="flex items-start gap-3">
-                                        <div onclick="window.toggleCheckbox(event, ${event.id}, ${isOptional})" class="mt-1 text-gray-400 hover:text-green-400 transition-colors">${checkedIds.has(event.id) ? icons.CheckSquare : icons.Square}</div>
+                                        <div onclick="window.toggleCheckbox(event, ${event.id})" class="mt-1 text-gray-400 hover:text-green-400 transition-colors">${checkedIds.has(event.id) ? icons.CheckSquare : icons.Square}</div>
                                         <div>
                                             <h3 class="text-lg font-bold font-heading ${checkedIds.has(event.id) ? 'line-through text-gray-500' : 'text-gray-100'}">${event.title}</h3>
                                             <span class="text-[10px] px-1.5 py-0.5 rounded uppercase tracking-wider ${isOptional ? 'bg-gray-800 text-gray-500' : 'bg-green-900/30 text-green-400'}">${event.type}</span>
@@ -814,7 +790,10 @@
                                 </div>
                                 <div id="content-${event.id}" class="${expandedId === event.id ? 'mt-4 max-h-96' : 'max-h-0'} overflow-hidden transition-all duration-300">
                                     <p class="border-t border-gray-800 pt-4 text-sm text-gray-300">${event.description}</p>
-                                    ${eventNotes[event.id] ? `<p class="mt-2 text-[10px] text-green-500/70 italic">📝 Notizen vorhanden</p>` : ''}
+                                    <div class="flex flex-wrap gap-2 mt-3">
+                                        ${(event.locations || []).map(l => `<span class="text-[10px] px-2 py-0.5 bg-gray-950/50 rounded text-gray-500">📍 ${l}</span>`).join('')}
+                                        ${(event.figures || []).map(f => `<span class="text-[10px] px-2 py-0.5 bg-blue-900/20 rounded text-blue-400">👤 ${f}</span>`).join('')}
+                                    </div>
                                 </div>
                             </button>
                         </div>
@@ -828,7 +807,7 @@
         // --- CORE FUNCTIONS (Modals/Interactions) ---
         window.closeModal = (id) => { 
             document.getElementById(id).classList.add('opacity-0', 'pointer-events-none'); 
-            if(id === 'eventModal') { currentOpenEventId = null; renderApp(); }
+            if(id === 'eventModal') currentOpenEventId = null; 
         };
         window.closeAllModals = () => ['eventModal','actModal','editModal','factionModal','headerModal','exportModal','importModal','dialogModal'].forEach(window.closeModal);
         
@@ -848,23 +827,18 @@
             else { clickTimers[act] = time; clickTimers['t'+act] = setTimeout(() => window.toggleAct(act), 300); }
         };
 
-        // --- MODAL DATA LOADING ---
         window.openEventModal = (id) => {
             const ev = events.find(e => e.id === id); if(!ev) return;
             currentOpenEventId = id;
             document.getElementById('modalTitle').textContent = ev.title;
             document.getElementById('modalDesc').textContent = ev.description;
-            document.getElementById('modalLocations').textContent = ev.locations || "N/A";
+            document.getElementById('modalLocations').textContent = (ev.locations || []).join(', ') || "N/A";
             document.getElementById('modalNotes').value = eventNotes[id] || "";
             document.getElementById('modalFluffContainer').className = ev.fluff ? "" : "hidden";
             document.getElementById('modalFluff').textContent = ev.fluff ? `» ${ev.fluff} «` : "";
-            
             const figList = document.getElementById('modalFigures'); figList.innerHTML = "";
             (ev.figures || []).forEach(f => {
-                const li = document.createElement('li');
-                li.className = "flex justify-between border-b border-gray-800/50 pb-1 text-sm";
-                li.innerHTML = `<span class="text-green-300 font-bold">${f}</span> <span class="text-[10px] text-gray-500 uppercase">${factions[f] || ""}</span>`;
-                figList.appendChild(li);
+                figList.insertAdjacentHTML('beforeend', `<li class="flex justify-between border-b border-gray-800/50 pb-1 text-sm"><span class="text-green-300 font-bold">${f}</span> <span class="text-[10px] text-gray-500 uppercase">${factions[f] || ""}</span></li>`);
             });
             document.getElementById('eventModal').classList.remove('opacity-0', 'pointer-events-none');
         };
@@ -872,14 +846,42 @@
         window.openActModal = (act) => {
             document.getElementById('actModalTitle').textContent = act;
             const mList = document.getElementById('actModalMotivations'); mList.innerHTML = "";
-            (actData[act] || []).forEach(m => {
-                const li = document.createElement('li'); li.className = "bg-gray-950/50 p-2 rounded border border-gray-800 text-sm";
-                li.textContent = m; mList.appendChild(li);
-            });
+            (actData[act] || []).forEach(m => mList.insertAdjacentHTML('beforeend', `<li class="bg-gray-950/50 p-2 rounded border border-gray-800 text-sm">${m}</li>`));
             document.getElementById('actModal').classList.remove('opacity-0', 'pointer-events-none');
         };
 
-        // Header and Faction logic (compacted)
+        window.openEditModal = (id=null) => {
+            const ev = events.find(e => e.id === id) || { act: Object.keys(actData)[0] || "", title: "", type: "Notwendig", icon: "Rocket", description: "", locations: [], figures: [] };
+            document.getElementById('editId').value = id || "";
+            document.getElementById('editAct').value = ev.act;
+            document.getElementById('editTitle').value = ev.title;
+            document.getElementById('editTypeCheckbox').checked = ev.type === "Notwendig";
+            document.getElementById('editDesc').value = ev.description;
+            document.getElementById('editFluff').value = ev.fluff || "";
+            document.getElementById('editIcon').value = ev.icon;
+            currentEditingTags = { Locations: [...(ev.locations || [])], Figures: [...(ev.figures || [])] };
+            window.renderEditTags('Locations');
+            window.renderEditTags('Figures');
+            window.renderIconSelection(ev.icon);
+            document.getElementById('btnDeleteEvent').style.display = id ? "flex" : "none";
+            document.getElementById('editModal').classList.remove('opacity-0', 'pointer-events-none');
+        };
+
+        window.saveEvent = () => {
+            const id = parseInt(document.getElementById('editId').value) || Date.now();
+            const data = {
+                id, act: document.getElementById('editAct').value, title: document.getElementById('editTitle').value,
+                type: document.getElementById('editTypeCheckbox').checked ? "Notwendig" : "Optional",
+                icon: document.getElementById('editIcon').value, fluff: document.getElementById('editFluff').value,
+                description: document.getElementById('editDesc').value, locations: currentEditingTags.Locations,
+                figures: currentEditingTags.Figures
+            };
+            const idx = events.findIndex(e => e.id === id);
+            if(idx > -1) events[idx] = data; else events.push(data);
+            if(data.act && !actData[data.act]) actData[data.act] = [];
+            window.closeModal('editModal'); renderApp();
+        };
+
         window.openHeaderModal = () => {
             document.getElementById('editAppTitle').value = appTitle;
             document.getElementById('editAppSubtitle').value = appSubtitle;
@@ -894,6 +896,12 @@
             window.closeModal('headerModal'); renderApp();
         };
 
+        window.renderIconSelection = (sel) => {
+            const container = document.getElementById('iconSelectionContainer');
+            container.innerHTML = availableIcons.map(i => `<button onclick="window.selectIcon('${i.id}')" class="p-2 border rounded ${sel===i.id?'border-blue-500 bg-blue-900/30 text-blue-400':'border-gray-700'}">${icons[i.id]}</button>`).join('');
+        };
+        window.selectIcon = (id) => { document.getElementById('editIcon').value = id; window.renderIconSelection(id); };
+
         window.openFactionModal = () => {
             const list = document.getElementById('factionList'); list.innerHTML = "";
             Object.entries(factions).forEach(([n, f]) => list.insertAdjacentHTML('beforeend', window.createFactionRow(n, f)));
@@ -906,47 +914,15 @@
             window.closeModal('factionModal'); renderApp();
         };
 
-        window.openEditModal = (id=null) => {
-            const ev = events.find(e => e.id === id) || { act: Object.keys(actData)[0], title: "", type: "Notwendig", icon: "Rocket", description: "", locations: "", figures: [] };
-            document.getElementById('editId').value = id || "";
-            document.getElementById('editAct').value = ev.act;
-            document.getElementById('editTitle').value = ev.title;
-            document.getElementById('editTypeCheckbox').checked = ev.type === "Notwendig";
-            document.getElementById('editDesc').value = ev.description;
-            document.getElementById('editFluff').value = ev.fluff || "";
-            document.getElementById('editLocations').value = ev.locations;
-            document.getElementById('editFigures').value = (ev.figures || []).join(', ');
-            document.getElementById('editIcon').value = ev.icon;
-            window.renderIconSelection(ev.icon);
-            document.getElementById('btnDeleteEvent').style.display = id ? "flex" : "none";
-            document.getElementById('editModal').classList.remove('opacity-0', 'pointer-events-none');
-        };
-        window.saveEvent = () => {
-            const id = parseInt(document.getElementById('editId').value) || Date.now();
-            const data = {
-                id, act: document.getElementById('editAct').value, title: document.getElementById('editTitle').value,
-                type: document.getElementById('editTypeCheckbox').checked ? "Notwendig" : "Optional",
-                icon: document.getElementById('editIcon').value, fluff: document.getElementById('editFluff').value,
-                description: document.getElementById('editDesc').value, locations: document.getElementById('editLocations').value,
-                figures: document.getElementById('editFigures').value.split(',').map(s => s.trim()).filter(s => s)
-            };
-            const idx = events.findIndex(e => e.id === id);
-            if(idx > -1) events[idx] = data; else events.push(data);
-            if(!actData[data.act]) actData[data.act] = [];
-            window.closeModal('editModal'); renderApp();
+        window.resetApp = () => {
+            window.customConfirm("Möchtest du alle Daten löschen und die App zurücksetzen?", () => {
+                location.reload();
+            });
         };
 
-        window.renderIconSelection = (sel) => {
-            const container = document.getElementById('iconSelectionContainer');
-            container.innerHTML = availableIcons.map(i => `<button onclick="window.selectIcon('${i.id}')" class="p-2 border rounded ${sel===i.id?'border-blue-500 bg-blue-900/30 text-blue-400':'border-gray-700'}">${icons[i.id]}</button>`).join('');
-        };
-        window.selectIcon = (id) => { document.getElementById('editIcon').value = id; window.renderIconSelection(id); };
-
-        // Global key/click
         window.addEventListener('keydown', e => { if(e.key === 'Escape') window.closeAllModals(); });
         document.getElementById('modalNotes').addEventListener('input', e => { if(currentOpenEventId) eventNotes[currentOpenEventId] = e.target.value; });
         
-        // Seed check
         window.addEventListener('load', () => {
             const seed = new URLSearchParams(window.location.search).get('scenario');
             if(seed) try { applyImportedData(JSON.parse(decodeScenario(seed))); window.history.replaceState({}, "", window.location.pathname); } catch(e){}
@@ -957,3 +933,11 @@
     </script>
 </body>
 </html>
+
+<!--
+CHANGE LOG
+Version: 1.4.1
+- Patch: Demo-Szenario "Station Kappa-7" vollständig wiederhergestellt (11 Ereignisse).
+- Patch: Konvertierung der Demo-Daten in das neue Tag-System (Arrays für Locations & Figuren).
+- Beibehaltung aller v1.4.0 Features: Drag & Drop, Act-Datalist, Tag-Editor, erweiterte Icons.
+-->
