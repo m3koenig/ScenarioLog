@@ -2,8 +2,8 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Scenario Log v1.5.4</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Scenario Log v1.5.6</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Markdown Parser -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
@@ -14,15 +14,11 @@
         .no-select {
             -webkit-touch-callout: none;
             -webkit-user-select: none;
-            -khtml-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
             user-select: none;
         }
-        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: #030712; }
-        ::-webkit-scrollbar-thumb { background: #1f2937; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #374151; }
+        ::-webkit-scrollbar-thumb { background: #1f2937; border-radius: 3px; }
         
         /* Drag and Drop Visuals */
         .drag-over { 
@@ -30,145 +26,165 @@
             padding-top: 1rem !important;
         }
         .dragging { 
-            opacity: 0.4;
-            transform: scale(0.98);
+            opacity: 0.3;
+            transform: scale(0.95);
         }
         .drop-target-act {
             background: rgba(74, 222, 128, 0.05) !important;
             border-color: rgba(74, 222, 128, 0.2) !important;
         }
 
-        /* Markdown Styling Fixes für Dark Mode */
+        /* Markdown Styling */
         .markdown-content p { margin-bottom: 0.75rem; }
         .markdown-content ul { list-style-type: disc; margin-left: 1.25rem; margin-bottom: 0.75rem; }
-        .markdown-content ol { list-style-type: decimal; margin-left: 1.25rem; margin-bottom: 0.75rem; }
         .markdown-content strong { color: #4ade80; font-weight: bold; }
         .markdown-content em { font-style: italic; opacity: 0.9; }
+
+        /* Navigation Responsive */
+        @media (max-width: 768px) {
+            .app-container { padding-bottom: 100px; padding-right: 1rem; }
+            .nav-container { 
+                position: fixed; 
+                bottom: 0; 
+                left: 0; 
+                width: 100%; 
+                display: flex; 
+                justify-content: space-around; 
+                align-items: center; 
+                background: rgba(17, 24, 39, 0.98); 
+                backdrop-filter: blur(12px);
+                border-top: 1px solid #1f2937;
+                padding: 16px 0 28px 0;
+                z-index: 50;
+            }
+            .nav-item-text { display: none; }
+            .sidebar-desktop { display: none; }
+        }
+        @media (min-width: 769px) {
+            .app-container { padding-right: 100px; }
+            .nav-container { display: none; }
+            .sidebar-desktop { 
+                position: fixed; 
+                right: 24px; 
+                top: 50%; 
+                transform: translateY(-50%); 
+                display: flex; 
+                flex-direction: column; 
+                gap: 12px;
+                z-index: 50;
+            }
+        }
     </style>
 </head>
 <body class="bg-gray-950 text-green-50 min-h-screen relative transition-all duration-300">
 
     <input type="file" id="importFile" accept=".json" class="hidden" onchange="window.handleImport(event)">
 
-    <!-- Sticky Side Bar -->
-    <div class="fixed right-4 top-1/2 -translate-y-1/2 z-40 flex flex-col gap-3">
-        <button onclick="window.openEditModal()" title="Neues Ereignis" class="p-3 bg-blue-600 hover:bg-blue-500 text-white rounded-full shadow-lg shadow-blue-900/40 transition-all hover:scale-110 flex items-center justify-center">
-            <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+    <!-- Desktop Sidebar -->
+    <nav class="sidebar-desktop">
+        <button onclick="window.openEditModal()" title="Neues Ereignis erstellen" class="p-4 bg-blue-600 hover:bg-blue-500 rounded-full shadow-lg transition-transform hover:scale-110 flex items-center justify-center">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"></path></svg>
         </button>
-        <button onclick="window.openFactionModal()" title="Figuren verwalten" class="p-3 bg-orange-600 hover:bg-orange-500 text-white rounded-full shadow-lg shadow-orange-900/40 transition-all hover:scale-110 flex items-center justify-center">
-            <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+        <button onclick="window.openFactionModal()" title="Figuren & Fraktionen verwalten" class="p-4 bg-orange-600 hover:bg-orange-500 rounded-full shadow-lg transition-transform hover:scale-110 flex items-center justify-center">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle></svg>
         </button>
-        <div class="w-full h-px bg-gray-800 my-1"></div>
-        <button onclick="window.openExportModal()" title="Exportieren" class="p-3 bg-green-700 hover:bg-green-600 text-white rounded-full shadow-lg transition-all hover:scale-110 flex items-center justify-center">
-            <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+        <div class="h-px bg-gray-800 my-2"></div>
+        <button onclick="window.openExportModal()" title="Daten exportieren" class="p-3 bg-green-700 hover:bg-green-600 rounded-full transition-transform hover:scale-110 flex items-center justify-center">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"></path></svg>
         </button>
-        <button onclick="document.getElementById('importModal').classList.remove('opacity-0', 'pointer-events-none')" title="Importieren" class="p-3 bg-gray-700 hover:bg-gray-600 text-white rounded-full shadow-lg transition-all hover:scale-110 flex items-center justify-center">
-            <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+        <button onclick="document.getElementById('importModal').classList.remove('opacity-0', 'pointer-events-none')" title="Daten importieren" class="p-3 bg-gray-700 hover:bg-gray-600 rounded-full transition-transform hover:scale-110 flex items-center justify-center">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"></path></svg>
         </button>
-        <button onclick="window.resetApp()" title="Reset" class="p-3 bg-red-900/50 hover:bg-red-800 text-red-200 rounded-full shadow-lg transition-all hover:scale-110 flex items-center justify-center">
-            <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg>
+        <button onclick="window.resetApp()" title="Anwendung zurücksetzen" class="p-3 bg-red-900/50 hover:bg-red-800 rounded-full transition-transform hover:scale-110 flex items-center justify-center">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8M3 3v5h5"></path></svg>
         </button>
-    </div>
+    </nav>
 
-    <div id="app" class="p-4 md:p-8 pb-32 pr-20 md:pr-24">
+    <!-- Mobile Bottom Navigation -->
+    <nav class="nav-container">
+        <button onclick="window.openEditModal()" title="Neu" class="p-3 bg-blue-600 rounded-full text-white shadow-lg"><svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"></path></svg></button>
+        <button onclick="window.openFactionModal()" title="Figuren" class="p-3 bg-orange-600 rounded-full text-white shadow-lg"><svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle></svg></button>
+        <button onclick="window.openExportModal()" title="Export" class="p-3 bg-green-700 rounded-full text-white"><svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1M12 12l-4-4m4 4l4-4m-4 4V3"></path></svg></button>
+        <button onclick="document.getElementById('importModal').classList.remove('opacity-0', 'pointer-events-none')" title="Import" class="p-3 bg-gray-700 rounded-full text-white"><svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1M12 12V3m0 0l-4 4m4-4l4 4"></path></svg></button>
+        <button onclick="window.resetApp()" title="Reset" class="p-3 bg-red-900/50 rounded-full text-red-200"><svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path></svg></button>
+    </nav>
+
+    <div id="app" class="app-container p-4 md:p-8">
         <!-- Der Inhalt wird per JavaScript geladen -->
     </div>
 
     <!-- Modals -->
     <!-- Event Details Modal -->
-    <div id="eventModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-300">
-        <div class="bg-gray-900 border border-green-500/50 rounded-lg max-w-2xl w-full mx-4 shadow-2xl shadow-green-900/20 max-h-[90vh] flex flex-col">
+    <div id="eventModal" class="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-300">
+        <div class="bg-gray-900 border border-green-500/50 rounded-lg max-w-2xl w-full mx-4 shadow-2xl flex flex-col max-h-[90vh]">
             <div class="p-4 border-b border-gray-800 flex justify-between items-center bg-gray-950/50 rounded-t-lg shrink-0">
                 <h3 id="modalTitle" class="text-xl font-bold text-green-400 uppercase tracking-wider"></h3>
-                <button onclick="window.closeModal('eventModal')" class="text-gray-500 hover:text-red-500 transition-colors p-1">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                </button>
+                <button onclick="window.closeModal('eventModal')" class="text-gray-500 hover:text-red-500 transition-colors p-1"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg></button>
             </div>
             <div class="p-6 overflow-y-auto space-y-6 flex-1">
                 <div id="modalFluffContainer" class="hidden">
                     <h4 class="text-gray-500 text-sm uppercase tracking-wider mb-2 border-b border-gray-800 pb-1">Vorlesetext</h4>
-                    <div class="bg-gray-950/80 border-l-4 border-blue-500/70 p-4 rounded text-blue-200/90 italic shadow-inner text-sm leading-relaxed markdown-content">
-                        <div id="modalFluff"></div>
-                    </div>
+                    <div class="bg-gray-950/80 border-l-4 border-blue-500/70 p-4 rounded text-blue-200/90 italic shadow-inner text-sm leading-relaxed markdown-content"><div id="modalFluff"></div></div>
                 </div>
-                <div>
-                    <h4 class="text-gray-500 text-sm uppercase tracking-wider mb-2 border-b border-gray-800 pb-1">GM Informationen</h4>
-                    <div id="modalDesc" class="text-gray-300 leading-relaxed text-sm markdown-content"></div>
-                </div>
-                <div>
-                    <h4 class="text-gray-500 text-sm uppercase tracking-wider mb-2 border-b border-gray-800 pb-1">Schauplätze</h4>
-                    <p id="modalLocations" class="text-gray-400 text-sm"></p>
-                </div>
-                <div>
-                    <h4 class="text-gray-500 text-sm uppercase tracking-wider mb-2 border-b border-gray-800 pb-1">Figuren</h4>
-                    <ul id="modalFigures" class="text-gray-400 text-sm space-y-2"></ul>
-                </div>
-                <div>
-                    <h4 class="text-gray-500 text-sm uppercase tracking-wider mb-2 border-b border-gray-800 pb-1">SL Notizen</h4>
-                    <textarea id="modalNotes" class="w-full bg-gray-950/50 border border-gray-700 rounded p-3 text-gray-300 focus:border-green-500 outline-none min-h-[150px] resize-y" placeholder="Notizen..."></textarea>
-                </div>
+                <div><h4 class="text-gray-500 text-sm uppercase tracking-wider mb-2 border-b border-gray-800 pb-1">GM Informationen</h4><div id="modalDesc" class="text-gray-300 leading-relaxed text-sm markdown-content"></div></div>
+                <div><h4 class="text-gray-500 text-sm uppercase tracking-wider mb-2 border-b border-gray-800 pb-1">Schauplätze</h4><p id="modalLocations" class="text-gray-400 text-sm"></p></div>
+                <div><h4 class="text-gray-500 text-sm uppercase tracking-wider mb-2 border-b border-gray-800 pb-1">Figuren</h4><ul id="modalFigures" class="text-gray-400 text-sm space-y-2"></ul></div>
+                <div><h4 class="text-gray-500 text-sm uppercase tracking-wider mb-2 border-b border-gray-800 pb-1">SL Notizen</h4><textarea id="modalNotes" class="w-full bg-gray-950/50 border border-gray-700 rounded p-3 text-gray-300 focus:border-green-500 outline-none min-h-[150px] resize-y" placeholder="Deine Notizen..."></textarea></div>
             </div>
         </div>
     </div>
 
     <!-- Export Modal -->
-    <div id="exportModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-md opacity-0 pointer-events-none transition-opacity duration-300">
+    <div id="exportModal" class="fixed inset-0 z-[60] flex items-center justify-center bg-black/90 backdrop-blur-md opacity-0 pointer-events-none transition-opacity duration-300">
         <div class="bg-gray-900 border border-gray-500/50 rounded-lg max-w-2xl w-full mx-4 shadow-2xl max-h-[90vh] flex flex-col">
             <div class="p-4 border-b border-gray-800 flex justify-between items-center bg-gray-950/80 rounded-t-lg shrink-0">
-                <h3 class="text-xl font-bold text-gray-300 uppercase tracking-wider">Daten exportieren</h3>
-                <button onclick="window.closeModal('exportModal')" class="text-gray-500 hover:text-red-500 p-1">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                </button>
+                <h3 class="text-xl font-bold text-gray-300 uppercase tracking-wider">Export</h3>
+                <button onclick="window.closeModal('exportModal')" class="text-gray-500 hover:text-red-500 p-1"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-width="2"></path></svg></button>
             </div>
             <div class="p-6 overflow-y-auto flex-1 flex flex-col gap-4">
-                <div>
-                    <label class="block text-gray-500 text-[10px] uppercase mb-1">JSON Rohdaten</label>
-                    <textarea id="exportTextarea" readonly class="w-full h-32 bg-gray-950 border border-gray-700 rounded p-3 text-xs text-green-500/80 font-mono outline-none resize-none"></textarea>
-                </div>
-                <div id="copySuccessMsg" class="text-green-400 text-sm font-bold opacity-0 transition-opacity text-center">Kopiert!</div>
+                <textarea id="exportTextarea" readonly class="w-full h-32 bg-gray-950 border border-gray-700 rounded p-3 text-xs text-green-500/80 font-mono outline-none resize-none"></textarea>
+                <div id="copySuccessMsg" class="text-green-400 text-sm font-bold opacity-0 transition-opacity text-center">In Zwischenablage kopiert!</div>
             </div>
             <div class="p-4 border-t border-gray-800 bg-gray-950/80 flex flex-wrap justify-end gap-2">
-                <button onclick="window.closeModal('exportModal')" class="px-4 py-2 bg-gray-800 text-gray-300 text-xs rounded transition-colors">Schließen</button>
-                <button onclick="window.generateAndCopyShareLink()" class="px-4 py-2 bg-purple-600 hover:bg-purple-500 rounded font-bold text-white text-xs">Share-Link kopieren</button>
-                <button onclick="window.copySeedToClipboard()" class="px-4 py-2 bg-purple-900/40 hover:bg-purple-800 text-purple-300 font-bold text-xs rounded">Seed kopieren</button>
-                <button onclick="window.copyExportToClipboard()" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white text-xs rounded">JSON kopieren</button>
-                <button onclick="window.triggerDownloadFile()" class="px-4 py-2 bg-green-600 hover:bg-green-500 rounded font-bold text-white text-xs">Download .json</button>
+                <button onclick="window.closeModal('exportModal')" class="px-4 py-2 bg-gray-800 text-gray-300 text-xs rounded">Schließen</button>
+                <button onclick="window.generateAndCopyShareLink()" class="px-4 py-2 bg-purple-600 rounded text-white text-xs">Share Link</button>
+                <button onclick="window.copySeedToClipboard()" class="px-4 py-2 bg-purple-900/40 text-purple-300 text-xs rounded">Seed Kopieren</button>
+                <button onclick="window.copyExportToClipboard()" class="px-4 py-2 bg-gray-700 text-white text-xs rounded">JSON Kopieren</button>
+                <button onclick="window.triggerDownloadFile()" class="px-4 py-2 bg-green-600 rounded text-white text-xs">Download .json</button>
             </div>
         </div>
     </div>
 
     <!-- Import Modal -->
-    <div id="importModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-md opacity-0 pointer-events-none transition-opacity duration-300">
+    <div id="importModal" class="fixed inset-0 z-[60] flex items-center justify-center bg-black/90 backdrop-blur-md opacity-0 pointer-events-none transition-opacity duration-300">
         <div class="bg-gray-900 border border-blue-500/50 rounded-lg max-w-xl w-full mx-4 shadow-2xl flex flex-col max-h-[90vh]">
             <div class="p-4 border-b border-gray-800 flex justify-between items-center bg-gray-950/80 rounded-t-lg shrink-0">
-                <h3 class="text-xl font-bold text-gray-300 uppercase tracking-wider">Daten importieren</h3>
-                <button onclick="window.closeModal('importModal')" class="text-gray-500 hover:text-red-500 p-1">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                </button>
+                <h3 class="text-xl font-bold text-gray-300 uppercase tracking-wider">Import</h3>
+                <button onclick="window.closeModal('importModal')" class="text-gray-500 hover:text-red-500 p-1"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-width="2"></path></svg></button>
             </div>
             <div class="p-6 space-y-6 flex-1 overflow-y-auto">
                 <div>
-                    <h4 class="text-gray-400 text-sm font-bold uppercase tracking-wider mb-2">1. Datei-Upload</h4>
-                    <button onclick="document.getElementById('importFile').click()" class="w-full px-4 py-3 bg-gray-800 hover:bg-gray-700 border border-gray-600 rounded text-gray-200">JSON Datei auswählen</button>
+                    <h4 class="text-gray-400 text-[10px] font-bold uppercase mb-2">1. Datei hochladen</h4>
+                    <button onclick="document.getElementById('importFile').click()" class="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded text-gray-200 text-sm">JSON Datei auswählen</button>
                 </div>
                 <div class="h-px bg-gray-800 w-full"></div>
                 <div>
-                    <h4 class="text-gray-400 text-sm font-bold uppercase tracking-wider mb-2">2. URL Import</h4>
+                    <h4 class="text-gray-400 text-[10px] font-bold uppercase mb-2">2. URL Laden</h4>
                     <div class="flex gap-2">
-                        <input type="text" id="importUrlInput" class="flex-1 bg-gray-950 border border-gray-700 rounded p-3 text-sm text-gray-200" placeholder="https://...">
-                        <button onclick="window.importFromUrl()" class="px-4 bg-blue-900/40 hover:bg-blue-800 border border-blue-700 rounded text-blue-400 font-bold">Laden</button>
+                        <input type="text" id="importUrlInput" class="flex-1 bg-gray-950 border border-gray-700 rounded p-2 text-sm text-gray-200" placeholder="https://...">
+                        <button onclick="window.importFromUrl()" class="px-4 bg-blue-900/40 border border-blue-700 rounded text-blue-400 font-bold text-xs uppercase">Laden</button>
                     </div>
                 </div>
                 <div class="h-px bg-gray-800 w-full"></div>
                 <div>
-                    <h4 class="text-gray-400 text-sm font-bold uppercase tracking-wider mb-2">3. Seed oder JSON-Text</h4>
-                    <div class="space-y-4">
+                    <h4 class="text-gray-400 text-[10px] font-bold uppercase mb-2">3. Seed / JSON-Text</h4>
+                    <div class="space-y-3">
                         <div class="flex gap-2">
                             <input type="text" id="importSeedInput" class="flex-1 bg-gray-950 border border-gray-700 rounded p-2 text-xs text-purple-400" placeholder="Base64 Seed einfügen...">
-                            <button onclick="window.importFromSeedText()" class="px-4 bg-purple-900/40 hover:bg-purple-800 border border-purple-700 rounded text-purple-300 font-bold text-xs">OK</button>
+                            <button onclick="window.importFromSeedText()" class="px-4 bg-purple-900/40 border border-purple-700 rounded text-purple-300 font-bold text-xs uppercase">OK</button>
                         </div>
                         <textarea id="importJsonInput" class="w-full h-24 bg-gray-950 border border-gray-700 rounded p-2 text-xs text-green-500/70 font-mono resize-none" placeholder='{"appTitle": ...}'></textarea>
-                        <button onclick="window.importFromJsonText()" class="w-full py-2 bg-gray-800 hover:bg-gray-700 border border-gray-600 rounded text-gray-300 font-bold text-xs">Text laden</button>
+                        <button onclick="window.importFromJsonText()" class="w-full py-2 bg-gray-800 border border-gray-600 rounded text-gray-300 font-bold text-xs uppercase tracking-wider">JSON Text laden</button>
                     </div>
                 </div>
             </div>
@@ -176,78 +192,70 @@
     </div>
 
     <!-- Edit Modal -->
-    <div id="editModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-md opacity-0 pointer-events-none transition-opacity duration-300">
+    <div id="editModal" class="fixed inset-0 z-[60] flex items-center justify-center bg-black/90 backdrop-blur-md opacity-0 pointer-events-none transition-opacity duration-300">
         <div class="bg-gray-900 border border-blue-500/50 rounded-lg max-w-3xl w-full mx-4 shadow-2xl flex flex-col max-h-[95vh]">
             <div class="p-4 border-b border-gray-800 flex justify-between items-center bg-gray-950/80 rounded-t-lg shrink-0">
                 <h3 id="editModalTitle" class="text-xl font-bold text-blue-400 uppercase tracking-wider">Ereignis bearbeiten</h3>
-                <button onclick="window.closeModal('editModal')" class="text-gray-500 hover:text-red-500 p-1">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                </button>
+                <button onclick="window.closeModal('editModal')" class="text-gray-500 hover:text-red-500 p-1"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-width="2"></path></svg></button>
             </div>
             <div class="p-6 overflow-y-auto space-y-5 flex-1 text-sm">
                 <input type="hidden" id="editId">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                    <div><label class="block text-gray-400 text-xs mb-1 uppercase tracking-wider">Akt</label><input type="text" id="editAct" list="actDatalist" class="w-full bg-gray-950 border border-gray-700 rounded p-2 text-gray-200 focus:border-blue-500 outline-none"><datalist id="actDatalist"></datalist></div>
-                    <div><label class="block text-gray-400 text-xs mb-1 uppercase tracking-wider">Titel</label><input type="text" id="editTitle" class="w-full bg-gray-950 border border-gray-700 rounded p-2 text-gray-200 focus:border-blue-500 outline-none"></div>
+                    <div><label class="block text-gray-400 text-xs mb-1 uppercase tracking-wider">Akt</label><input type="text" id="editAct" list="actDatalist" class="w-full bg-gray-950 border border-gray-700 rounded p-2 text-gray-200 outline-none"><datalist id="actDatalist"></datalist></div>
+                    <div><label class="block text-gray-400 text-xs mb-1 uppercase tracking-wider">Titel</label><input type="text" id="editTitle" class="w-full bg-gray-950 border border-gray-700 rounded p-2 text-gray-200 outline-none"></div>
                 </div>
+                <div class="flex items-center gap-3"><input type="checkbox" id="editTypeCheckbox" class="w-5 h-5 rounded bg-gray-950 border-gray-700 text-blue-600"><span class="text-gray-200 font-bold uppercase tracking-wider text-xs">Notwendig</span></div>
+                <div><label class="block text-gray-400 text-xs mb-2 uppercase tracking-wider">Symbol</label><div id="iconSelectionContainer" class="flex flex-wrap gap-2"></div><input type="hidden" id="editIcon" value="Rocket"></div>
+                <div><label class="block text-blue-400/80 text-xs mb-1 uppercase tracking-wider">Vorlesetext (MD)</label><textarea id="editFluff" class="w-full bg-gray-950 border border-gray-700 rounded p-2 text-blue-200 italic min-h-[100px] resize-y"></textarea></div>
+                <div><label class="block text-gray-400 text-xs mb-1 uppercase tracking-wider">GM Info (MD)</label><textarea id="editDesc" class="w-full bg-gray-950 border border-gray-700 rounded p-2 text-gray-200 min-h-[150px] resize-y"></textarea></div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                    <label class="flex items-center gap-3 cursor-pointer"><input type="checkbox" id="editTypeCheckbox" class="w-5 h-5 rounded bg-gray-950 border-gray-700 text-blue-600 focus:ring-0"><span class="text-gray-200 font-bold uppercase tracking-wider text-xs">Notwendiges Ereignis</span></label>
-                    <div><label class="block text-gray-400 text-xs mb-2 uppercase tracking-wider">Icon</label><div id="iconSelectionContainer" class="flex flex-wrap gap-2"></div><input type="hidden" id="editIcon" value="Rocket"></div>
-                </div>
-                <div><label class="block text-blue-400/80 text-xs mb-1 uppercase tracking-wider">Vorlesetext (Markdown)</label><textarea id="editFluff" class="w-full bg-gray-950 border border-gray-700 rounded p-2 text-blue-200 italic focus:border-blue-500 outline-none min-h-[100px] resize-y"></textarea></div>
-                <div><label class="block text-gray-400 text-xs mb-1 uppercase tracking-wider">GM Beschreibung (Markdown)</label><textarea id="editDesc" class="w-full bg-gray-950 border border-gray-700 rounded p-2 text-gray-200 focus:border-blue-500 outline-none min-h-[150px] resize-y"></textarea></div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                    <div><label class="block text-gray-400 text-xs mb-1 uppercase tracking-wider">Schauplätze</label><div class="flex gap-2 mb-2"><input type="text" id="tagInputLocations" list="locationsDatalist" class="flex-1 bg-gray-950 border border-gray-700 rounded p-2 text-gray-200 focus:border-blue-500 outline-none"><button onclick="window.addTag('Locations')" class="px-3 bg-gray-800 rounded text-gray-300 hover:bg-gray-700">+</button></div><datalist id="locationsDatalist"></datalist><div id="tagListLocations" class="flex flex-wrap gap-2"></div></div>
-                    <div><label class="block text-gray-400 text-xs mb-1 uppercase tracking-wider">Figuren</label><div class="flex gap-2 mb-2"><input type="text" id="tagInputFigures" list="factionsDatalist" class="flex-1 bg-gray-950 border border-gray-700 rounded p-2 text-gray-200 focus:border-blue-500 outline-none"><button onclick="window.addTag('Figures')" class="px-3 bg-gray-800 rounded text-gray-300 hover:bg-gray-700">+</button></div><datalist id="factionsDatalist"></datalist><div id="tagListFigures" class="flex flex-wrap gap-2"></div></div>
+                    <div><label class="block text-gray-400 text-xs mb-1 uppercase tracking-wider">Schauplätze</label><div class="flex gap-2 mb-2"><input type="text" id="tagInputLocations" list="locationsDatalist" class="flex-1 bg-gray-950 border border-gray-700 rounded p-2 text-gray-200"><button onclick="window.addTag('Locations')" class="px-3 bg-gray-800 rounded text-gray-300">+</button></div><datalist id="locationsDatalist"></datalist><div id="tagListLocations" class="flex flex-wrap gap-2"></div></div>
+                    <div><label class="block text-gray-400 text-xs mb-1 uppercase tracking-wider">Figuren</label><div class="flex gap-2 mb-2"><input type="text" id="tagInputFigures" list="factionsDatalist" class="flex-1 bg-gray-950 border border-gray-700 rounded p-2 text-gray-200"><button onclick="window.addTag('Figures')" class="px-3 bg-gray-800 rounded text-gray-300">+</button></div><datalist id="factionsDatalist"></datalist><div id="tagListFigures" class="flex flex-wrap gap-2"></div></div>
                 </div>
             </div>
             <div class="p-4 border-t border-gray-800 bg-gray-950/80 flex justify-between items-center shrink-0">
-                <button id="btnDeleteEvent" onclick="window.confirmDeleteEvent()" class="px-4 py-2 bg-red-900/30 text-red-400 border border-red-800/50 rounded flex items-center gap-2 transition-colors hover:bg-red-800/60"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg> Löschen</button>
-                <div class="flex gap-3"><button onclick="window.closeModal('editModal')" class="px-4 py-2 bg-gray-800 text-gray-300 rounded hover:bg-gray-700">Abbrechen</button><button onclick="window.saveEvent()" class="px-6 py-2 bg-blue-600 font-bold text-white rounded hover:bg-blue-500 shadow-lg">Speichern</button></div>
+                <button id="btnDeleteEvent" onclick="window.confirmDeleteEvent()" class="px-4 py-2 bg-red-900/30 text-red-400 border border-red-800/50 rounded flex items-center gap-2 hover:bg-red-800/60">Löschen</button>
+                <div class="flex gap-3"><button onclick="window.closeModal('editModal')" class="px-4 py-2 bg-gray-800 text-gray-300 rounded">Abbrechen</button><button onclick="window.saveEvent()" class="px-6 py-2 bg-blue-600 font-bold text-white rounded">Speichern</button></div>
             </div>
         </div>
     </div>
 
     <!-- Faction Modal -->
-    <div id="factionModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-md opacity-0 pointer-events-none transition-opacity duration-300">
+    <div id="factionModal" class="fixed inset-0 z-[60] flex items-center justify-center bg-black/90 backdrop-blur-md opacity-0 pointer-events-none transition-opacity duration-300">
         <div class="bg-gray-900 border border-orange-500/50 rounded-lg max-w-2xl w-full mx-4 shadow-2xl flex flex-col max-h-[90vh]">
             <div class="p-4 border-b border-gray-800 flex justify-between items-center bg-gray-950/80 rounded-t-lg shrink-0">
-                <h3 class="text-xl font-bold text-orange-400 uppercase tracking-wider">Figuren verwalten</h3>
-                <button onclick="window.closeModal('factionModal')" class="text-gray-500 hover:text-red-500 p-1">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                </button>
+                <h3 class="text-xl font-bold text-orange-400 uppercase tracking-wider">Figuren & Fraktionen</h3>
+                <button onclick="window.closeModal('factionModal')" class="text-gray-500 hover:text-red-500 p-1"><svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-width="2"></path></svg></button>
             </div>
             <div class="p-6 overflow-y-auto flex-1">
                 <div id="factionList" class="space-y-2"></div>
-                <button onclick="window.addFactionRow()" class="mt-5 px-4 py-2 bg-gray-800 hover:bg-gray-700 border border-gray-600 text-sm rounded text-gray-200 transition-colors">+ Neue Figur hinzufügen</button>
+                <button onclick="window.addFactionRow()" class="mt-5 px-4 py-2 bg-gray-800 border border-gray-600 text-sm rounded text-gray-200">+ Neue Figur hinzufügen</button>
             </div>
-            <div class="p-4 border-t border-gray-800 bg-gray-950/80 rounded-b-lg flex justify-end gap-3 shrink-0">
-                <button onclick="window.closeModal('factionModal')" class="px-4 py-2 bg-gray-800 text-gray-300 rounded">Abbrechen</button>
-                <button onclick="window.saveFactions()" class="px-6 py-2 bg-orange-600 hover:bg-orange-500 rounded font-bold text-white transition-all">Speichern</button>
-            </div>
+            <div class="p-4 border-t border-gray-800 bg-gray-950/80 rounded-b-lg flex justify-end gap-3 shrink-0"><button onclick="window.closeModal('factionModal')" class="px-4 py-2 bg-gray-800 text-gray-300 rounded">Abbrechen</button><button onclick="window.saveFactions()" class="px-6 py-2 bg-orange-600 rounded font-bold text-white">Speichern</button></div>
         </div>
     </div>
 
-    <!-- Header Design Modal -->
-    <div id="headerModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-md opacity-0 pointer-events-none transition-opacity duration-300">
+    <!-- Design Modal -->
+    <div id="headerModal" class="fixed inset-0 z-[60] flex items-center justify-center bg-black/90 backdrop-blur-md opacity-0 pointer-events-none transition-opacity duration-300">
         <div class="bg-gray-900 border border-green-500/50 rounded-lg max-w-xl w-full mx-4 shadow-2xl flex flex-col max-h-[90vh]">
             <div class="p-4 border-b border-gray-800 flex justify-between items-center bg-gray-950/80 rounded-t-lg shrink-0">
-                <h3 class="text-xl font-bold text-green-400 uppercase tracking-wider">Titel & Design</h3>
-                <button onclick="window.closeModal('headerModal')" class="text-gray-500 hover:text-red-500 p-1"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
+                <h3 class="text-xl font-bold text-green-400 uppercase tracking-wider">Design</h3>
+                <button onclick="window.closeModal('headerModal')" class="text-gray-500 hover:text-red-500 p-1"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-width="2"></path></svg></button>
             </div>
             <div class="p-6 space-y-5 flex-1">
-                <div><label class="block text-gray-400 uppercase text-xs mb-1 tracking-wider">Haupttitel</label><input type="text" id="editAppTitle" class="w-full bg-gray-950 border border-gray-700 rounded p-2 text-gray-200 focus:border-green-500 outline-none"></div>
-                <div><label class="block text-gray-400 uppercase text-xs mb-1 tracking-wider">Untertitel</label><input type="text" id="editAppSubtitle" class="w-full bg-gray-950 border border-gray-700 rounded p-2 text-gray-200 focus:border-green-500 outline-none"></div>
+                <div><label class="block text-gray-400 uppercase text-xs mb-1">Titel</label><input type="text" id="editAppTitle" class="w-full bg-gray-950 border border-gray-700 rounded p-2 text-gray-200 focus:border-green-500 outline-none"></div>
+                <div><label class="block text-gray-400 uppercase text-xs mb-1">Untertitel</label><input type="text" id="editAppSubtitle" class="w-full bg-gray-950 border border-gray-700 rounded p-2 text-gray-200 focus:border-green-500 outline-none"></div>
                 <div class="grid grid-cols-2 gap-4">
-                    <div><label class="block text-gray-400 text-xs mb-1 tracking-wider uppercase">Font Heading</label><select id="editAppFontHeading" class="w-full bg-gray-950 border border-gray-700 rounded p-2 text-gray-200 focus:border-green-500 outline-none"><option value="Orbitron">Orbitron</option><option value="Space Mono">Space Mono</option><option value="Rajdhani">Rajdhani</option><option value="Exo 2">Exo 2</option><option value="Inter">Inter</option></select></div>
-                    <div><label class="block text-gray-400 text-xs mb-1 tracking-wider uppercase">Font Body</label><select id="editAppFontBody" class="w-full bg-gray-950 border border-gray-700 rounded p-2 text-gray-200 focus:border-green-500 outline-none"><option value="Inter">Inter</option><option value="Space Mono">Space Mono</option><option value="Roboto">Roboto</option><option value="Rajdhani">Rajdhani</option></select></div>
+                    <div><label class="block text-gray-400 text-xs mb-1">Überschrift</label><select id="editAppFontHeading" class="w-full bg-gray-950 border border-gray-700 rounded p-2 text-gray-200 outline-none"><option value="Orbitron">Orbitron</option><option value="Space Mono">Space Mono</option><option value="Rajdhani">Rajdhani</option><option value="Inter">Inter</option></select></div>
+                    <div><label class="block text-gray-400 text-xs mb-1">Textkörper</label><select id="editAppFontBody" class="w-full bg-gray-950 border border-gray-700 rounded p-2 text-gray-200 outline-none"><option value="Inter">Inter</option><option value="Space Mono">Space Mono</option><option value="Roboto">Roboto</option></select></div>
                 </div>
             </div>
             <div class="p-4 border-t border-gray-800 bg-gray-950/80 flex justify-end gap-3 shrink-0"><button onclick="window.closeModal('headerModal')" class="px-4 py-2 bg-gray-800 text-gray-300 rounded">Abbrechen</button><button onclick="window.saveHeader()" class="px-6 py-2 bg-green-600 font-bold text-white rounded">Speichern</button></div>
         </div>
     </div>
 
-    <div id="dialogModal" class="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-300">
+    <!-- Dialog Modal -->
+    <div id="dialogModal" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-300">
         <div class="bg-gray-900 border border-gray-600 rounded-lg max-w-sm w-full mx-4 shadow-2xl p-6 text-center">
             <p id="dialogMessage" class="text-gray-200 text-sm mb-6"></p>
             <div class="flex justify-center gap-3" id="dialogButtons"></div>
@@ -257,9 +265,36 @@
     <script>
         marked.setOptions({ breaks: true, gfm: true });
 
-        // --- GLOBAL STATE ---
+        // --- COLORS CONFIG ---
+        const FACTION_PALETTES = [
+            { bg: "bg-red-900/20", text: "text-red-400", border: "border-red-800/30" },
+            { bg: "bg-blue-900/20", text: "text-blue-400", border: "border-blue-800/30" },
+            { bg: "bg-orange-900/20", text: "text-orange-400", border: "border-orange-800/30" },
+            { bg: "bg-purple-900/20", text: "text-purple-400", border: "border-purple-800/30" },
+            { bg: "bg-green-900/20", text: "text-green-400", border: "border-green-800/30" },
+            { bg: "bg-pink-900/20", text: "text-pink-400", border: "border-pink-800/30" },
+            { bg: "bg-cyan-900/20", text: "text-cyan-400", border: "border-cyan-800/30" },
+            { bg: "bg-yellow-900/20", text: "text-yellow-400", border: "border-yellow-800/30" },
+            { bg: "bg-indigo-900/20", text: "text-indigo-400", border: "border-indigo-800/30" },
+            { bg: "bg-teal-900/20", text: "text-teal-400", border: "border-teal-800/30" }
+        ];
+
+        function getFactionPalette(figureName) {
+            const faction = factions[figureName];
+            if (!faction) return { bg: "bg-gray-800/40", text: "text-gray-400", border: "border-gray-700/50" };
+            
+            // Hash function for consistent color based on faction string
+            let hash = 0;
+            for (let i = 0; i < faction.length; i++) {
+                hash = faction.charCodeAt(i) + ((hash << 5) - hash);
+            }
+            const index = Math.abs(hash) % FACTION_PALETTES.length;
+            return FACTION_PALETTES[index];
+        }
+
+        // --- STATE ---
         let appTitle = "Scenario Log";
-        let appSubtitle = "USCSS CRONUS INCIDENT TERMINAL // EVENT PROTOCOL";
+        let appSubtitle = "INCIDENT PROTOCOL // SYSTEM ONLINE";
         let appFontHeading = "Orbitron"; 
         let appFontBody = "Inter";
         let expandedId = null;
@@ -270,25 +305,17 @@
         let currentOpenEventId = null;
         let currentEditingTags = { Locations: [], Figures: [] };
         let draggedEventId = null;
-
         let factions = {};
         let actData = {};
         let events = [];
 
-        // --- I/O SYSTEMS ---
+        // --- I/O ---
         function encodeScenario(str) { return btoa(unescape(encodeURIComponent(str))); }
-        function decodeScenario(b64) { return decodeURIComponent(escape(atob(b64))); }
-        
-        function getExportData() { 
-            return JSON.stringify({ 
-                appTitle, appSubtitle, appFontHeading, appFontBody, factions, events, actData, eventNotes, 
-                checkedIds: Array.from(checkedIds), collapsedActs: Array.from(collapsedActs) 
-            }, null, 2); 
-        }
+        function decodeScenario(b64) { try { return decodeURIComponent(escape(atob(b64))); } catch(e) { return null; } }
+        function getExportData() { return JSON.stringify({ appTitle, appSubtitle, appFontHeading, appFontBody, factions, events, actData, eventNotes, checkedIds: Array.from(checkedIds), collapsedActs: Array.from(collapsedActs) }, null, 2); }
 
         window.triggerDownloadFile = function() {
-            const data = getExportData();
-            const blob = new Blob([data], { type: 'application/json' });
+            const blob = new Blob([getExportData()], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a'); a.href = url; a.download = `${appTitle.replace(/\s+/g, '_')}_Save.json`; a.click();
             URL.revokeObjectURL(url);
@@ -299,18 +326,10 @@
         window.copySeedToClipboard = () => { const seed = encodeScenario(getExportData()); copyToClipboard(seed); showCopySuccess("Seed kopiert!"); };
         window.generateAndCopyShareLink = () => { const seed = encodeScenario(getExportData()); copyToClipboard(window.location.origin + window.location.pathname + '?scenario=' + seed); showCopySuccess("Link kopiert!"); };
 
-        window.importFromSeedText = () => { try { applyImportedData(JSON.parse(decodeScenario(document.getElementById('importSeedInput').value.trim()))); window.closeModal('importModal'); } catch(e) { window.customAlert("Ungültiger Seed!"); } };
-        window.importFromJsonText = () => { try { applyImportedData(JSON.parse(document.getElementById('importJsonInput').value)); window.closeModal('importModal'); } catch(e) { window.customAlert("JSON Fehler!"); } };
-        window.importFromUrl = async () => {
-            const url = document.getElementById('importUrlInput').value.trim();
-            if(!url) return;
-            try { const res = await fetch(url); applyImportedData(await res.json()); window.closeModal('importModal'); } catch(e) { window.customAlert("URL Fehler!"); }
-        };
-        window.handleImport = (e) => {
-            const f = e.target.files[0]; if(!f) return;
-            const r = new FileReader(); r.onload = (ev) => { try { applyImportedData(JSON.parse(ev.target.result)); window.closeModal('importModal'); } catch(ex){} };
-            r.readAsText(f);
-        };
+        window.importFromSeedText = () => { const dec = decodeScenario(document.getElementById('importSeedInput').value.trim()); if(dec) { applyImportedData(JSON.parse(dec)); window.closeModal('importModal'); } else { window.customAlert("Fehler beim Dekodieren des Seeds."); } };
+        window.importFromJsonText = () => { try { applyImportedData(JSON.parse(document.getElementById('importJsonInput').value)); window.closeModal('importModal'); } catch(e) { window.customAlert("JSON Syntaxfehler."); } };
+        window.importFromUrl = async () => { const url = document.getElementById('importUrlInput').value.trim(); if(url) { try { const res = await fetch(url); applyImportedData(await res.json()); window.closeModal('importModal'); } catch(e) { window.customAlert("Fehler beim Laden der URL."); } } };
+        window.handleImport = (e) => { const f = e.target.files[0]; if(f) { const r = new FileReader(); r.onload = (ev) => { try { applyImportedData(JSON.parse(ev.target.result)); window.closeModal('importModal'); } catch(ex){} }; r.readAsText(f); } };
 
         function applyImportedData(data) {
             if(!data) return;
@@ -323,286 +342,122 @@
             eventNotes = data.eventNotes || {};
             checkedIds = new Set(data.checkedIds || []);
             collapsedActs = new Set(data.collapsedActs || []);
-
-            if (data.events && Array.isArray(data.events)) {
-                events = data.events.map(ev => ({
-                    ...ev,
-                    locations: Array.isArray(ev.locations) ? ev.locations : (ev.locations ? ev.locations.split(',').map(s => s.trim()) : []),
-                    figures: Array.isArray(ev.figures) ? ev.figures : (ev.figures ? ev.figures.split(',').map(s => s.trim()) : [])
-                }));
-            } else {
-                events = [];
-            }
-
+            events = (data.events || []).map(ev => ({
+                ...ev,
+                locations: Array.isArray(ev.locations) ? ev.locations : (ev.locations ? ev.locations.split(',').map(s => s.trim()) : []),
+                figures: Array.isArray(ev.figures) ? ev.figures : (ev.figures ? ev.figures.split(',').map(s => s.trim()) : [])
+            }));
             applyFonts(appFontHeading, appFontBody);
             renderApp();
         }
 
-        // --- DRAG AND DROP LOGIC (v1.5.4) ---
-        window.handleDragStart = (e, id) => {
-            draggedEventId = id;
-            e.target.classList.add('dragging');
-            e.dataTransfer.effectAllowed = 'move';
-        };
-
-        window.handleDragOver = (e) => {
-            e.preventDefault();
-            e.dataTransfer.dropEffect = 'move';
-            const target = e.target.closest('[data-drag-id]');
-            if (target) target.classList.add('drag-over');
-            
-            const actHeader = e.target.closest('[data-act-drop]');
-            if (actHeader) actHeader.classList.add('drop-target-act');
-        };
-
-        window.handleDragLeave = (e) => {
-            const target = e.target.closest('[data-drag-id]');
-            if (target) target.classList.remove('drag-over');
-
-            const actHeader = e.target.closest('[data-act-drop]');
-            if (actHeader) actHeader.classList.remove('drop-target-act');
-        };
-
+        // --- DRAG AND DROP ---
+        window.handleDragStart = (e, id) => { draggedEventId = id; e.target.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move'; };
+        window.handleDragOver = (e) => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; const target = e.target.closest('[data-drag-id]'); if (target) target.classList.add('drag-over'); const actHeader = e.target.closest('[data-act-drop]'); if (actHeader) actHeader.classList.add('drop-target-act'); };
+        window.handleDragLeave = (e) => { const target = e.target.closest('[data-drag-id]'); if (target) target.classList.remove('drag-over'); const actHeader = e.target.closest('[data-act-drop]'); if (actHeader) actHeader.classList.remove('drop-target-act'); };
         window.handleDrop = (e, targetId, targetAct) => {
             e.preventDefault();
             document.querySelectorAll('.drag-over, .drop-target-act').forEach(el => el.classList.remove('drag-over', 'drop-target-act'));
-            
             if (draggedEventId === null) return;
-            
             const draggedIdx = events.findIndex(ev => ev.id === draggedEventId);
             const targetIdx = targetId ? events.findIndex(ev => ev.id === targetId) : -1;
-            
             if (draggedIdx === -1) return;
-
             const [draggedItem] = events.splice(draggedIdx, 1);
-            
-            // Wenn in einen Akt gedroppt wird, ändere den Akt des Items
             if (targetAct) draggedItem.act = targetAct;
-
-            if (targetIdx !== -1) {
-                // An Position des Targets schieben (evtl. Index korrigieren wenn davor verschoben)
-                const newIdx = events.findIndex(ev => ev.id === targetId);
-                events.splice(newIdx, 0, draggedItem);
-            } else {
-                // Einfach ans Ende des Arrays (oder ans Ende des Aktes durch renderApp sortiert)
-                events.push(draggedItem);
-            }
-
+            if (targetIdx !== -1) { const newIdx = events.findIndex(ev => ev.id === targetId); events.splice(newIdx, 0, draggedItem); }
+            else { events.push(draggedItem); }
             draggedEventId = null;
             renderApp();
         };
+        window.handleDragEnd = (e) => { e.target.classList.remove('dragging'); document.querySelectorAll('.drag-over, .drop-target-act').forEach(el => el.classList.remove('drag-over', 'drop-target-act')); };
 
-        window.handleDragEnd = (e) => {
-            e.target.classList.remove('dragging');
-            document.querySelectorAll('.drag-over, .drop-target-act').forEach(el => el.classList.remove('drag-over', 'drop-target-act'));
-        };
-
-        // --- RENDER LOGIC ---
+        // --- RENDERING ---
         function applyFonts(h, b) {
             document.querySelectorAll('.dynamic-font').forEach(e => e.remove());
-            const link = document.createElement('link'); link.rel = 'stylesheet'; link.className = 'dynamic-font';
-            link.href = `https://fonts.googleapis.com/css2?family=${h.replace(/ /g,'+')}:wght@400;700&family=${b.replace(/ /g,'+')}:wght@400;700&display=swap`;
-            document.head.appendChild(link);
-            const style = document.createElement('style'); style.className = 'dynamic-font';
-            style.textContent = `body { font-family: "${b}", sans-serif !important; } h1,h2,h3,h4,.font-heading { font-family: "${h}", sans-serif !important; }`;
-            document.head.appendChild(style);
+            const link = document.createElement('link'); link.rel = 'stylesheet'; link.className = 'dynamic-font'; link.href = `https://fonts.googleapis.com/css2?family=${h.replace(/ /g,'+')}:wght@400;700&family=${b.replace(/ /g,'+')}:wght@400;700&display=swap`; document.head.appendChild(link);
+            const style = document.createElement('style'); style.className = 'dynamic-font'; style.textContent = `body { font-family: "${b}", sans-serif !important; } h1,h2,h3,h4,.font-heading { font-family: "${h}", sans-serif !important; }`; document.head.appendChild(style);
         }
 
         const icons = {
-            AlertCircle: `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>`,
-            ShieldAlert: `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><path d="M12 8v4"></path><path d="M12 16h.01"></path></svg>`,
-            Rocket: `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"></path><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"></path></svg>`,
-            CheckSquare: `<svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"></polyline><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>`,
-            Square: `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"></rect></svg>`,
-            ChevronDown: `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"></path></svg>`,
-            ChevronUp: `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="m18 15-6-6-6 6"></path></svg>`,
-            ChevronRight: `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"></path></svg>`,
-            Pencil: `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>`,
-            Skull: `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="9" cy="12" r="1"></circle><circle cx="15" cy="12" r="1"></circle><path d="M8 20v2h8v-2"></path><path d="M16 20a2 2 0 0 0 1.56-3.25 8 8 0 1 0-11.12 0A2 2 0 0 0 8 20"></path></svg>`,
-            Radio: `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4.9 19.1C1 15.2 1 8.8 4.9 4.9"></path><path d="M7.8 16.2c-2.3-2.3-2.3-6.1 0-8.5"></path><circle cx="12" cy="12" r="2"></circle><path d="M16.2 7.8c2.3 2.3 2.3 6.1 0 8.5"></path><path d="M19.1 4.9C23 8.8 23 15.1 19.1 19"></path></svg>`,
-            Crosshair: `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="22" y1="12" x2="18" y2="12"></line><line x1="6" y1="12" x2="2" y2="12"></line><line x1="12" y1="6" x2="12" y2="2"></line><line x1="12" y1="22" x2="12" y2="18"></line></svg>`,
-            DragVertical: `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="9" cy="5" r="1"></circle><circle cx="9" cy="12" r="1"></circle><circle cx="9" cy="19" r="1"></circle><circle cx="15" cy="5" r="1"></circle><circle cx="15" cy="12" r="1"></circle><circle cx="15" cy="19" r="1"></circle></svg>`
+            AlertCircle: `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v4M12 16h.01" stroke-width="2"></path></svg>`,
+            ShieldAlert: `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10zM12 8v4M12 16h.01" stroke-width="2"></path></svg>`,
+            Rocket: `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2M12 15l-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z" stroke-width="2"></path></svg>`,
+            CheckSquare: `<svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" stroke-width="2"></path></svg>`,
+            Square: `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="3" rx="2" ry="2" stroke-width="2"></rect></svg>`,
+            ChevronDown: `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6" stroke-width="2"></path></svg>`,
+            ChevronUp: `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="m18 15-6-6-6 6" stroke-width="2"></path></svg>`,
+            ChevronRight: `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6" stroke-width="2"></path></svg>`,
+            Pencil: `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" stroke-width="2"></path></svg>`,
+            Skull: `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 12h.01M15 12h.01M8 20v2h8v-2M16 20a2 2 0 0 0 1.56-3.25 8 8 0 1 0-11.12 0A2 2 0 0 0 8 20" stroke-width="2"></path></svg>`,
+            Radio: `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4.9 19.1C1 15.2 1 8.8 4.9 4.9M7.8 16.2c-2.3-2.3-2.3-6.1 0-8.5M12 12m-2 0a2 2 0 1 0 4 0 2 2 0 1 0-4 0M16.2 7.8c2.3 2.3 2.3 6.1 0 8.5M19.1 4.9C23 8.8 23 15.1 19.1 19" stroke-width="2"></path></svg>`,
+            Crosshair: `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="2"></circle><path d="M22 12h-4M6 12H2M12 6V2M12 22v-4" stroke-width="2"></path></svg>`,
+            DragVertical: `<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><circle cx="9" cy="5" r="1"></circle><circle cx="9" cy="12" r="1"></circle><circle cx="9" cy="19" r="1"></circle><circle cx="15" cy="5" r="1"></circle><circle cx="15" cy="12" r="1"></circle><circle cx="15" cy="19" r="1"></circle></svg>`
         };
 
         function renderApp() {
             const app = document.getElementById('app');
-            const grouped = (events || []).reduce((acc, e) => { if (!acc[e.act]) acc[e.act] = []; acc[e.act].push(e); return acc; }, {});
+            const grouped = events.reduce((acc, e) => { if (!acc[e.act]) acc[e.act] = []; acc[e.act].push(e); return acc; }, {});
             
             document.getElementById('actDatalist').innerHTML = Object.keys(grouped).map(a => `<option value="${a}">`).join('');
             document.getElementById('factionsDatalist').innerHTML = Object.keys(factions).map(f => `<option value="${f}">`).join('');
             document.getElementById('locationsDatalist').innerHTML = [...new Set(events.flatMap(e => e.locations || []))].map(l => `<option value="${l}">`).join('');
 
-            let html = `<div class="max-w-4xl mx-auto"><header class="mb-12 border-b border-green-800/50 pb-6"><div class="text-left"><h1 onclick="window.openHeaderModal()" class="text-3xl md:text-5xl font-bold text-green-500 mb-2 uppercase cursor-pointer flex items-center gap-3 font-heading">${appTitle}</h1><p onclick="window.openHeaderModal()" class="text-gray-400 text-sm cursor-pointer uppercase tracking-widest">${appSubtitle}</p></div></header><div class="space-y-12">`;
+            let html = `<div class="max-w-4xl mx-auto"><header class="mb-12 border-b border-green-800/50 pb-6"><div class="text-left"><h1 onclick="window.openHeaderModal()" class="text-3xl md:text-5xl font-bold text-green-500 mb-2 uppercase cursor-pointer flex items-center gap-3 font-heading tracking-tighter">${appTitle}</h1><p onclick="window.openHeaderModal()" class="text-gray-400 text-[10px] md:text-xs cursor-pointer uppercase tracking-[0.2em] font-bold">${appSubtitle}</p></div></header><div class="space-y-12">`;
 
-            if (Object.keys(grouped).length === 0) {
-                html += `<div class="text-center py-20 border-2 border-dashed border-gray-800 rounded-xl text-gray-500"><p>Keine Ereignisse vorhanden. Nutze die Sidebar (+), um zu starten.</p></div>`;
-            }
+            if (Object.keys(grouped).length === 0) html += `<div class="text-center py-20 border-2 border-dashed border-gray-800 rounded-xl text-gray-500">Keine Daten vorhanden. Nutze die Steuerleiste zum Hinzufügen.</div>`;
 
             for (const [actName, actEvents] of Object.entries(grouped)) {
                 const colors = actName.includes("Akt I") ? {text:"text-blue-400", border:"border-blue-500", bg:"bg-blue-900/10"} : actName.includes("Akt II") ? {text:"text-purple-400", border:"border-purple-500", bg:"bg-purple-900/10"} : {text:"text-red-400", border:"border-red-500", bg:"bg-red-900/10"};
                 const isC = collapsedActs.has(actName);
-                
-                html += `
-                <div class="relative" 
-                     data-act-drop="${actName}" 
-                     ondragover="window.handleDragOver(event)" 
-                     ondragleave="window.handleDragLeave(event)"
-                     ondrop="window.handleDrop(event, null, '${actName}')">
-                    <div onclick="window.toggleAct('${actName}')" class="sticky top-0 z-10 bg-gray-950/90 py-4 mb-6 cursor-pointer flex items-center gap-3 no-select transition-all">
-                        <div class="text-gray-500">${isC ? icons.ChevronRight : icons.ChevronDown}</div>
-                        <h2 class="text-2xl font-bold uppercase border-l-4 pl-4 ${colors.text} ${colors.border} font-heading">${actName}</h2>
-                    </div>
-                    <div class="border-l-2 border-gray-800 ml-4 md:ml-8 space-y-6 ${isC ? 'hidden' : ''}">`;
+                html += `<div data-act-drop="${actName}" ondragover="window.handleDragOver(event)" ondragleave="window.handleDragLeave(event)" ondrop="window.handleDrop(event, null, '${actName}')"><div onclick="window.toggleAct('${actName}')" class="sticky top-0 z-10 bg-gray-950/90 py-4 mb-6 cursor-pointer flex items-center gap-3 no-select"><div class="text-gray-500">${isC ? icons.ChevronRight : icons.ChevronDown}</div><h2 class="text-xl md:text-2xl font-bold uppercase border-l-4 pl-4 ${colors.text} ${colors.border} font-heading">${actName}</h2></div><div class="border-l-2 border-gray-800 ml-4 md:ml-8 space-y-6 ${isC ? 'hidden' : ''}">`;
 
                 actEvents.forEach(e => {
                     const isO = e.type === 'Optional';
-                    const locationsStr = Array.isArray(e.locations) ? e.locations.join(', ') : (e.locations || "");
-                    const figuresStr = Array.isArray(e.figures) ? e.figures.join(', ') : (e.figures || "");
-
-                    html += `
-                    <div class="relative pl-8 md:pl-12 transition-all group" 
-                         data-drag-id="${e.id}" 
-                         draggable="true" 
-                         ondragstart="window.handleDragStart(event, ${e.id})"
-                         ondragover="window.handleDragOver(event)" 
-                         ondragleave="window.handleDragLeave(event)"
-                         ondrop="window.handleDrop(event, ${e.id}, '${actName}')"
-                         ondragend="window.handleDragEnd(event)">
-                        
-                        <!-- Drag Handle -->
-                        <div class="absolute left-0 top-6 text-gray-700 opacity-0 group-hover:opacity-100 transition-opacity cursor-grab">
-                            ${icons.DragVertical}
-                        </div>
-
-                        <div class="absolute -left-[17px] top-4 w-8 h-8 rounded-full border-2 flex items-center justify-center bg-gray-950 ${isO ? 'border-dashed border-gray-600 text-gray-600' : colors.border + ' ' + colors.text}">
-                            ${icons[e.icon] || icons.Rocket}
-                        </div>
-                        
-                        <button onclick="window.handleInteraction(event, ${e.id})" class="w-full text-left p-4 rounded-lg border border-gray-800 transition-all ${colors.bg} hover:border-green-500/50 no-select">
-                            <div class="flex justify-between gap-4">
-                                <div class="flex items-start gap-3">
-                                    <div onclick="window.toggleCheckbox(event, ${e.id})" class="mt-1 text-gray-400 hover:text-green-400">
-                                        ${checkedIds.has(e.id) ? icons.CheckSquare : icons.Square}
-                                    </div>
-                                    <div>
-                                        <h3 class="text-lg font-bold font-heading ${checkedIds.has(e.id) ? 'line-through text-gray-500' : 'text-gray-100'}">${e.title}</h3>
-                                        <div class="flex items-center gap-3 mt-1 flex-wrap">
-                                            <span class="text-[9px] px-1.5 py-0.5 rounded uppercase font-bold ${isO ? 'bg-gray-800 text-gray-500' : 'bg-green-900/30 text-green-400'}">${e.type}</span>
-                                            ${locationsStr ? `<span class="text-[9px] text-gray-500 italic max-w-full">📍 ${locationsStr}</span>` : ''}
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="flex items-center gap-2">
-                                    <div onclick="window.openEditModal(${e.id}); event.stopPropagation();" class="text-gray-600 hover:text-blue-400 p-1 transition-colors">
-                                        ${icons.Pencil}
-                                    </div>
-                                    <div class="text-gray-500">${expandedId === e.id ? icons.ChevronUp : icons.ChevronDown}</div>
-                                </div>
-                            </div>
-                            <div class="${expandedId === e.id ? 'mt-4 max-h-[1500px]' : 'max-h-0'} overflow-hidden transition-all duration-300">
-                                <div class="border-t border-gray-800 pt-4 text-sm text-gray-300 markdown-content">
-                                    ${marked.parse(e.description || "")}
-                                </div>
-                                ${figuresStr ? `<div class="flex flex-wrap gap-2 mt-4"><span class="text-[10px] px-2 py-0.5 bg-blue-900/20 rounded border border-blue-800/30 text-blue-400">👤 ${figuresStr}</span></div>` : ''}
-                            </div>
-                        </button>
-                    </div>`;
+                    const locs = (e.locations || []).join(', ');
+                    const figs = (e.figures || []);
+                    html += `<div class="relative pl-8 md:pl-12 group" data-drag-id="${e.id}" draggable="true" ondragstart="window.handleDragStart(event, ${e.id})" ondragover="window.handleDragOver(event)" ondragleave="window.handleDragLeave(event)" ondrop="window.handleDrop(event, ${e.id}, '${actName}')" ondragend="window.handleDragEnd(event)"><div class="absolute left-0 top-6 text-gray-700 opacity-0 md:group-hover:opacity-100 transition-opacity cursor-grab">${icons.DragVertical}</div><div class="absolute -left-[17px] top-4 w-8 h-8 rounded-full border-2 flex items-center justify-center bg-gray-950 ${isO ? 'border-dashed border-gray-600 text-gray-600' : colors.border + ' ' + colors.text}">${icons[e.icon] || icons.Rocket}</div><button onclick="window.handleInteraction(event, ${e.id})" class="w-full text-left p-4 rounded-lg border border-gray-800 transition-all ${colors.bg} hover:border-green-500/50 no-select"><div class="flex justify-between gap-4"><div class="flex items-start gap-3"><div onclick="window.toggleCheckbox(event, ${e.id})" class="mt-1 text-gray-400 hover:text-green-400">${checkedIds.has(e.id) ? icons.CheckSquare : icons.Square}</div><div><h3 class="text-base md:text-lg font-bold font-heading ${checkedIds.has(e.id) ? 'line-through text-gray-500' : 'text-gray-100'}">${e.title}</h3><div class="flex items-center gap-3 mt-1 flex-wrap"><span class="text-[9px] px-1.5 py-0.5 rounded uppercase font-bold ${isO ? 'bg-gray-800 text-gray-500' : 'bg-green-900/30 text-green-400'}">${e.type}</span>${locs ? `<span class="text-[9px] text-gray-500 italic">📍 ${locs}</span>` : ''}</div></div></div><div class="flex items-center gap-2"><div onclick="window.openEditModal(${e.id}); event.stopPropagation();" class="text-gray-600 hover:text-blue-400 p-1">${icons.Pencil}</div><div class="text-gray-500">${expandedId === e.id ? icons.ChevronUp : icons.ChevronDown}</div></div></div><div class="${expandedId === e.id ? 'mt-4 max-h-[1500px]' : 'max-h-0'} overflow-hidden transition-all duration-300"><div class="border-t border-gray-800 pt-4 text-sm text-gray-300 markdown-content">${marked.parse(e.description || "")}</div>${figs.length > 0 ? `<div class="flex flex-wrap gap-2 mt-4">${figs.map(f => {
+                        const palette = getFactionPalette(f);
+                        return `<span class="text-[10px] px-2 py-0.5 rounded border ${palette.bg} ${palette.text} ${palette.border} font-bold">👤 ${f}</span>`;
+                    }).join('')}</div>` : ''}</div></button></div>`;
                 });
                 html += `</div></div>`;
             }
             app.innerHTML = html + `</div>`;
         }
 
-        // --- UTILS ---
+        // --- HANDLER ---
         window.closeModal = (id) => { document.getElementById(id).classList.add('opacity-0', 'pointer-events-none'); };
         window.toggleAct = (a) => { collapsedActs.has(a) ? collapsedActs.delete(a) : collapsedActs.add(a); renderApp(); };
         window.toggleCheckbox = (ev, id) => { ev.stopPropagation(); checkedIds.has(id) ? checkedIds.delete(id) : checkedIds.add(id); renderApp(); };
-        window.handleInteraction = (ev, id) => {
-            const time = Date.now();
-            if(time - (clickTimers[id] || 0) < 300) { clearTimeout(clickTimers['t'+id]); window.openEventModal(id); }
-            else { clickTimers[id] = time; clickTimers['t'+id] = setTimeout(() => { expandedId = expandedId === id ? null : id; renderApp(); }, 300); }
-        };
-
-        window.openEventModal = (id) => {
-            const e = events.find(ev => ev.id === id); if(!e) return;
-            currentOpenEventId = id;
-            document.getElementById('modalTitle').textContent = e.title;
-            document.getElementById('modalDesc').innerHTML = marked.parse(e.description || "");
-            document.getElementById('modalFluffContainer').className = e.fluff ? "" : "hidden";
-            document.getElementById('modalFluff').innerHTML = e.fluff ? marked.parse(e.fluff) : "";
-            document.getElementById('modalLocations').textContent = Array.isArray(e.locations) ? e.locations.join(', ') : (e.locations || "N/A");
-            document.getElementById('modalNotes').value = eventNotes[id] || "";
-            const fl = document.getElementById('modalFigures'); fl.innerHTML = "";
-            const figures = Array.isArray(e.figures) ? e.figures : (e.figures ? [e.figures] : []);
-            figures.forEach(f => fl.insertAdjacentHTML('beforeend', `<li class="flex justify-between border-b border-gray-800 text-xs py-1"><span class="text-green-300 font-bold">${f}</span><span class="text-gray-500">${factions[f]||""}</span></li>`));
-            document.getElementById('eventModal').classList.remove('opacity-0', 'pointer-events-none');
-        };
-
-        window.openEditModal = (id=null) => {
-            const e = events.find(ev => ev.id === id) || { act: Object.keys(actData)[0]||"", title: "", type: "Notwendig", icon: "Rocket", description: "", locations: [], figures: [] };
-            document.getElementById('editId').value = id || "";
-            document.getElementById('editAct').value = e.act;
-            document.getElementById('editTitle').value = e.title;
-            document.getElementById('editTypeCheckbox').checked = e.type === "Notwendig";
-            document.getElementById('editDesc').value = e.description;
-            document.getElementById('editFluff').value = e.fluff || "";
-            document.getElementById('editIcon').value = e.icon;
-            currentEditingTags = { 
-                Locations: Array.isArray(e.locations) ? [...e.locations] : (e.locations ? [e.locations] : []), 
-                Figures: Array.isArray(e.figures) ? [...e.figures] : (e.figures ? [e.figures] : []) 
-            };
-            window.renderEditTags('Locations'); window.renderEditTags('Figures');
-            window.renderIconSelection(e.icon);
-            document.getElementById('btnDeleteEvent').style.display = id ? "flex" : "none";
-            document.getElementById('editModal').classList.remove('opacity-0', 'pointer-events-none');
-        };
-
-        window.saveEvent = () => {
-            const id = parseInt(document.getElementById('editId').value) || Date.now();
-            const data = { id, act: document.getElementById('editAct').value, title: document.getElementById('editTitle').value, type: document.getElementById('editTypeCheckbox').checked ? "Notwendig" : "Optional", icon: document.getElementById('editIcon').value, fluff: document.getElementById('editFluff').value, description: document.getElementById('editDesc').value, locations: currentEditingTags.Locations, figures: currentEditingTags.Figures };
-            const idx = events.findIndex(e => e.id === id);
-            if(idx > -1) events[idx] = data; else events.push(data);
-            if(data.act && !actData[data.act]) actData[data.act] = [];
-            window.closeModal('editModal'); renderApp();
-        };
-
+        window.handleInteraction = (ev, id) => { const time = Date.now(); if(time - (clickTimers[id] || 0) < 300) { clearTimeout(clickTimers['t'+id]); window.openEventModal(id); } else { clickTimers[id] = time; clickTimers['t'+id] = setTimeout(() => { expandedId = expandedId === id ? null : id; renderApp(); }, 300); } };
+        window.openEventModal = (id) => { const e = events.find(ev => ev.id === id); if(!e) return; currentOpenEventId = id; document.getElementById('modalTitle').textContent = e.title; document.getElementById('modalDesc').innerHTML = marked.parse(e.description || ""); document.getElementById('modalFluffContainer').className = e.fluff ? "" : "hidden"; document.getElementById('modalFluff').innerHTML = e.fluff ? marked.parse(e.fluff) : ""; document.getElementById('modalLocations').textContent = (e.locations || []).join(', ') || "N/A"; document.getElementById('modalNotes').value = eventNotes[id] || ""; const fl = document.getElementById('modalFigures'); fl.innerHTML = ""; (e.figures || []).forEach(f => {
+            const palette = getFactionPalette(f);
+            fl.insertAdjacentHTML('beforeend', `<li class="flex justify-between items-center border-b border-gray-800 text-xs py-2"><span class="px-2 py-0.5 rounded border ${palette.bg} ${palette.text} ${palette.border} font-bold">${f}</span><span class="text-gray-500 font-mono text-[10px] uppercase">${factions[f]||"Keine Fraktion"}</span></li>`);
+        }); document.getElementById('eventModal').classList.remove('opacity-0', 'pointer-events-none'); };
+        window.openEditModal = (id=null) => { const e = events.find(ev => ev.id === id) || { act: Object.keys(actData)[0]||"", title: "", type: "Notwendig", icon: "Rocket", description: "", locations: [], figures: [] }; document.getElementById('editId').value = id || ""; document.getElementById('editAct').value = e.act; document.getElementById('editTitle').value = e.title; document.getElementById('editTypeCheckbox').checked = e.type === "Notwendig"; document.getElementById('editDesc').value = e.description; document.getElementById('editFluff').value = e.fluff || ""; document.getElementById('editIcon').value = e.icon; currentEditingTags = { Locations: [...(e.locations || [])], Figures: [...(e.figures || [])] }; window.renderEditTags('Locations'); window.renderEditTags('Figures'); window.renderIconSelection(e.icon); document.getElementById('btnDeleteEvent').style.display = id ? "flex" : "none"; document.getElementById('editModal').classList.remove('opacity-0', 'pointer-events-none'); };
+        window.saveEvent = () => { const id = parseInt(document.getElementById('editId').value) || Date.now(); const data = { id, act: document.getElementById('editAct').value, title: document.getElementById('editTitle').value, type: document.getElementById('editTypeCheckbox').checked ? "Notwendig" : "Optional", icon: document.getElementById('editIcon').value, fluff: document.getElementById('editFluff').value, description: document.getElementById('editDesc').value, locations: currentEditingTags.Locations, figures: currentEditingTags.Figures }; const idx = events.findIndex(e => e.id === id); if(idx > -1) events[idx] = data; else events.push(data); if(data.act && !actData[data.act]) actData[data.act] = []; window.closeModal('editModal'); renderApp(); };
         window.addTag = (t) => { const i = document.getElementById(`tagInput${t}`); const v = i.value.trim(); if(v && !currentEditingTags[t].includes(v)){ currentEditingTags[t].push(v); i.value=""; window.renderEditTags(t); } };
         window.removeTag = (t, i) => { currentEditingTags[t].splice(i,1); window.renderEditTags(t); };
-        window.renderEditTags = (t) => { document.getElementById(`tagList${t}`).innerHTML = currentEditingTags[t].map((tag, i) => `<span class="bg-blue-900/40 border border-blue-700/50 text-blue-300 px-2 py-1 rounded text-[10px] flex items-center gap-2">${tag}<button onclick="window.removeTag('${t}', ${i})" class="hover:text-red-400">×</button></span>`).join(''); };
-
-        window.renderIconSelection = (s) => { const c = document.getElementById('iconSelectionContainer'); c.innerHTML = ["Rocket", "Radio", "AlertCircle", "ShieldAlert", "Skull", "Crosshair"].map(i => `<button onclick="window.selectIcon('${i}')" class="p-2 border rounded transition-all ${s===i?'border-blue-500 bg-blue-900/30 text-blue-400':'border-gray-700 hover:border-gray-500'}">${icons[i]}</button>`).join(''); };
+        window.renderEditTags = (t) => { document.getElementById(`tagList${t}`).innerHTML = currentEditingTags[t].map((tag, i) => `<span class="bg-blue-900/40 border border-blue-700/50 text-blue-300 px-2 py-1 rounded text-[10px] flex items-center gap-2">${tag}<button onclick="window.removeTag('${t}', ${i})" class="hover:text-red-400 font-bold">×</button></span>`).join(''); };
+        window.renderIconSelection = (s) => { const c = document.getElementById('iconSelectionContainer'); c.innerHTML = ["Rocket", "Radio", "AlertCircle", "ShieldAlert", "Skull", "Crosshair"].map(i => `<button onclick="window.selectIcon('${i}')" class="p-2 border rounded transition-all ${s===i?'border-blue-500 bg-blue-900/30 text-blue-400':'border-gray-700'}">${icons[i]}</button>`).join(''); };
         window.selectIcon = (i) => { document.getElementById('editIcon').value = i; window.renderIconSelection(i); };
-
         window.openFactionModal = () => { const l = document.getElementById('factionList'); l.innerHTML = ""; Object.entries(factions).forEach(([n, f]) => l.insertAdjacentHTML('beforeend', window.createFactionRow(n, f))); document.getElementById('factionModal').classList.remove('opacity-0', 'pointer-events-none'); };
-        window.createFactionRow = (n='', f='') => `<div class="faction-row grid grid-cols-12 gap-2 mb-2"><input type="text" class="faction-name col-span-5 bg-gray-950 border border-gray-700 rounded p-1 text-xs text-gray-200" value="${n}"><input type="text" class="faction-value col-span-6 bg-gray-950 border border-gray-700 rounded p-1 text-xs text-gray-200" value="${f}"><button onclick="this.parentElement.remove()" class="text-red-500 text-xs font-bold hover:text-red-400 transition-colors">X</button></div>`;
+        window.createFactionRow = (n='', f='') => `<div class="faction-row grid grid-cols-12 gap-2 mb-2"><input type="text" placeholder="Name" class="faction-name col-span-5 bg-gray-950 border border-gray-700 rounded p-1 text-xs text-gray-200 outline-none" value="${n}"><input type="text" placeholder="Fraktion" class="faction-value col-span-6 bg-gray-950 border border-gray-700 rounded p-1 text-xs text-gray-200 outline-none" value="${f}"><button onclick="this.parentElement.remove()" class="text-red-500 text-xs font-bold hover:text-red-400 transition-colors">×</button></div>`;
         window.addFactionRow = () => document.getElementById('factionList').insertAdjacentHTML('beforeend', window.createFactionRow());
         window.saveFactions = () => { factions = {}; document.querySelectorAll('.faction-row').forEach(r => { const n = r.querySelector('.faction-name').value; if(n) factions[n] = r.querySelector('.faction-value').value; }); window.closeModal('factionModal'); renderApp(); };
-
         window.saveHeader = () => { appTitle = document.getElementById('editAppTitle').value; appSubtitle = document.getElementById('editAppSubtitle').value; appFontHeading = document.getElementById('editAppFontHeading').value; appFontBody = document.getElementById('editAppFontBody').value; applyFonts(appFontHeading, appFontBody); window.closeModal('headerModal'); renderApp(); };
         window.openHeaderModal = () => { document.getElementById('editAppTitle').value = appTitle; document.getElementById('editAppSubtitle').value = appSubtitle; document.getElementById('headerModal').classList.remove('opacity-0', 'pointer-events-none'); };
-
-        window.resetApp = () => { window.customConfirm("Möchtest du alle Daten löschen?", () => location.reload()); };
-        window.confirmDeleteEvent = () => { const id = parseInt(document.getElementById('editId').value); window.customConfirm("Ereignis löschen?", () => { events = events.filter(e => e.id !== id); window.closeModal('editModal'); renderApp(); }); };
-
+        window.resetApp = () => { window.customConfirm("Möchtest du wirklich alle Daten löschen und die App zurücksetzen?", () => location.reload()); };
+        window.confirmDeleteEvent = () => { const id = parseInt(document.getElementById('editId').value); window.customConfirm("Dieses Ereignis unwiderruflich löschen?", () => { events = events.filter(e => e.id !== id); window.closeModal('editModal'); renderApp(); }); };
         function copyToClipboard(text) { const dummy = document.createElement("input"); document.body.appendChild(dummy); dummy.value = text; dummy.select(); document.execCommand("copy"); document.body.removeChild(dummy); }
         function showCopySuccess(t) { const m = document.getElementById('copySuccessMsg'); m.textContent = t; m.classList.remove('opacity-0'); setTimeout(() => m.classList.add('opacity-0'), 2000); }
-
-        window.customAlert = function(msg) {
-            document.getElementById('dialogMessage').textContent = msg;
-            document.getElementById('dialogButtons').innerHTML = `<button onclick="window.closeDialog()" class="px-6 py-2 bg-blue-600 rounded text-white text-sm font-bold hover:bg-blue-500 transition-colors">OK</button>`;
-            document.getElementById('dialogModal').classList.remove('opacity-0', 'pointer-events-none');
-        };
-        window.customConfirm = function(msg, onConfirm) {
-            document.getElementById('dialogMessage').textContent = msg;
-            window._currentConfirmCallback = onConfirm;
-            document.getElementById('dialogButtons').innerHTML = `<button onclick="window.closeDialog()" class="px-4 py-2 bg-gray-800 border border-gray-600 rounded text-gray-300 text-sm hover:bg-gray-700 transition-colors">Abbrechen</button><button onclick="window.executeConfirm()" class="px-4 py-2 bg-red-600 rounded text-white text-sm font-bold hover:bg-red-500 transition-colors">Bestätigen</button>`;
-            document.getElementById('dialogModal').classList.remove('opacity-0', 'pointer-events-none');
-        };
-        window.closeDialog = () => { document.getElementById('dialogModal').classList.add('opacity-0', 'pointer-events-none'); window._currentConfirmCallback = null; };
-        window.executeConfirm = () => { if(window._currentConfirmCallback) window._currentConfirmCallback(); window.closeDialog(); };
+        window.customAlert = (msg) => { document.getElementById('dialogMessage').textContent = msg; document.getElementById('dialogButtons').innerHTML = `<button onclick="window.closeDialog()" class="px-6 py-2 bg-blue-600 rounded text-white text-sm font-bold">OK</button>`; document.getElementById('dialogModal').classList.remove('opacity-0', 'pointer-events-none'); };
+        window.customConfirm = (msg, onC) => { document.getElementById('dialogMessage').textContent = msg; window._cC = onC; document.getElementById('dialogButtons').innerHTML = `<button onclick="window.closeDialog()" class="px-4 py-2 bg-gray-800 rounded text-gray-300 text-xs">Abbrechen</button><button onclick="window.exC()" class="px-4 py-2 bg-red-600 rounded text-white text-xs font-bold">Bestätigen</button>`; document.getElementById('dialogModal').classList.remove('opacity-0', 'pointer-events-none'); };
+        window.closeDialog = () => { document.getElementById('dialogModal').classList.add('opacity-0', 'pointer-events-none'); };
+        window.exC = () => { if(window._cC) window._cC(); window.closeDialog(); };
 
         document.getElementById('modalNotes').addEventListener('input', e => { if(currentOpenEventId) eventNotes[currentOpenEventId] = e.target.value; });
-        window.addEventListener('load', () => { const s = new URLSearchParams(window.location.search).get('scenario'); if(s) try { applyImportedData(JSON.parse(decodeScenario(s))); window.history.replaceState({}, "", window.location.pathname); } catch(e){} });
+        window.addEventListener('load', () => { const s = new URLSearchParams(window.location.search).get('scenario'); if(s) { const dec = decodeScenario(s); if(dec) applyImportedData(JSON.parse(dec)); window.history.replaceState({}, "", window.location.pathname); } });
 
         applyFonts(appFontHeading, appFontBody);
         renderApp();
@@ -612,10 +467,11 @@
 
 <!--
 CHANGE LOG
-Version: 1.5.4
-- Feature: Drag-and-Drop System für Ereignisse hinzugefügt.
-- Ereignisse können nun innerhalb eines Aktes oder zwischen Akten verschoben werden.
-- Visuelles Feedback beim Draggen (Transparenz) und Hovern über Zielpositionen (grüne Markierung).
-- "Drag-Handle" Icon erscheint beim Hovern über ein Ereignis links am Rand.
-- Beibehaltung aller v1.5.3 Fixes (Import-Robustheit).
+Version: 1.5.6
+- UI: Menütexte in der mobilen Navigation entfernt (Icons pur für sauberen Look).
+- UI: Native Tooltips (title-Attribut) für Desktop-Icons optimiert.
+- Fix: Seed-Import im Modal repariert (fehlender Button für Seed-Eingabe hinzugefügt).
+- Feature: Fraktions-Farbsystem. Jede Fraktion hat eine eigene Farbe. 
+- Feature: Figuren-Tags werden nun in der Fraktionsfarbe gerendert (Übersicht + Details).
+- UX: Besseres Padding und Konsistenz für Modal-Inhalte.
 -->
