@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Scenario Log v1.7.2</title>
+    <title>Scenario Log v1.7.3</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Markdown Parser -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
@@ -210,7 +210,7 @@
         </div>
     </div>
 
-    <!-- Other Modals (Omitted for brevity, fully functional) -->
+    <!-- Modals -->
     <div id="eventModal" class="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-300">
         <div class="bg-surface border border-accent rounded-theme max-w-2xl w-full mx-4 shadow-2xl flex flex-col max-h-[90vh]">
             <div class="p-4 border-b border-gray-800 flex justify-between items-center rounded-t-theme shrink-0">
@@ -251,6 +251,7 @@
         </div>
     </div>
 
+    <!-- Export/Import -->
     <div id="exportModal" class="fixed inset-0 z-[60] flex items-center justify-center bg-black/90 backdrop-blur-md opacity-0 pointer-events-none transition-opacity duration-300">
         <div class="bg-surface border border-gray-500/50 rounded-theme max-w-2xl w-full mx-4 shadow-2xl flex flex-col max-h-[90vh]">
             <div class="p-4 border-b border-gray-800 flex justify-between items-center shrink-0"><h3 class="text-xl font-bold text-gray-300 uppercase tracking-wider">Export</h3><button onclick="window.closeModal('exportModal')" class="text-gray-500 hover:text-red-500 p-1"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-width="2"></path></svg></button></div>
@@ -413,11 +414,32 @@
             renderApp();
         }
 
+        /**
+         * Berechnet die Farbpalette basierend auf der FRAKTION der Figur,
+         * damit alle Mitglieder einer Fraktion die gleiche Farbe haben.
+         */
         function getFactionPalette(figureName) {
-            const faction = factions[figureName];
-            if (!faction) return { bg: "rgba(100,100,100,0.1)", text: "gray-400", border: "rgba(100,100,100,0.3)" };
-            const palettes = [{bg:"rgba(239,68,68,0.1)", text:"text-red-400", b:"rgba(239,68,68,0.3)"}, {bg:"rgba(59,130,246,0.1)", text:"text-blue-400", b:"rgba(59,130,246,0.3)"}, {bg:"rgba(245,158,11,0.1)", text:"text-orange-400", b:"rgba(245,158,11,0.3)"}, {bg:"rgba(168,85,247,0.1)", text:"text-purple-400", b:"rgba(168,85,247,0.3)"}, {bg:"rgba(6,182,212,0.1)", text:"text-cyan-400", b:"rgba(6,182,212,0.3)"}];
-            let hash = 0; for (let i = 0; i < figureName.length; i++) hash = figureName.charCodeAt(i) + ((hash << 5) - hash);
+            const factionName = factions[figureName];
+            // Fallback für Figuren ohne Fraktionszuordnung
+            if (!factionName) return { bg: "rgba(100,100,100,0.1)", text: "text-gray-400", border: "rgba(100,100,100,0.3)" };
+            
+            const palettes = [
+                {bg:"rgba(239,68,68,0.15)", text:"text-red-400", b:"rgba(239,68,68,0.4)"},
+                {bg:"rgba(59,130,246,0.15)", text:"text-blue-400", b:"rgba(59,130,246,0.4)"},
+                {bg:"rgba(245,158,11,0.15)", text:"text-orange-400", b:"rgba(245,158,11,0.4)"},
+                {bg:"rgba(168,85,247,0.15)", text:"text-purple-400", b:"rgba(168,85,247,0.4)"},
+                {bg:"rgba(6,182,212,0.15)", text:"text-cyan-400", b:"rgba(6,182,212,0.4)"},
+                {bg:"rgba(34,197,94,0.15)", text:"text-green-400", b:"rgba(34,197,94,0.4)"},
+                {bg:"rgba(236,72,153,0.15)", text:"text-pink-400", b:"rgba(236,72,153,0.4)"},
+                {bg:"rgba(250,204,21,0.15)", text:"text-yellow-400", b:"rgba(250,204,21,0.4)"}
+            ];
+
+            // Hash basierend auf dem Fraktionsnamen (statt dem Personennamen)
+            let hash = 0; 
+            for (let i = 0; i < factionName.length; i++) {
+                hash = factionName.charCodeAt(i) + ((hash << 5) - hash);
+            }
+            
             return palettes[Math.abs(hash) % palettes.length];
         }
 
@@ -502,7 +524,6 @@
         function calculateDynamicSlideTime(e) {
             const text = (e.description || "") + (e.fluff || "");
             const words = text.split(/\s+/).filter(w => w.length > 0).length;
-            // Basis 10s + 0.5s pro Wort, Deckelung bei 60s
             return Math.min(60000, Math.max(10000, words * 500 + 10000));
         }
 
@@ -657,8 +678,8 @@
 
 <!--
 CHANGE LOG
-Version: 1.7.2
-- Feature: Dynamische Diashow-Dauer basierend auf Wortanzahl (Basis 10s + 0.5s pro Wort).
-- Feature: Die Verweildauer wird automatisch angepasst, damit genug Zeit zum Lesen und für den Auto-Scroll bleibt.
-- UI: Konsistente Card-Abmessungen und fixierte Header-Icons.
+Version: 1.7.3
+- Logic Fix: Die Farben der Figuren-Tags werden nun basierend auf ihrer Fraktion berechnet. 
+- UI: Alle Mitglieder einer Fraktion teilen sich nun dieselbe Farbe für eine bessere Übersicht.
+- UI: Konsistente Card-Abmessungen und Fixierung der Header-Icons in der Diashow.
 -->
