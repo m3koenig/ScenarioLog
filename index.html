@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Scenario Log v1.6.1</title>
+    <title>Scenario Log v1.6.2</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Markdown Parser -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
@@ -201,8 +201,8 @@
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div><label class="block text-gray-400 text-[10px] mb-1 uppercase font-bold tracking-widest">Radius: <span id="radiusLabel">8px</span></label><input type="range" id="themeRadius" min="0" max="24" step="2" oninput="window.updateCustomTheme()" class="w-full accent-blue-600"></div>
-                    <div><label class="block text-gray-400 text-[10px] mb-1 uppercase font-bold">Überschrift</label><select id="editAppFontHeading" class="w-full bg-black/20 border border-gray-700 rounded p-2 text-sm outline-none"><option value="Orbitron">Orbitron</option><option value="Space Mono">Space Mono</option><option value="Rajdhani">Rajdhani</option><option value="Inter">Inter</option></select></div>
-                    <div><label class="block text-gray-400 text-[10px] mb-1 uppercase font-bold">Textkörper</label><select id="editAppFontBody" class="w-full bg-black/20 border border-gray-700 rounded p-2 text-sm outline-none"><option value="Inter">Inter</option><option value="Space Mono">Space Mono</option><option value="Roboto">Roboto</option></select></div>
+                    <div><label class="block text-gray-400 text-[10px] mb-1 uppercase font-bold">Überschrift</label><select id="editAppFontHeading" class="w-full bg-black/20 border border-gray-700 rounded p-2 text-sm outline-none"><option value="Orbitron">Orbitron</option><option value="Space Mono">Space Mono</option><option value="Rajdhani">Rajdhani</option><option value="Inter">Inter</option><option value="Lexend">Lexend</option><option value="Space Grotesk">Space Grotesk</option><option value="Bebas Neue">Bebas Neue</option></select></div>
+                    <div><label class="block text-gray-400 text-[10px] mb-1 uppercase font-bold">Textkörper</label><select id="editAppFontBody" class="w-full bg-black/20 border border-gray-700 rounded p-2 text-sm outline-none"><option value="Inter">Inter</option><option value="Space Mono">Space Mono</option><option value="Roboto">Roboto</option><option value="Montserrat">Montserrat</option><option value="JetBrains Mono">JetBrains Mono</option></select></div>
                 </div>
             </div>
             <div class="p-4 border-t border-gray-800 bg-black/20 flex justify-end gap-3 shrink-0">
@@ -272,7 +272,7 @@
                     <div><label class="block text-gray-400 text-xs mb-1 uppercase font-bold">Titel</label><input type="text" id="editTitle" class="w-full bg-black/20 border border-gray-700 rounded p-2 outline-none"></div>
                 </div>
                 <div class="flex items-center gap-3"><input type="checkbox" id="editTypeCheckbox" class="w-5 h-5 rounded bg-black/20 border-gray-700 text-blue-600"><span class="text-gray-400 font-bold uppercase text-xs">Notwendig</span></div>
-                <div><label class="block text-gray-400 text-xs mb-2 uppercase">Symbol</label><div id="iconSelectionContainer" class="flex flex-wrap gap-2"></div><input type="hidden" id="editIcon"></div>
+                <div><label class="block text-gray-400 text-xs mb-2 uppercase font-bold tracking-wider">Symbol auswählen</label><div id="iconSelectionContainer" class="flex flex-wrap gap-2 p-2 bg-black/20 rounded-theme border border-gray-800"></div><input type="hidden" id="editIcon"></div>
                 <div><label class="block text-blue-400/80 text-xs mb-1 uppercase">Vorlesetext (MD)</label><textarea id="editFluff" class="w-full bg-black/20 border border-gray-700 rounded p-2 text-blue-200 italic min-h-[100px]"></textarea></div>
                 <div><label class="block text-gray-400 text-xs mb-1 uppercase">GM Info (MD)</label><textarea id="editDesc" class="w-full bg-black/20 border border-gray-700 rounded p-2 min-h-[150px]"></textarea></div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -308,8 +308,38 @@
     <script>
         marked.setOptions({ breaks: true, gfm: true });
 
-        // --- THEME PRESETS ---
-        const THEMES = {
+        // --- ICONS CONFIG ---
+        const icons = {
+            AppIcon: `<svg class="w-10 h-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2L4 7v10l8 5 8-5V7l-8-5z"></path><path d="M12 22V12"></path><path d="M20 7l-8 5-8-5"></path><path d="M12 12l8-5"></path><path d="M12 12L4 7"></path><path d="M8 10L8 14"></path><path d="M12 14L12 18"></path><path d="M16 10L16 14"></path></svg>`,
+            ExpandAll: `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" stroke-width="2"></path></svg>`,
+            CollapseAll: `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 14h6v6M20 10h-6V4M10 14l-7 7M14 10l7-7" stroke-width="2"></path></svg>`,
+            AlertCircle: `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v4M12 16h.01" stroke-width="2"></path></svg>`,
+            ShieldAlert: `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10zM12 8v4M12 16h.01" stroke-width="2"></path></svg>`,
+            Rocket: `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2M12 15l-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z" stroke-width="2"></path></svg>`,
+            CheckSquare: `<svg class="w-5 h-5 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" stroke-width="2"></path></svg>`,
+            Square: `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="3" rx="2" ry="2" stroke-width="2"></rect></svg>`,
+            ChevronDown: `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6" stroke-width="2"></path></svg>`,
+            ChevronUp: `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="m18 15-6-6-6 6" stroke-width="2"></path></svg>`,
+            ChevronRight: `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6" stroke-width="2"></path></svg>`,
+            Pencil: `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" stroke-width="2"></path></svg>`,
+            Skull: `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 12h.01M15 12h.01M8 20v2h8v-2M16 20a2 2 0 0 0 1.56-3.25 8 8 0 1 0-11.12 0A2 2 0 0 0 8 20" stroke-width="2"></path></svg>`,
+            Radio: `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4.9 19.1C1 15.2 1 8.8 4.9 4.9M7.8 16.2c-2.3-2.3-2.3-6.1 0-8.5M12 12m-2 0a2 2 0 1 0 4 0 2 2 0 1 0-4 0M16.2 7.8c2.3 2.3 2.3 6.1 0 8.5M19.1 4.9C23 8.8 23 15.1 19.1 19" stroke-width="2"></path></svg>`,
+            Crosshair: `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="2"></circle><path d="M22 12h-4M6 12H2M12 6V2M12 22v-4" stroke-width="2"></path></svg>`,
+            DragVertical: `<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><circle cx="9" cy="5" r="1"></circle><circle cx="9" cy="12" r="1"></circle><circle cx="9" cy="19" r="1"></circle><circle cx="15" cy="5" r="1"></circle><circle cx="15" cy="12" r="1"></circle><circle cx="15" cy="19" r="1"></circle></svg>`,
+            // Neue Icons für Ereignisse
+            Zap: `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" stroke-width="2"></path></svg>`,
+            Target: `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="2"></circle><circle cx="12" cy="12" r="6" stroke-width="2"></circle><circle cx="12" cy="12" r="2" stroke-width="2"></circle></svg>`,
+            MapPin: `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" stroke-width="2"></path><circle cx="12" cy="10" r="3" stroke-width="2"></circle></svg>`,
+            Eye: `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke-width="2"></path><circle cx="12" cy="12" r="3" stroke-width="2"></circle></svg>`,
+            Lock: `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2" stroke-width="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4" stroke-width="2"></path></svg>`,
+            Unlock: `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2" stroke-width="2"></rect><path d="M7 11V7a5 5 0 0 1 9.9-1" stroke-width="2"></path></svg>`,
+            Terminal: `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 17l6-6-6-6M12 19h8" stroke-width="2"></path></svg>`,
+            Users: `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" stroke-width="2"></path><circle cx="9" cy="7" r="4" stroke-width="2"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" stroke-width="2"></path></svg>`,
+            FileText: `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke-width="2"></path><polyline points="14 2 14 8 20 8" stroke-width="2"></polyline><line x1="16" y1="13" x2="8" y2="13" stroke-width="2"></line><line x1="16" y1="17" x2="8" y2="17" stroke-width="2"></line><polyline points="10 9 9 9 8 9" stroke-width="2"></polyline></svg>`,
+            Settings: `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3" stroke-width="2"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" stroke-width="2"></path></svg>`
+        };
+
+        const THEME_PRESETS = {
             classic: { bg: "#030712", surface: "#111827", text: "#f3f4f6", accent: "#22c55e", radius: "8" },
             light: { bg: "#ffffff", surface: "#f9fafb", text: "#111827", accent: "#2563eb", radius: "12" },
             deepsea: { bg: "#020617", surface: "#0f172a", text: "#e2e8f0", accent: "#38bdf8", radius: "20" },
@@ -321,8 +351,8 @@
         let appSubtitle = "INCIDENT PROTOCOL // SYSTEM ONLINE";
         let appFontHeading = "Orbitron"; 
         let appFontBody = "Inter";
-        let themeSettings = { ...THEMES.classic };
-        let expandedId = null;
+        let themeSettings = { ...THEME_PRESETS.classic };
+        let expandedIds = new Set(); // Umstellung auf Set für Mehrfach-Expansion
         let checkedIds = new Set();
         let collapsedActs = new Set();
         let factions = {};
@@ -345,7 +375,12 @@
         function applyFontsAndTheme(h, b, theme) {
             themeSettings = theme;
             document.querySelectorAll('.dynamic-styles').forEach(e => e.remove());
-            const link = document.createElement('link'); link.rel = 'stylesheet'; link.className = 'dynamic-styles'; link.href = `https://fonts.googleapis.com/css2?family=${h.replace(/ /g,'+')}:wght@400;700&family=${b.replace(/ /g,'+')}:wght@400;700&display=swap`; document.head.appendChild(link);
+            const fontsToLoad = [h, b, "Orbitron", "Inter", "Space Mono", "Rajdhani", "Roboto", "Lexend", "Space Grotesk", "Bebas Neue", "Montserrat", "JetBrains Mono"];
+            const uniqueFonts = [...new Set(fontsToLoad)];
+            const link = document.createElement('link'); link.rel = 'stylesheet'; link.className = 'dynamic-styles'; 
+            link.href = `https://fonts.googleapis.com/css2?${uniqueFonts.map(f => `family=${f.replace(/ /g,'+')}:wght@400;700`).join('&')}&display=swap`; 
+            document.head.appendChild(link);
+            
             const style = document.createElement('style'); style.className = 'dynamic-styles';
             const rgb = hexToRgb(theme.accent);
             style.textContent = `
@@ -363,7 +398,7 @@
         }
 
         window.applyThemePreset = (p) => {
-            const t = THEMES[p];
+            const t = THEME_PRESETS[p];
             document.getElementById('themeColorBg').value = t.bg;
             document.getElementById('themeColorSurface').value = t.surface;
             document.getElementById('themeColorText').value = t.text;
@@ -387,7 +422,7 @@
         // --- I/O SYSTEMS ---
         function encodeScenario(str) { return btoa(unescape(encodeURIComponent(str))); }
         function decodeScenario(b64) { try { return decodeURIComponent(escape(atob(b64))); } catch(e) { return null; } }
-        function getExportData() { return JSON.stringify({ appTitle, appSubtitle, appFontHeading, appFontBody, themeSettings, factions, events, actData, eventNotes, checkedIds: Array.from(checkedIds), collapsedActs: Array.from(collapsedActs) }, null, 2); }
+        function getExportData() { return JSON.stringify({ appTitle, appSubtitle, appFontHeading, appFontBody, themeSettings, factions, events, actData, eventNotes, checkedIds: Array.from(checkedIds), collapsedActs: Array.from(collapsedActs), expandedIds: Array.from(expandedIds) }, null, 2); }
 
         function applyImportedData(data) {
             if(!data) return;
@@ -395,34 +430,18 @@
             appSubtitle = data.appSubtitle || "";
             appFontHeading = data.appFontHeading || "Orbitron";
             appFontBody = data.appFontBody || "Inter";
-            themeSettings = data.themeSettings || { ...THEMES.classic };
+            themeSettings = data.themeSettings || { ...THEME_PRESETS.classic };
             if (data.appColor && !data.themeSettings) themeSettings.accent = (data.appColor.startsWith('#') ? data.appColor : "#22c55e");
             factions = data.factions || {};
             actData = data.actData || {};
             eventNotes = data.eventNotes || {};
             checkedIds = new Set(data.checkedIds || []);
             collapsedActs = new Set(data.collapsedActs || []);
+            expandedIds = new Set(data.expandedIds || []);
             events = (data.events || []).map(ev => ({ ...ev }));
             applyFontsAndTheme(appFontHeading, appFontBody, themeSettings);
             renderApp();
         }
-
-        // --- RENDER ---
-        const icons = {
-            AlertCircle: `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v4M12 16h.01" stroke-width="2"></path></svg>`,
-            ShieldAlert: `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10zM12 8v4M12 16h.01" stroke-width="2"></path></svg>`,
-            Rocket: `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2M12 15l-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z" stroke-width="2"></path></svg>`,
-            CheckSquare: `<svg class="w-5 h-5 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" stroke-width="2"></path></svg>`,
-            Square: `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="3" rx="2" ry="2" stroke-width="2"></rect></svg>`,
-            ChevronDown: `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6" stroke-width="2"></path></svg>`,
-            ChevronUp: `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="m18 15-6-6-6 6" stroke-width="2"></path></svg>`,
-            ChevronRight: `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6" stroke-width="2"></path></svg>`,
-            Pencil: `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" stroke-width="2"></path></svg>`,
-            Skull: `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 12h.01M15 12h.01M8 20v2h8v-2M16 20a2 2 0 0 0 1.56-3.25 8 8 0 1 0-11.12 0A2 2 0 0 0 8 20" stroke-width="2"></path></svg>`,
-            Radio: `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4.9 19.1C1 15.2 1 8.8 4.9 4.9M7.8 16.2c-2.3-2.3-2.3-6.1 0-8.5M12 12m-2 0a2 2 0 1 0 4 0 2 2 0 1 0-4 0M16.2 7.8c2.3 2.3 2.3 6.1 0 8.5M19.1 4.9C23 8.8 23 15.1 19.1 19" stroke-width="2"></path></svg>`,
-            Crosshair: `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="2"></circle><path d="M22 12h-4M6 12H2M12 6V2M12 22v-4" stroke-width="2"></path></svg>`,
-            DragVertical: `<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><circle cx="9" cy="5" r="1"></circle><circle cx="9" cy="12" r="1"></circle><circle cx="9" cy="19" r="1"></circle><circle cx="15" cy="5" r="1"></circle><circle cx="15" cy="12" r="1"></circle><circle cx="15" cy="19" r="1"></circle></svg>`
-        };
 
         function getFactionPalette(figureName) {
             const faction = factions[figureName];
@@ -438,6 +457,7 @@
             return palettes[Math.abs(hash) % palettes.length];
         }
 
+        // --- RENDER APP ---
         function renderApp() {
             const app = document.getElementById('app');
             const grouped = events.reduce((acc, e) => { if (!acc[e.act]) acc[e.act] = []; acc[e.act].push(e); return acc; }, {});
@@ -447,41 +467,130 @@
             document.getElementById('factionsDatalist').innerHTML = Object.keys(factions).map(f => `<option value="${f}">`).join('');
             document.getElementById('locationsDatalist').innerHTML = [...new Set(events.flatMap(e => e.locations || []))].map(l => `<option value="${l}">`).join('');
 
-            let html = `<div class="max-w-4xl mx-auto"><header class="mb-12 border-b border-gray-800 pb-6"><div class="text-left"><h1 onclick="window.openHeaderModal()" class="text-3xl md:text-5xl font-bold text-accent mb-2 uppercase cursor-pointer font-heading tracking-tighter">${appTitle}</h1><p onclick="window.openHeaderModal()" class="opacity-60 text-[10px] md:text-xs cursor-pointer uppercase tracking-[0.2em] font-bold">${appSubtitle}</p></div></header><div class="space-y-12">`;
+            let html = `
+            <div class="max-w-4xl mx-auto">
+                <header class="mb-12 border-b border-gray-800 pb-6">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                        <div class="flex items-center gap-4 group cursor-pointer" onclick="window.openHeaderModal()">
+                            <div class="text-accent group-hover:scale-110 transition-transform">${icons.AppIcon}</div>
+                            <div class="text-left">
+                                <h1 class="text-3xl md:text-5xl font-bold text-accent uppercase font-heading tracking-tighter leading-none">${appTitle}</h1>
+                                <p class="opacity-60 text-[10px] md:text-xs uppercase tracking-[0.2em] font-bold mt-1">${appSubtitle}</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button onclick="window.expandAllEvents()" title="Alle ausklappen" class="p-2 bg-accent/10 border border-accent/20 text-accent rounded hover:bg-accent/20 transition-colors">
+                                ${icons.ExpandAll}
+                            </button>
+                            <button onclick="window.collapseAllEvents()" title="Alle einklappen" class="p-2 bg-gray-800 border border-gray-700 text-gray-400 rounded hover:bg-gray-700 transition-colors">
+                                ${icons.CollapseAll}
+                            </button>
+                        </div>
+                    </div>
+                </header>
+                <div class="space-y-12">`;
 
             if (Object.keys(grouped).length === 0) html += `<div class="text-center py-20 border-2 border-dashed border-gray-800 rounded-theme opacity-50">Keine Daten vorhanden.</div>`;
 
             for (const [actName, actEvents] of Object.entries(grouped)) {
                 const isC = collapsedActs.has(actName);
-                html += `<div ondragover="window.handleDragOver(event)" ondragleave="window.handleDragLeave(event)" ondrop="window.handleDrop(event, null, '${actName}')"><div onclick="window.toggleAct('${actName}')" class="sticky top-0 z-10 py-4 mb-6 cursor-pointer flex items-center gap-3 no-select" style="background-color: var(--bg)"><div class="opacity-40">${isC ? icons.ChevronRight : icons.ChevronDown}</div><h2 class="text-xl md:text-2xl font-bold uppercase border-l-4 border-accent pl-4 text-accent font-heading">${actName}</h2></div><div class="border-l-2 border-gray-800 ml-4 md:ml-8 space-y-6 ${isC ? 'hidden' : ''}">`;
+                html += `
+                <div ondragover="window.handleDragOver(event)" ondragleave="window.handleDragLeave(event)" ondrop="window.handleDrop(event, null, '${actName}')">
+                    <div onclick="window.toggleAct('${actName}')" class="sticky top-0 z-10 py-4 mb-6 cursor-pointer flex items-center gap-3 no-select" style="background-color: var(--bg)">
+                        <div class="opacity-40">${isC ? icons.ChevronRight : icons.ChevronDown}</div>
+                        <h2 class="text-xl md:text-2xl font-bold uppercase border-l-4 border-accent pl-4 text-accent font-heading">${actName}</h2>
+                    </div>
+                    <div class="border-l-2 border-gray-800 ml-4 md:ml-8 space-y-6 ${isC ? 'hidden' : ''}">`;
 
                 actEvents.forEach(e => {
                     const isO = e.type === 'Optional';
                     const locs = (e.locations || []).join(', ');
                     const figs = (e.figures || []);
-                    html += `<div class="relative pl-8 md:pl-12 group" data-drag-id="${e.id}" draggable="true" ondragstart="window.handleDragStart(event, ${e.id})" ondragover="window.handleDragOver(event)" ondragleave="window.handleDragLeave(event)" ondrop="window.handleDrop(event, ${e.id}, '${actName}')" ondragend="window.handleDragEnd(event)"><div class="absolute left-0 top-6 opacity-20 md:group-hover:opacity-100 transition-opacity cursor-grab">${icons.DragVertical}</div><div class="absolute -left-[17px] top-4 w-8 h-8 rounded-full border-2 flex items-center justify-center bg-surface ${isO ? 'border-dashed opacity-40' : 'border-accent text-accent'}">${icons[e.icon] || icons.Rocket}</div><button onclick="window.handleInteraction(event, ${e.id})" class="w-full text-left p-4 rounded-theme border border-gray-800 transition-all hover:border-accent/40 no-select bg-surface/40"><div class="flex justify-between gap-4"><div class="flex items-start gap-3"><div onclick="window.toggleCheckbox(event, ${e.id})" class="mt-1 opacity-50 hover:text-accent hover:opacity-100">${checkedIds.has(e.id) ? icons.CheckSquare : icons.Square}</div><div><h3 class="text-base md:text-lg font-bold font-heading ${checkedIds.has(e.id) ? 'line-through opacity-40' : ''}">${e.title}</h3><div class="flex items-center gap-3 mt-1 flex-wrap"><span class="text-[9px] px-1.5 py-0.5 rounded-theme uppercase font-bold bg-accent/10 text-accent ${isO?'opacity-40':''}">${e.type}</span>${locs ? `<span class="text-[9px] opacity-40 italic">📍 ${locs}</span>` : ''}</div></div></div><div class="flex items-center gap-2"><div onclick="window.openEditModal(${e.id}); event.stopPropagation();" class="opacity-20 hover:text-blue-400 hover:opacity-100 p-1">${icons.Pencil}</div><div class="opacity-30">${expandedId === e.id ? icons.ChevronUp : icons.ChevronDown}</div></div></div><div class="${expandedId === e.id ? 'mt-4 max-h-[1500px]' : 'max-h-0'} overflow-hidden transition-all duration-300"><div class="border-t border-gray-800 pt-4 text-sm opacity-80 markdown-content">${marked.parse(e.description || "")}</div>${figs.length > 0 ? `<div class="flex flex-wrap gap-2 mt-4">${figs.map(f => {
-                        const p = getFactionPalette(f);
-                        return `<span class="text-[10px] px-2 py-0.5 rounded-theme border ${p.text} font-bold" style="background:${p.bg}; border-color:${p.b}">👤 ${f}</span>`;
-                    }).join('')}</div>` : ''}</div></button></div>`;
+                    const isExpanded = expandedIds.has(e.id);
+                    html += `
+                    <div class="relative pl-8 md:pl-12 group" data-drag-id="${e.id}" draggable="true" ondragstart="window.handleDragStart(event, ${e.id})" ondragover="window.handleDragOver(event)" ondragleave="window.handleDragLeave(event)" ondrop="window.handleDrop(event, ${e.id}, '${actName}')" ondragend="window.handleDragEnd(event)">
+                        <div class="absolute left-0 top-6 opacity-20 md:group-hover:opacity-100 transition-opacity cursor-grab">${icons.DragVertical}</div>
+                        <div class="absolute -left-[17px] top-4 w-8 h-8 rounded-full border-2 flex items-center justify-center bg-surface ${isO ? 'border-dashed opacity-40' : 'border-accent text-accent'}">
+                            ${icons[e.icon] || icons.Rocket}
+                        </div>
+                        <button onclick="window.handleInteraction(event, ${e.id})" class="w-full text-left p-4 rounded-theme border border-gray-800 transition-all hover:border-accent/40 no-select bg-surface/40">
+                            <div class="flex justify-between gap-4">
+                                <div class="flex items-start gap-3">
+                                    <div onclick="window.toggleCheckbox(event, ${e.id})" class="mt-1 opacity-50 hover:text-accent hover:opacity-100">
+                                        ${checkedIds.has(e.id) ? icons.CheckSquare : icons.Square}
+                                    </div>
+                                    <div>
+                                        <h3 class="text-base md:text-lg font-bold font-heading ${checkedIds.has(e.id) ? 'line-through opacity-40' : ''}">${e.title}</h3>
+                                        <div class="flex items-center gap-3 mt-1 flex-wrap">
+                                            <span class="text-[9px] px-1.5 py-0.5 rounded-theme uppercase font-bold bg-accent/10 text-accent ${isO?'opacity-40':''}">${e.type}</span>
+                                            ${locs ? `<span class="text-[9px] opacity-40 italic">📍 ${locs}</span>` : ''}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <div onclick="window.openEditModal(${e.id}); event.stopPropagation();" class="opacity-20 hover:text-blue-400 hover:opacity-100 p-1">${icons.Pencil}</div>
+                                    <div class="opacity-30">${isExpanded ? icons.ChevronUp : icons.ChevronDown}</div>
+                                </div>
+                            </div>
+                            <div class="${isExpanded ? 'mt-4 max-h-[2500px]' : 'max-h-0'} overflow-hidden transition-all duration-300">
+                                <div class="border-t border-gray-800 pt-4 text-sm opacity-80 markdown-content">${marked.parse(e.description || "")}</div>
+                                ${figs.length > 0 ? `<div class="flex flex-wrap gap-2 mt-4">${figs.map(f => {
+                                    const p = getFactionPalette(f);
+                                    return `<span class="text-[10px] px-2 py-0.5 rounded-theme border ${p.text} font-bold" style="background:${p.bg}; border-color:${p.b}">👤 ${f}</span>`;
+                                }).join('')}</div>` : ''}
+                            </div>
+                        </button>
+                    </div>`;
                 });
                 html += `<div class="act-drop-zone" ondragover="window.handleDragOver(event)" ondragleave="window.handleDragLeave(event)" ondrop="window.handleDrop(event, null, '${actName}')"></div></div></div>`;
             }
             app.innerHTML = html + `</div>`;
         }
 
-        // --- HANDLER ---
+        // --- HANDLERS ---
         window.closeModal = (id) => { document.getElementById(id).classList.add('opacity-0', 'pointer-events-none'); };
         window.toggleAct = (a) => { collapsedActs.has(a) ? collapsedActs.delete(a) : collapsedActs.add(a); renderApp(); };
         window.toggleCheckbox = (ev, id) => { ev.stopPropagation(); checkedIds.has(id) ? checkedIds.delete(id) : checkedIds.add(id); renderApp(); };
-        window.handleInteraction = (ev, id) => { const t = Date.now(); if(t - (clickTimers[id] || 0) < 300) { clearTimeout(clickTimers['t'+id]); window.openEventModal(id); } else { clickTimers[id] = t; clickTimers['t'+id] = setTimeout(() => { expandedId = expandedId === id ? null : id; renderApp(); }, 300); } };
-        window.openEventModal = (id) => { const e = events.find(ev => ev.id === id); if(!e) return; currentOpenEventId = id; document.getElementById('modalTitle').textContent = e.title; document.getElementById('modalDesc').innerHTML = marked.parse(e.description || ""); document.getElementById('modalFluffContainer').className = e.fluff ? "" : "hidden"; document.getElementById('modalFluff').innerHTML = e.fluff ? marked.parse(e.fluff) : ""; document.getElementById('modalLocations').textContent = (e.locations || []).join(', ') || "N/A"; document.getElementById('modalNotes').value = eventNotes[id] || ""; const fl = document.getElementById('modalFigures'); fl.innerHTML = ""; (e.figures || []).forEach(f => {
-            const p = getFactionPalette(f);
-            fl.insertAdjacentHTML('beforeend', `<li class="flex justify-between items-center border-b border-gray-800 text-xs py-2"><span class="px-2 py-0.5 rounded-theme border ${p.text} font-bold" style="background:${p.bg}; border-color:${p.b}">${f}</span><span class="opacity-40 font-mono text-[10px] uppercase">${factions[f]||"Divers"}</span></li>`);
-        }); document.getElementById('eventModal').classList.remove('opacity-0', 'pointer-events-none'); };
+        
+        window.expandAllEvents = () => { events.forEach(e => expandedIds.add(e.id)); renderApp(); };
+        window.collapseAllEvents = () => { expandedIds.clear(); renderApp(); };
+
+        window.handleInteraction = (ev, id) => { 
+            const t = Date.now(); 
+            if(t - (clickTimers[id] || 0) < 300) { 
+                clearTimeout(clickTimers['t'+id]); 
+                window.openEventModal(id); 
+            } else { 
+                clickTimers[id] = t; 
+                clickTimers['t'+id] = setTimeout(() => { 
+                    expandedIds.has(id) ? expandedIds.delete(id) : expandedIds.add(id); 
+                    renderApp(); 
+                }, 300); 
+            } 
+        };
+
+        window.openEventModal = (id) => { 
+            const e = events.find(ev => ev.id === id); 
+            if(!e) return; 
+            currentOpenEventId = id; 
+            document.getElementById('modalTitle').textContent = e.title; 
+            document.getElementById('modalDesc').innerHTML = marked.parse(e.description || ""); 
+            document.getElementById('modalFluffContainer').className = e.fluff ? "" : "hidden"; 
+            document.getElementById('modalFluff').innerHTML = e.fluff ? marked.parse(e.fluff) : ""; 
+            document.getElementById('modalLocations').textContent = (e.locations || []).join(', ') || "N/A"; 
+            document.getElementById('modalNotes').value = eventNotes[id] || ""; 
+            const fl = document.getElementById('modalFigures'); 
+            fl.innerHTML = ""; 
+            (e.figures || []).forEach(f => {
+                const p = getFactionPalette(f);
+                fl.insertAdjacentHTML('beforeend', `<li class="flex justify-between items-center border-b border-gray-800 text-xs py-2"><span class="px-2 py-0.5 rounded-theme border ${p.text} font-bold" style="background:${p.bg}; border-color:${p.b}">${f}</span><span class="opacity-40 font-mono text-[10px] uppercase">${factions[f]||"Divers"}</span></li>`);
+            }); 
+            document.getElementById('eventModal').classList.remove('opacity-0', 'pointer-events-none'); 
+        };
         
         window.openEditModal = (id=null) => { 
             const uniqueActs = [...new Set(events.map(ev => ev.act))];
-            const defaultAct = uniqueActs.length > 0 ? uniqueActs[0] : "";
+            const defaultAct = uniqueActs.length > 0 ? uniqueActs[0] : "Akt I";
             
             const e = events.find(ev => ev.id === id) || { 
                 act: defaultAct, title: "", type: "Notwendig", icon: "Rocket", 
@@ -502,69 +611,52 @@
             document.getElementById('editModal').classList.remove('opacity-0', 'pointer-events-none'); 
         };
 
-        window.saveEvent = () => { const id = parseInt(document.getElementById('editId').value) || Date.now(); const data = { id, act: document.getElementById('editAct').value, title: document.getElementById('editTitle').value, type: document.getElementById('editTypeCheckbox').checked ? "Notwendig" : "Optional", icon: document.getElementById('editIcon').value, fluff: document.getElementById('editFluff').value, description: document.getElementById('editDesc').value, locations: currentEditingTags.Locations, figures: currentEditingTags.Figures }; const idx = events.findIndex(e => e.id === id); if(idx > -1) events[idx] = data; else events.push(data); window.closeModal('editModal'); renderApp(); };
-        window.saveHeader = () => { appTitle = document.getElementById('editAppTitle').value; appSubtitle = document.getElementById('editAppSubtitle').value; appFontHeading = document.getElementById('editAppFontHeading').value; appFontBody = document.getElementById('editAppFontBody').value; window.updateCustomTheme(); window.closeModal('headerModal'); renderApp(); };
+        window.renderIconSelection = (s) => { 
+            const c = document.getElementById('iconSelectionContainer'); 
+            const iconsToSelect = ["Rocket", "Zap", "Target", "MapPin", "Skull", "Radio", "Crosshair", "AlertCircle", "ShieldAlert", "Eye", "Terminal", "Users", "FileText", "Lock", "Unlock", "Settings"];
+            c.innerHTML = iconsToSelect.map(i => `
+                <button onclick="window.selectIcon('${i}')" class="p-3 border-2 rounded-theme transition-all ${s===i?'border-accent bg-accent/20 text-accent':'opacity-40 border-gray-700 hover:opacity-100'}" title="${i}">
+                    ${icons[i] || icons.Rocket}
+                </button>`).join(''); 
+        };
+
+        window.saveEvent = () => { 
+            const id = parseInt(document.getElementById('editId').value) || Date.now(); 
+            const data = { id, act: document.getElementById('editAct').value, title: document.getElementById('editTitle').value, type: document.getElementById('editTypeCheckbox').checked ? "Notwendig" : "Optional", icon: document.getElementById('editIcon').value, fluff: document.getElementById('editFluff').value, description: document.getElementById('editDesc').value, locations: currentEditingTags.Locations, figures: currentEditingTags.Figures }; 
+            const idx = events.findIndex(e => e.id === id); 
+            if(idx > -1) events[idx] = data; else events.push(data); 
+            window.closeModal('editModal'); 
+            renderApp(); 
+        };
+
+        window.saveHeader = () => { 
+            appTitle = document.getElementById('editAppTitle').value; 
+            appSubtitle = document.getElementById('editAppSubtitle').value; 
+            appFontHeading = document.getElementById('editAppFontHeading').value; 
+            appFontBody = document.getElementById('editAppFontBody').value; 
+            window.updateCustomTheme(); 
+            window.closeModal('headerModal'); 
+            renderApp(); 
+        };
+
         window.openHeaderModal = () => { 
             document.getElementById('editAppTitle').value = appTitle; document.getElementById('editAppSubtitle').value = appSubtitle; 
             document.getElementById('themeColorBg').value = themeSettings.bg; document.getElementById('themeColorSurface').value = themeSettings.surface; 
             document.getElementById('themeColorText').value = themeSettings.text; document.getElementById('themeColorAccent').value = themeSettings.accent; 
             document.getElementById('themeRadius').value = themeSettings.radius; document.getElementById('radiusLabel').textContent = themeSettings.radius + "px";
+            document.getElementById('editAppFontHeading').value = appFontHeading;
+            document.getElementById('editAppFontBody').value = appFontBody;
             document.getElementById('headerModal').classList.remove('opacity-0', 'pointer-events-none'); 
         };
 
-        window.handleDragStart = (e, id) => { 
-            draggedEventId = id; 
-            e.target.classList.add('dragging'); 
-            e.dataTransfer.effectAllowed = 'move'; 
-        };
-        
-        window.handleDragOver = (e) => { 
-            e.preventDefault(); 
-            e.dataTransfer.dropEffect = 'move'; 
-            const t = e.target.closest('[data-drag-id], .act-drop-zone'); 
-            if (t && !t.classList.contains('drag-over')) {
-                // Nur ein Element darf das Highlight haben
-                document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
-                t.classList.add('drag-over');
-            }
-        };
+        // --- DRAG AND DROP ---
+        window.handleDragStart = (e, id) => { draggedEventId = id; e.target.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move'; };
+        window.handleDragOver = (e) => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; const t = e.target.closest('[data-drag-id], .act-drop-zone'); if (t && !t.classList.contains('drag-over')) { document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over')); t.classList.add('drag-over'); } };
+        window.handleDragLeave = (e) => { const t = e.target.closest('[data-drag-id], .act-drop-zone'); if (t && !t.contains(e.relatedTarget)) { t.classList.remove('drag-over'); } };
+        window.handleDrop = (e, targetId, targetAct) => { e.preventDefault(); document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over')); if (draggedEventId === null) return; const draggedIdx = events.findIndex(ev => ev.id === draggedEventId); const targetIdx = targetId ? events.findIndex(ev => ev.id === targetId) : -1; if (draggedIdx === -1) return; const [item] = events.splice(draggedIdx, 1); if (targetAct) item.act = targetAct; if (targetIdx !== -1) { const newIdx = events.findIndex(ev => ev.id === targetId); events.splice(newIdx, 0, item); } else { events.push(item); } draggedEventId = null; renderApp(); };
+        window.handleDragEnd = (e) => { e.target.classList.remove('dragging'); document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over')); };
 
-        window.handleDragLeave = (e) => { 
-            const t = e.target.closest('[data-drag-id], .act-drop-zone'); 
-            // Nur entfernen, wenn wir wirklich das gesamte Container-Element verlassen
-            if (t && !t.contains(e.relatedTarget)) {
-                t.classList.remove('drag-over');
-            }
-        };
-
-        window.handleDrop = (e, targetId, targetAct) => { 
-            e.preventDefault(); 
-            document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over')); 
-            if (draggedEventId === null) return; 
-            
-            const draggedIdx = events.findIndex(ev => ev.id === draggedEventId); 
-            const targetIdx = targetId ? events.findIndex(ev => ev.id === targetId) : -1; 
-            
-            if (draggedIdx === -1) return; 
-            
-            const [item] = events.splice(draggedIdx, 1); 
-            if (targetAct) item.act = targetAct; 
-            
-            if (targetIdx !== -1) { 
-                const newIdx = events.findIndex(ev => ev.id === targetId); 
-                events.splice(newIdx, 0, item); 
-            } else { 
-                events.push(item); 
-            } 
-            draggedEventId = null; 
-            renderApp(); 
-        };
-
-        window.handleDragEnd = (e) => { 
-            e.target.classList.remove('dragging'); 
-            document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
-        };
-
+        // --- EXPORT/IMPORT ---
         window.openExportModal = () => { document.getElementById('exportTextarea').value = getExportData(); document.getElementById('exportModal').classList.remove('opacity-0', 'pointer-events-none'); };
         window.copyExportToClipboard = () => { const tx = document.getElementById('exportTextarea'); tx.select(); document.execCommand('copy'); showCopySuccess("In Zwischenablage kopiert!"); };
         window.copySeedToClipboard = () => { copyToClipboard(encodeScenario(getExportData())); showCopySuccess("Seed kopiert!"); };
@@ -572,20 +664,25 @@
         window.importFromSeedText = () => { const dec = decodeScenario(document.getElementById('importSeedInput').value.trim()); if(dec) { applyImportedData(JSON.parse(dec)); window.closeModal('importModal'); } };
         window.importFromJsonText = () => { try { applyImportedData(JSON.parse(document.getElementById('importJsonInput').value)); window.closeModal('importModal'); } catch(e){} };
         window.handleImport = (e) => { const f = e.target.files[0]; if(f) { const r = new FileReader(); r.onload = (ev) => { try { applyImportedData(JSON.parse(ev.target.result)); window.closeModal('importModal'); } catch(ex){} }; r.readAsText(f); } };
+        window.triggerDownloadFile = function() { const blob = new Blob([getExportData()], { type: 'application/json' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `${appTitle.replace(/\s+/g, '_')}_Save.json`; a.click(); URL.revokeObjectURL(url); };
+
+        // --- TAGS ---
         window.addTag = (t) => { const i = document.getElementById(`tagInput${t}`); const v = i.value.trim(); if(v && !currentEditingTags[t].includes(v)){ currentEditingTags[t].push(v); i.value=""; window.renderEditTags(t); } };
         window.removeTag = (t, idx) => { currentEditingTags[t].splice(idx,1); window.renderEditTags(t); };
-        window.renderEditTags = (t) => { document.getElementById(`tagList${t}`).innerHTML = currentEditingTags[t].map((tag, i) => `<span class="bg-blue-900/40 border border-blue-700/50 text-blue-300 px-2 py-1 rounded text-[10px] flex items-center gap-2">${tag}<button onclick="window.removeTag('${t}', ${i})" class="hover:text-red-400 font-bold">×</button></span>`).join(''); };
-        window.renderIconSelection = (s) => { const c = document.getElementById('iconSelectionContainer'); c.innerHTML = ["Rocket", "Radio", "AlertCircle", "ShieldAlert", "Skull", "Crosshair"].map(i => `<button onclick="window.selectIcon('${i}')" class="p-2 border rounded transition-all ${s===i?'border-accent opacity-100':'opacity-30 border-gray-700'}">${icons[i]}</button>`).join(''); };
+        window.renderEditTags = (t) => { document.getElementById(`tagList${t}`).innerHTML = currentEditingTags[t].map((tag, i) => `<span class="bg-accent/10 border border-accent/20 text-accent px-2 py-1 rounded text-[10px] flex items-center gap-2">${tag}<button onclick="window.removeTag('${t}', ${i})" class="hover:text-red-400 font-bold">×</button></span>`).join(''); };
         window.selectIcon = (i) => { document.getElementById('editIcon').value = i; window.renderIconSelection(i); };
+
+        // --- FACTIONS ---
         window.openFactionModal = () => { const l = document.getElementById('factionList'); l.innerHTML = ""; Object.entries(factions).forEach(([n, f]) => l.insertAdjacentHTML('beforeend', window.createFactionRow(n, f))); document.getElementById('factionModal').classList.remove('opacity-0', 'pointer-events-none'); };
         window.createFactionRow = (n='', f='') => `<div class="faction-row grid grid-cols-12 gap-2 mb-2"><input type="text" placeholder="Name" class="faction-name col-span-5 bg-black/20 border border-gray-700 rounded p-1 text-xs outline-none" value="${n}"><input type="text" placeholder="Fraktion" class="faction-value col-span-6 bg-black/20 border border-gray-700 rounded p-1 text-xs outline-none" value="${f}"><button onclick="this.parentElement.remove()" class="text-red-500 font-bold">×</button></div>`;
         window.addFactionRow = () => document.getElementById('factionList').insertAdjacentHTML('beforeend', window.createFactionRow());
         window.saveFactions = () => { factions = {}; document.querySelectorAll('.faction-row').forEach(r => { const n = r.querySelector('.faction-name').value; if(n) factions[n] = r.querySelector('.faction-value').value; }); window.closeModal('factionModal'); renderApp(); };
+        
+        // --- DIALOGS ---
         window.resetApp = () => { window.customConfirm("Alles löschen?", () => location.reload()); };
         window.confirmDeleteEvent = () => { const id = parseInt(document.getElementById('editId').value); window.customConfirm("Löschen?", () => { events = events.filter(e => e.id !== id); window.closeModal('editModal'); renderApp(); }); };
         function copyToClipboard(t) { const d = document.createElement("input"); document.body.appendChild(d); d.value = t; d.select(); document.execCommand("copy"); document.body.removeChild(d); }
         function showCopySuccess(t) { const m = document.getElementById('copySuccessMsg'); m.textContent = t; m.classList.remove('opacity-0'); setTimeout(() => m.classList.add('opacity-0'), 2000); }
-        window.customAlert = (msg) => { document.getElementById('dialogMessage').textContent = msg; document.getElementById('dialogButtons').innerHTML = `<button onclick="window.closeDialog()" class="px-6 py-2 bg-blue-600 rounded text-white text-sm font-bold">OK</button>`; document.getElementById('dialogModal').classList.remove('opacity-0', 'pointer-events-none'); };
         window.customConfirm = (msg, onC) => { document.getElementById('dialogMessage').textContent = msg; window._cC = onC; document.getElementById('dialogButtons').innerHTML = `<button onclick="window.closeDialog()" class="px-4 py-2 bg-gray-800 rounded text-gray-300 text-xs">Abbrechen</button><button onclick="window.exC()" class="px-4 py-2 bg-red-600 rounded text-white text-xs font-bold">Bestätigen</button>`; document.getElementById('dialogModal').classList.remove('opacity-0', 'pointer-events-none'); };
         window.closeDialog = () => { document.getElementById('dialogModal').classList.add('opacity-0', 'pointer-events-none'); };
         window.exC = () => { if(window._cC) window._cC(); window.closeDialog(); };
@@ -601,9 +698,10 @@
 
 <!--
 CHANGE LOG
-Version: 1.6.1
-- Fix: Drag and Drop Mechanik überarbeitet. Kein "wildes Blinken" mehr.
-- Fix: Drop-Indikator (Linie) wird jetzt über ein Pseudo-Element gerendert, um Layout-Shifts zu verhindern.
-- Fix: handleDragLeave Logik verbessert, um flackernde UI bei Child-Elementen zu vermeiden.
-- UX: Größere und stabilere Drop-Zonen am Ende von Akten.
+Version: 1.6.2
+- UI: Neues Terminal-Hexagon Icon im Header eingefügt.
+- UI: Mehrere Icons für Ereignisse hinzugefügt (Zap, Target, Eye, Terminal, Settings etc.).
+- UI: Schriftarten-Auswahl erweitert (Lexend, JetBrains Mono, Space Grotesk etc.).
+- UX: "Collapse All" und "Expand All" Buttons im Header integriert.
+- UX: Expansion-Logik von Single auf Multiple umgestellt (mehrere Ereignisse gleichzeitig offen haltbar).
 -->
