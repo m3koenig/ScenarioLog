@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Scenario Log v1.7.3</title>
+    <title>Scenario Log v1.8.0</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Markdown Parser -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
@@ -230,15 +230,56 @@
     <div id="headerModal" class="fixed inset-0 z-[60] flex items-center justify-center bg-black/90 backdrop-blur-md opacity-0 pointer-events-none transition-opacity duration-300">
         <div class="bg-surface border border-accent rounded-theme max-w-2xl w-full mx-4 shadow-2xl flex flex-col max-h-[90vh]">
             <div class="p-4 border-b border-gray-800 flex justify-between items-center shrink-0">
-                <h3 class="text-xl font-bold text-accent uppercase tracking-wider font-heading">Theme Designer</h3>
+                <h3 class="text-xl font-bold text-accent uppercase tracking-wider font-heading">Scenario Styles</h3>
                 <button onclick="window.closeModal('headerModal')" class="text-gray-500 hover:text-red-500 p-1"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-width="2"></path></svg></button>
             </div>
             <div class="p-6 space-y-6 flex-1 overflow-y-auto">
+                <!-- Presets -->
+                <div>
+                    <label class="block text-gray-400 uppercase text-[10px] mb-3 font-bold tracking-[0.2em]">Themen-Presets</label>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+                        <button onclick="window.applyThemePreset('classic')" class="py-2 text-[10px] font-bold uppercase bg-gray-800 border border-gray-700 rounded hover:border-accent transition-colors">Classic</button>
+                        <button onclick="window.applyThemePreset('light')" class="py-2 text-[10px] font-bold uppercase bg-white text-gray-900 rounded border border-gray-200 hover:border-accent transition-colors">Bright</button>
+                        <button onclick="window.applyThemePreset('deepsea')" class="py-2 text-[10px] font-bold uppercase bg-slate-900 text-blue-400 rounded border border-blue-900 hover:border-blue-400 transition-colors">Deep Sea</button>
+                        <button onclick="window.applyThemePreset('hazard')" class="py-2 text-[10px] font-bold uppercase bg-stone-900 text-yellow-500 rounded border border-orange-800 hover:border-yellow-500 transition-colors">Hazard</button>
+                    </div>
+                </div>
+
+                <div class="h-px bg-gray-800"></div>
+
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div><label class="block text-gray-400 uppercase text-[10px] mb-1 font-bold">Terminal Titel</label><input type="text" id="editAppTitle" class="w-full bg-black/20 border border-gray-700 rounded-theme p-2 focus:border-accent outline-none"></div>
                     <div><label class="block text-gray-400 uppercase text-[10px] mb-1 font-bold">Untertitel</label><input type="text" id="editAppSubtitle" class="w-full bg-black/20 border border-gray-700 rounded-theme p-2 focus:border-accent outline-none"></div>
                 </div>
+
+                <!-- Font Selection -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-gray-400 uppercase text-[10px] mb-1 font-bold">Überschriften-Font</label>
+                        <select id="selectFontHeading" onchange="window.updateCustomTheme()" class="w-full bg-black/20 border border-gray-700 rounded-theme p-2 outline-none text-sm">
+                            <option value="Orbitron">Orbitron (Cyber)</option>
+                            <option value="Bebas Neue">Bebas Neue (Impact)</option>
+                            <option value="Rajdhani">Rajdhani (Tech)</option>
+                            <option value="Space Grotesk">Space Grotesk (Modern)</option>
+                            <option value="JetBrains Mono">JetBrains Mono (Code)</option>
+                            <option value="Montserrat">Montserrat (Standard)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-gray-400 uppercase text-[10px] mb-1 font-bold">Text-Font</label>
+                        <select id="selectFontBody" onchange="window.updateCustomTheme()" class="w-full bg-black/20 border border-gray-700 rounded-theme p-2 outline-none text-sm">
+                            <option value="Inter">Inter (Clean)</option>
+                            <option value="Roboto">Roboto (Classic)</option>
+                            <option value="Lexend">Lexend (Readable)</option>
+                            <option value="JetBrains Mono">JetBrains Mono (Monospace)</option>
+                            <option value="Fira Code">Fira Code (Terminal)</option>
+                            <option value="Open Sans">Open Sans (Sans)</option>
+                        </select>
+                    </div>
+                </div>
+
                 <div class="h-px bg-gray-800"></div>
+
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <div><label class="block text-gray-400 text-[10px] mb-1 uppercase">Hintergrund</label><input type="color" id="themeColorBg" oninput="window.updateCustomTheme()" class="color-preview"></div>
                     <div><label class="block text-gray-400 text-[10px] mb-1 uppercase">Oberfläche</label><input type="color" id="themeColorSurface" oninput="window.updateCustomTheme()" class="color-preview"></div>
@@ -261,7 +302,7 @@
     </div>
 
     <div id="importModal" class="fixed inset-0 z-[60] flex items-center justify-center bg-black/90 backdrop-blur-md opacity-0 pointer-events-none transition-opacity duration-300">
-        <div class="bg-surface border border-blue-500/50 rounded-theme max-w-xl w-full mx-4 shadow-2xl flex flex-col max-h-[90vh]">
+        <div class="bg-surface border border-blue-500/50 rounded-theme max-xl w-full mx-4 shadow-2xl flex flex-col max-h-[90vh]">
             <div class="p-4 border-b border-gray-800 flex justify-between items-center shrink-0"><h3 class="text-xl font-bold text-gray-300 uppercase tracking-wider">Import</h3><button onclick="window.closeModal('importModal')" class="text-gray-500 hover:text-red-500 p-1"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-width="2"></path></svg></button></div>
             <div class="p-6 space-y-6 flex-1 overflow-y-auto"><button onclick="document.getElementById('importFile').click()" class="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded text-gray-200">JSON Datei auswählen</button><div class="flex gap-2"><input type="text" id="importUrlInput" class="flex-1 bg-black/20 border border-gray-700 rounded p-2 text-sm" placeholder="URL..."><button onclick="window.importFromUrl()" class="px-4 bg-blue-900/40 rounded text-blue-400 font-bold text-xs uppercase">Laden</button></div><div class="space-y-3"><div class="flex gap-2"><input type="text" id="importSeedInput" class="flex-1 bg-black/20 border border-gray-700 rounded p-2 text-xs text-purple-400" placeholder="Seed..."><button onclick="window.importFromSeedText()" class="px-4 bg-purple-900/40 rounded text-purple-300 font-bold text-xs uppercase">OK</button></div><textarea id="importJsonInput" class="w-full h-24 bg-black/20 border border-gray-700 rounded p-2 text-xs text-green-500/70 font-mono" placeholder='JSON Text...'></textarea><button onclick="window.importFromJsonText()" class="w-full py-2 bg-gray-800 rounded text-gray-300 font-bold text-xs">JSON laden</button></div></div>
         </div>
@@ -316,14 +357,14 @@
             Terminal: `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 17l6-6-6-6M12 19h8" stroke-width="2"></path></svg>`,
             Users: `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" stroke-width="2"></path><circle cx="9" cy="7" r="4" stroke-width="2"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" stroke-width="2"></path></svg>`,
             FileText: `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke-width="2"></path><polyline points="14 2 14 8 20 8" stroke-width="2"></polyline><line x1="16" y1="13" x2="8" y2="13" stroke-width="2"></line><line x1="16" y1="17" x2="8" y2="17" stroke-width="2"></line><polyline points="10 9 9 9 8 9" stroke-width="2"></polyline></svg>`,
-            Settings: `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3" stroke-width="2"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1-2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" stroke-width="2"></path></svg>`
+            Settings: `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3" stroke-width="2"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1-2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" stroke-width="2"></path></svg>`
         };
 
         const THEME_PRESETS = {
-            classic: { bg: "#030712", surface: "#111827", text: "#f3f4f6", accent: "#22c55e", radius: "8" },
-            light: { bg: "#ffffff", surface: "#f9fafb", text: "#111827", accent: "#2563eb", radius: "12" },
-            deepsea: { bg: "#020617", surface: "#0f172a", text: "#e2e8f0", accent: "#38bdf8", radius: "20" },
-            hazard: { bg: "#1c1917", surface: "#292524", text: "#fde047", accent: "#ea580c", radius: "0" }
+            classic: { bg: "#030712", surface: "#111827", text: "#f3f4f6", accent: "#22c55e", radius: "8", fontH: "Orbitron", fontB: "Inter" },
+            light: { bg: "#ffffff", surface: "#f9fafb", text: "#111827", accent: "#2563eb", radius: "12", fontH: "Montserrat", fontB: "Roboto" },
+            deepsea: { bg: "#020617", surface: "#0f172a", text: "#e2e8f0", accent: "#38bdf8", radius: "20", fontH: "Rajdhani", fontB: "Inter" },
+            hazard: { bg: "#1c1917", surface: "#292524", text: "#fde047", accent: "#ea580c", radius: "0", fontH: "Bebas Neue", fontB: "JetBrains Mono" }
         };
 
         let appTitle = "Scenario Log";
@@ -360,9 +401,11 @@
         }
 
         function applyFontsAndTheme(h, b, theme) {
+            appFontHeading = h;
+            appFontBody = b;
             themeSettings = theme;
             document.querySelectorAll('.dynamic-styles').forEach(e => e.remove());
-            const uniqueFonts = [h, b, "Orbitron", "Inter", "Rajdhani", "Roboto", "Lexend", "Space Grotesk", "Bebas Neue", "Montserrat", "JetBrains Mono"];
+            const uniqueFonts = [h, b, "Orbitron", "Inter", "Rajdhani", "Roboto", "Lexend", "Space Grotesk", "Bebas Neue", "Montserrat", "JetBrains Mono", "Fira Code", "Open Sans"];
             const link = document.createElement('link'); link.rel = 'stylesheet'; link.className = 'dynamic-styles'; 
             link.href = `https://fonts.googleapis.com/css2?${[...new Set(uniqueFonts)].map(f => `family=${f.replace(/ /g,'+')}:wght@400;700`).join('&')}&display=swap`; 
             document.head.appendChild(link);
@@ -383,13 +426,23 @@
             document.getElementById('themeColorText').value = t.text;
             document.getElementById('themeColorAccent').value = t.accent;
             document.getElementById('themeRadius').value = t.radius;
+            document.getElementById('selectFontHeading').value = t.fontH;
+            document.getElementById('selectFontBody').value = t.fontB;
             window.updateCustomTheme();
         };
 
         window.updateCustomTheme = () => {
-            const t = { bg: document.getElementById('themeColorBg').value, surface: document.getElementById('themeColorSurface').value, text: document.getElementById('themeColorText').value, accent: document.getElementById('themeColorAccent').value, radius: document.getElementById('themeRadius').value };
+            const t = { 
+                bg: document.getElementById('themeColorBg').value, 
+                surface: document.getElementById('themeColorSurface').value, 
+                text: document.getElementById('themeColorText').value, 
+                accent: document.getElementById('themeColorAccent').value, 
+                radius: document.getElementById('themeRadius').value 
+            };
+            const h = document.getElementById('selectFontHeading').value;
+            const b = document.getElementById('selectFontBody').value;
             document.getElementById('radiusLabel').textContent = t.radius + "px";
-            applyFontsAndTheme(appFontHeading, appFontBody, t);
+            applyFontsAndTheme(h, b, t);
         };
 
         function encodeScenario(str) { return btoa(unescape(encodeURIComponent(str))); }
@@ -636,8 +689,25 @@
         window.openEditModal = (id=null) => { const uniqueActs = [...new Set(events.map(ev => ev.act))]; const defaultAct = uniqueActs.length > 0 ? uniqueActs[0] : "Akt I"; const e = events.find(ev => ev.id === id) || { act: defaultAct, title: "", type: "Notwendig", icon: "Rocket", description: "", locations: [], figures: [] }; document.getElementById('editId').value = id || ""; document.getElementById('editAct').value = e.act; document.getElementById('editTitle').value = e.title; document.getElementById('editTypeCheckbox').checked = e.type === "Notwendig"; document.getElementById('editDesc').value = e.description || ""; document.getElementById('editFluff').value = e.fluff || ""; document.getElementById('editIcon').value = e.icon || "Rocket"; currentEditingTags = { Locations: [...(e.locations || [])], Figures: [...(e.figures || [])] }; window.renderEditTags('Locations'); window.renderEditTags('Figures'); window.renderIconSelection(e.icon || "Rocket"); document.getElementById('btnDeleteEvent').style.display = id ? "block" : "none"; document.getElementById('editModal').classList.remove('opacity-0', 'pointer-events-none'); };
         window.renderIconSelection = (s) => { const c = document.getElementById('iconSelectionContainer'); const iconsToSelect = ["Rocket", "Zap", "Target", "MapPin", "Skull", "Radio", "Crosshair", "AlertCircle", "ShieldAlert", "Eye", "Terminal", "Users", "FileText", "Lock", "Unlock", "Settings"]; c.innerHTML = iconsToSelect.map(i => `<button onclick="window.selectIcon('${i}')" class="p-3 border-2 rounded-theme transition-all ${s===i?'border-accent bg-accent/20 text-accent':'opacity-40 border-gray-700 hover:opacity-100'}" title="${i}">${icons[i] || icons.Rocket}</button>`).join(''); };
         window.saveEvent = () => { const id = parseInt(document.getElementById('editId').value) || Date.now(); const data = { id, act: document.getElementById('editAct').value, title: document.getElementById('editTitle').value, type: document.getElementById('editTypeCheckbox').checked ? "Notwendig" : "Optional", icon: document.getElementById('editIcon').value, fluff: document.getElementById('editFluff').value, description: document.getElementById('editDesc').value, locations: currentEditingTags.Locations, figures: currentEditingTags.Figures }; const idx = events.findIndex(e => e.id === id); if(idx > -1) events[idx] = data; else events.push(data); window.closeModal('editModal'); renderApp(); };
-        window.saveHeader = () => { appTitle = document.getElementById('editAppTitle').value; appSubtitle = document.getElementById('editAppSubtitle').value; window.updateCustomTheme(); window.closeModal('headerModal'); renderApp(); };
-        window.openHeaderModal = () => { document.getElementById('editAppTitle').value = appTitle; document.getElementById('editAppSubtitle').value = appSubtitle; document.getElementById('themeColorBg').value = themeSettings.bg; document.getElementById('themeColorSurface').value = themeSettings.surface; document.getElementById('themeColorText').value = themeSettings.text; document.getElementById('themeColorAccent').value = themeSettings.accent; document.getElementById('themeRadius').value = themeSettings.radius; document.getElementById('headerModal').classList.remove('opacity-0', 'pointer-events-none'); };
+        window.saveHeader = () => { 
+            appTitle = document.getElementById('editAppTitle').value; 
+            appSubtitle = document.getElementById('editAppSubtitle').value; 
+            window.updateCustomTheme(); 
+            window.closeModal('headerModal'); 
+            renderApp(); 
+        };
+        window.openHeaderModal = () => { 
+            document.getElementById('editAppTitle').value = appTitle; 
+            document.getElementById('editAppSubtitle').value = appSubtitle; 
+            document.getElementById('themeColorBg').value = themeSettings.bg; 
+            document.getElementById('themeColorSurface').value = themeSettings.surface; 
+            document.getElementById('themeColorText').value = themeSettings.text; 
+            document.getElementById('themeColorAccent').value = themeSettings.accent; 
+            document.getElementById('themeRadius').value = themeSettings.radius; 
+            document.getElementById('selectFontHeading').value = appFontHeading;
+            document.getElementById('selectFontBody').value = appFontBody;
+            document.getElementById('headerModal').classList.remove('opacity-0', 'pointer-events-none'); 
+        };
         window.handleDragStart = (e, id) => { draggedEventId = id; e.target.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move'; };
         window.handleDragOver = (e) => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; const t = e.target.closest('[data-drag-id], .act-drop-zone'); if (t && !t.classList.contains('drag-over')) { document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over')); t.classList.add('drag-over'); } };
         window.handleDragLeave = (e) => { const t = e.target.closest('[data-drag-id], .act-drop-zone'); if (t && !t.contains(e.relatedTarget)) { t.classList.remove('drag-over'); } };
@@ -678,8 +748,10 @@
 
 <!--
 CHANGE LOG
-Version: 1.7.3
-- Logic Fix: Die Farben der Figuren-Tags werden nun basierend auf ihrer Fraktion berechnet. 
-- UI: Alle Mitglieder einer Fraktion teilen sich nun dieselbe Farbe für eine bessere Übersicht.
-- UI: Konsistente Card-Abmessungen und Fixierung der Header-Icons in der Diashow.
+Version: 1.8.0
+- Feature: Schriftarten-Selektor im Theme-Designer integriert.
+- Feature: Unterstützung für kuratierte Google Fonts (Cyber, Tech, Modern, Code).
+- Feature: Themen-Presets direkt im Modal abrufbar (Classic, Bright, Deep Sea, Hazard).
+- UI: Überarbeitung des "Scenario Styles" Modals für bessere Übersichtlichkeit.
+- Logic: Synchronisierung von Fonts und Farben beim Laden von Szenarien optimiert.
 -->
