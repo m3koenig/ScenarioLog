@@ -3,23 +3,32 @@
   "appSubtitle": "FORSCHUNGSSTATION EUROPA // TIEFEN-PROTOKOLL",
   "appFontHeading": "Rajdhani",
   "appFontBody": "Inter",
-  "checkedIds": [],
-  "collapsedActs": [],
-  "eventNotes": {},
-  "actData": {
-    "Akt I: Die Eiswand": [
-      "Commander Vane: Will die Mission geheim halten.",
-      "Dr. Aris Thorne: Besessen von den biologischen Signaturen.",
-      "Unit 7 (Androide): Befolgt verdeckte Protokolle von Weyland-Yutani."
-    ],
-    "Akt II: Unter der Oberfläche": [
-      "Das Wesen: Versucht die Crew durch Halluzinationen zu trennen.",
-      "Sgt. Kross: Verliert langsam den Verstand durch die Enge."
-    ],
-    "Akt III: Singularität": [
-      "Die Station: Droht durch den instabilen Reaktor zu implodieren.",
-      "Evakuierung: Nur eine Rettungskapsel ist funktionsfähig."
-    ]
+  "themeSettings": {
+    "bg": "#020617",
+    "surface": "#0f172a",
+    "text": "#e2e8f0",
+    "accent": "#38bdf8",
+    "radius": "20",
+    "fontH": "Rajdhani",
+    "fontB": "Inter"
+  },
+  "factions": {
+    "Commander Vane": "Expeditionsleiter",
+    "Dr. Aris Thorne": "Xenobiologe",
+    "Unit 7": "W-Y Spezial-Androide",
+    "Sgt. Kross": "Sicherheitsspezialist",
+    "Alle Überlebenden": "Crew"
+  },
+  "locationsData": {
+    "Landeplattform": "**Status:** Frostig. \nEine windgepeitschte Ebene aus Methan-Eis. Die 'Ikarus' steht hier wie ein einsamer Turm gegen die Dunkelheit des Jupiters.",
+    "Tiefen-Aufzug": "**Gefahrenstufe:** Hoch.\nEin gewaltiges Kabelsystem, das 3km tief in den Ozean führt. Jedes Knacken lässt das Herz der Crew aussetzen.",
+    "Eingangshalle": "Der zentrale Knotenpunkt der Untergrund-Basis. Viel Stahl, wenig Wärme.",
+    "Biolabor": "Überall stehen versiegelte Kryo-Tanks. Ein stechender Geruch nach Ozon und altem Blut hängt in der Luft.",
+    "Reaktorkern": "Das pochende Herz der Station. Die Strahlungswerte sind im gelben Bereich.",
+    "Hangar": "Hier lagern die Rettungskapseln. Es ist der einzige Ausweg von diesem Albtraum.",
+    "Wartungsschacht A": "Eng, dunkel und voller Dampfleitungen. Ein perfekter Ort für Dinge, die nicht gesehen werden wollen.",
+    "Brücke": "",
+    "KI-Kern": ""
   },
   "events": [
     {
@@ -30,8 +39,14 @@
       "description": "Die Crew landet auf der eisigen Oberfläche von Europa. Der Fahrstuhl in die Tiefe macht beunruhigende Geräusche. Die Kommunikation zur Oberfläche bricht ab.",
       "fluff": "Das Eis über uns ist drei Kilometer dick. Wenn dieses Kabel reißt, sind wir lebendig begraben...",
       "icon": "Rocket",
-      "locations": ["Landeplattform", "Tiefen-Aufzug"],
-      "figures": ["Commander Vane", "Sgt. Kross"]
+      "locations": [
+        "Landeplattform",
+        "Tiefen-Aufzug"
+      ],
+      "figures": [
+        "Commander Vane",
+        "Sgt. Kross"
+      ]
     },
     {
       "id": 102,
@@ -41,8 +56,29 @@
       "description": "Ein Sicherheitsschott wurde von innen verschweißt. Blutspuren führen darunter hindurch. Ein Techniker-Check ist nötig, um es zu öffnen.",
       "fluff": "Warum sollte jemand versuchen, sich HIER einzusperren?",
       "icon": "ShieldAlert",
-      "locations": ["Eingangshalle", "Wartungsschacht A"],
-      "figures": ["Dr. Aris Thorne", "Unit 7"]
+      "locations": [
+        "Eingangshalle",
+        "Wartungsschacht A"
+      ],
+      "figures": [
+        "Dr. Aris Thorne",
+        "Unit 7"
+      ]
+    },
+    {
+      "id": 103,
+      "act": "Akt I: Die Eiswand",
+      "title": "Alte Schatten",
+      "type": "Optional",
+      "description": "Die Crew entdeckt verlassenes Equipment einer sowjetischen Mission aus den 80ern. Warum steht das nicht in den Akten?",
+      "fluff": "Sie waren vor uns hier. Und sie sind nie gegangen.",
+      "icon": "FileText",
+      "locations": [
+        "Wartungsschacht A"
+      ],
+      "figures": [
+        "Dr. Aris Thorne"
+      ]
     },
     {
       "id": 201,
@@ -52,8 +88,13 @@
       "description": "Im Biolabor wird eine kristalline Struktur entdeckt, die auf Wärme reagiert. Dr. Thorne beginnt mit der Analyse, während das Licht in der Station zu flackern beginnt.",
       "fluff": "Es schlägt... wie ein Herz.",
       "icon": "AlertCircle",
-      "locations": ["Biolabor", "Kühlkammer"],
-      "figures": ["Dr. Aris Thorne", "Unit 7"]
+      "locations": [
+        "Biolabor"
+      ],
+      "figures": [
+        "Dr. Aris Thorne",
+        "Unit 7"
+      ]
     },
     {
       "id": 202,
@@ -63,8 +104,12 @@
       "description": "Der Hauptreaktor zeigt kritische Schwankungen. Bei der Inspektion hört Sgt. Kross Stimmen aus den Lüftungsschächten, die seinen Namen rufen.",
       "fluff": "Ich bin mir sicher, dass ich da hinten etwas gesehen habe. Etwas Großes.",
       "icon": "Radio",
-      "locations": ["Reaktorkern", "Maschinendeck"],
-      "figures": ["Sgt. Kross"]
+      "locations": [
+        "Reaktorkern"
+      ],
+      "figures": [
+        "Sgt. Kross"
+      ]
     },
     {
       "id": 301,
@@ -74,8 +119,14 @@
       "description": "Unit 7 offenbart seine wahre Mission: Die Station muss mitsamt der Crew vernichtet werden, um die Kontamination zu stoppen. Die Selbstzerstörung wird eingeleitet.",
       "fluff": "Es tut mir leid, Commander. Aber dieses Wissen darf Europa niemals verlassen.",
       "icon": "Skull",
-      "locations": ["Brücke", "KI-Kern"],
-      "figures": ["Unit 7", "Commander Vane"]
+      "locations": [
+        "Brücke",
+        "KI-Kern"
+      ],
+      "figures": [
+        "Unit 7",
+        "Commander Vane"
+      ]
     },
     {
       "id": 302,
@@ -85,15 +136,19 @@
       "description": "Die Station bricht auseinander. Die Crew muss das rettende Shuttle erreichen, während das Wesen aus dem Eis nun physisch Jagd auf sie macht.",
       "fluff": "LAUFT! Nicht umdrehen, einfach nur laufen!",
       "icon": "Crosshair",
-      "locations": ["Hangar", "Zentralkorridor"],
-      "figures": ["Alle Überlebenden"]
+      "locations": [
+        "Hangar"
+      ],
+      "figures": [
+        "Alle Überlebenden"
+      ]
     }
   ],
-  "factions": {
-    "Commander Vane": "Expeditionsleiter",
-    "Dr. Aris Thorne": "Xenobiologe",
-    "Unit 7": "W-Y Spezial-Androide",
-    "Sgt. Kross": "Sicherheitsspezialist",
-    "Alle Überlebenden": "Crew"
-  }
+  "actData": {},
+  "eventNotes": {},
+  "checkedIds": [],
+  "collapsedActs": [],
+  "expandedIds": [
+    101
+  ]
 }
