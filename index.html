@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Scenario Log v1.14.0</title>
+    <title>Scenario Log v1.15.0</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -112,10 +112,10 @@
         .color-preview { width: 100%; height: 38px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.1); cursor: pointer; padding: 2px; background: #000; }
         .color-preview::-webkit-color-swatch { border-radius: 4px; border: none; }
 
-        /* Slideshow Specific - 30% larger */
+        /* Slideshow Specific */
         #slideshowModal .slide-card {
             transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            max-height: calc(100% - 40px);
+            max-height: 100%;
             width: 100%;
         }
         
@@ -185,7 +185,7 @@
             </button>
         </div>
 
-        <div class="flex-1 flex items-center justify-center px-4 pt-2 pb-10 md:px-12 md:pb-16 overflow-hidden">
+        <div class="flex-1 flex items-center justify-center px-4 pt-2 pb-4 md:px-12 md:pb-6 overflow-hidden">
             <div id="slideCard" class="slide-card bg-surface border border-accent/30 rounded-theme shadow-2xl max-w-[1600px] flex flex-col relative group cursor-pointer hover:border-accent/60 transition-colors" title="Klicken zum Bearbeiten">
                 
                 <div class="flex items-center gap-6 p-6 md:p-10 border-b border-gray-800 shrink-0 no-select">
@@ -221,22 +221,22 @@
             </div>
         </div>
 
-        <div class="p-6 md:p-10 shrink-0 flex flex-col items-center gap-4 bg-black/40 backdrop-blur-md pb-12 md:pb-16 no-select">
-            <div class="flex items-center gap-8">
-                <button onclick="window.prevSlide()" class="p-3 md:p-4 rounded-full bg-white/5 hover:bg-white/10 text-white transition-all transform hover:scale-110">
-                    <svg class="w-6 h-6 md:w-8 md:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7" stroke-width="2"></path></svg>
+        <div class="p-4 md:p-6 shrink-0 flex flex-col items-center gap-3 bg-black/40 backdrop-blur-md pb-6 md:pb-8 no-select">
+            <div class="flex items-center gap-6">
+                <button onclick="window.prevSlide()" class="p-2 md:p-3 rounded-full bg-white/5 hover:bg-white/10 text-white transition-all transform hover:scale-110">
+                    <svg class="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7" stroke-width="2"></path></svg>
                 </button>
-                <button id="slidePlayBtn" onclick="window.toggleSlideshowAuto()" class="p-5 md:p-6 rounded-full bg-accent text-white shadow-xl transform transition-all hover:scale-110">
-                    <div id="slidePlayIcon"><svg class="w-8 h-8 md:w-10 md:h-10" fill="currentColor" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"></path></svg></div>
+                <button id="slidePlayBtn" onclick="window.toggleSlideshowAuto()" class="p-4 md:p-5 rounded-full bg-accent text-white shadow-xl transform transition-all hover:scale-110">
+                    <div id="slidePlayIcon"><svg class="w-6 h-6 md:w-8 md:h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"></path></svg></div>
                 </button>
-                <button onclick="window.nextSlide()" class="p-3 md:p-4 rounded-full bg-white/5 hover:bg-white/10 text-white transition-all transform hover:scale-110">
-                    <svg class="w-6 h-6 md:w-8 md:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" stroke-width="2"></path></svg>
+                <button onclick="window.nextSlide()" class="p-2 md:p-3 rounded-full bg-white/5 hover:bg-white/10 text-white transition-all transform hover:scale-110">
+                    <svg class="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" stroke-width="2"></path></svg>
                 </button>
             </div>
-            <div class="w-full max-w-xs bg-gray-800 h-1 rounded-full overflow-hidden">
+            <div class="w-full max-w-[200px] bg-gray-800 h-1 rounded-full overflow-hidden">
                 <div id="slideProgress" class="bg-accent h-full transition-all duration-500" style="width: 0%"></div>
             </div>
-            <div id="slideCounter" class="text-xs font-mono opacity-40">1 / 10</div>
+            <div id="slideCounter" class="text-[10px] font-mono opacity-40 uppercase">Ereignis 1 / 10</div>
         </div>
     </div>
 
@@ -485,7 +485,7 @@
             Terminal: `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 17l6-6-6-6M12 19h8" stroke-width="2"></path></svg>`,
             Users: `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" stroke-width="2"></path><circle cx="9" cy="7" r="4" stroke-width="2"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" stroke-width="2"></path></svg>`,
             FileText: `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke-width="2"></path><polyline points="14 2 14 8 20 8" stroke-width="2"></polyline><line x1="16" y1="13" x2="8" y2="13" stroke-width="2"></line><line x1="16" y1="17" x2="8" y2="17" stroke-width="2"></line><polyline points="10 9 9 9 8 9" stroke-width="2"></polyline></svg>`,
-            Settings: `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3" stroke-width="2"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1-2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" stroke-width="2"></path></svg>`
+            Settings: `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3" stroke-width="2"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2 2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1-2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" stroke-width="2"></path></svg>`
         };
 
         const THEME_PRESETS = {
@@ -703,7 +703,7 @@
                     facList.insertAdjacentHTML('beforeend', `<span class="text-[12px] px-4 py-1.5 rounded-theme border ${p.text} font-bold shadow-sm" style="background:${p.bg}; border-color:${p.b}">👤 ${f}</span>`);
                 });
             } else document.getElementById('slideMeta').classList.add('hidden');
-            document.getElementById('slideCounter').textContent = `${slideshowIndex + 1} / ${flatEvents.length}`;
+            document.getElementById('slideCounter').textContent = `Ereignis ${slideshowIndex + 1} / ${flatEvents.length}`;
             document.getElementById('slideProgress').style.width = ((slideshowIndex + 1) / flatEvents.length) * 100 + "%";
             const card = document.getElementById('slideCard'); card.style.opacity = "0"; card.style.transform = "translateY(20px)";
             setTimeout(() => { card.style.opacity = "1"; card.style.transform = "translateY(0)"; }, 50);
@@ -720,7 +720,7 @@
         window.toggleSlideshowAuto = () => { slideshowIsAuto = !slideshowIsAuto; if (slideshowIsAuto) startSlideshowTimer(); else clearInterval(slideshowInterval); updateSlideshowPlayBtn(); };
         function updateSlideshowPlayBtn() {
             const btn = document.getElementById('slidePlayIcon');
-            btn.innerHTML = slideshowIsAuto ? `<svg class="w-8 h-8 md:w-10 md:h-10" fill="currentColor" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"></path></svg>` : `<svg class="w-8 h-8 md:w-10 md:h-10 ml-1" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"></path></svg>`;
+            btn.innerHTML = slideshowIsAuto ? `<svg class="w-6 h-6 md:w-8 md:h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"></path></svg>` : `<svg class="w-6 h-6 md:w-8 md:h-8 ml-1" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"></path></svg>`;
         }
         window.nextSlide = () => { slideshowIndex = (slideshowIndex < flatEvents.length - 1) ? slideshowIndex + 1 : 0; updateSlideshowView(); };
         window.prevSlide = () => { slideshowIndex = (slideshowIndex > 0) ? slideshowIndex - 1 : flatEvents.length - 1; updateSlideshowView(); };
@@ -981,11 +981,9 @@
         renderApp();
     </script>
     
-    <!-- CHANGE LOG v1.14.0
-    - Hinzugefügt: Tooltips für Schauplatz-Tags an allen Stellen (Liste, Diashow, Modale, Editor).
-    - Hinzugefügt: Neue Schauplätze können im Editor sofort nach dem Hinzufügen editiert werden.
-    - Verbessert: Diashow-Fenster (`slide-card`) um ca. 30% vergrößert für bessere Lesbarkeit.
-    - Geändert: "Speichern" eines Ereignisses schließt das Fenster nun wieder direkt.
+    <!-- CHANGE LOG v1.15.0
+    - Verbessert: Diashow-Layout optimiert. Steuerung verkleinert, Inhaltsbereich vergrößert.
+    - Geändert: Abstände im Diashow-Modal reduziert, um mehr Platz für vertikalen Text zu schaffen.
     -->
 </body>
 </html>
