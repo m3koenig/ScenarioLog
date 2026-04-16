@@ -1,9 +1,10 @@
+```html
 <!DOCTYPE html>
 <html lang="de">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Scenario Log v1.6.2</title>
+    <title>Scenario Log v1.6.3</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Markdown Parser -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
@@ -326,7 +327,6 @@
             Radio: `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4.9 19.1C1 15.2 1 8.8 4.9 4.9M7.8 16.2c-2.3-2.3-2.3-6.1 0-8.5M12 12m-2 0a2 2 0 1 0 4 0 2 2 0 1 0-4 0M16.2 7.8c2.3 2.3 2.3 6.1 0 8.5M19.1 4.9C23 8.8 23 15.1 19.1 19" stroke-width="2"></path></svg>`,
             Crosshair: `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="2"></circle><path d="M22 12h-4M6 12H2M12 6V2M12 22v-4" stroke-width="2"></path></svg>`,
             DragVertical: `<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><circle cx="9" cy="5" r="1"></circle><circle cx="9" cy="12" r="1"></circle><circle cx="9" cy="19" r="1"></circle><circle cx="15" cy="5" r="1"></circle><circle cx="15" cy="12" r="1"></circle><circle cx="15" cy="19" r="1"></circle></svg>`,
-            // Neue Icons für Ereignisse
             Zap: `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" stroke-width="2"></path></svg>`,
             Target: `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="2"></circle><circle cx="12" cy="12" r="6" stroke-width="2"></circle><circle cx="12" cy="12" r="2" stroke-width="2"></circle></svg>`,
             MapPin: `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" stroke-width="2"></path><circle cx="12" cy="10" r="3" stroke-width="2"></circle></svg>`,
@@ -352,7 +352,7 @@
         let appFontHeading = "Orbitron"; 
         let appFontBody = "Inter";
         let themeSettings = { ...THEME_PRESETS.classic };
-        let expandedIds = new Set(); // Umstellung auf Set für Mehrfach-Expansion
+        let expandedIds = new Set();
         let checkedIds = new Set();
         let collapsedActs = new Set();
         let factions = {};
@@ -462,7 +462,6 @@
             const app = document.getElementById('app');
             const grouped = events.reduce((acc, e) => { if (!acc[e.act]) acc[e.act] = []; acc[e.act].push(e); return acc; }, {});
             
-            // Update Datalists
             document.getElementById('actDatalist').innerHTML = Object.keys(grouped).map(a => `<option value="${a}">`).join('');
             document.getElementById('factionsDatalist').innerHTML = Object.keys(factions).map(f => `<option value="${f}">`).join('');
             document.getElementById('locationsDatalist').innerHTML = [...new Set(events.flatMap(e => e.locations || []))].map(l => `<option value="${l}">`).join('');
@@ -661,6 +660,21 @@
         window.copyExportToClipboard = () => { const tx = document.getElementById('exportTextarea'); tx.select(); document.execCommand('copy'); showCopySuccess("In Zwischenablage kopiert!"); };
         window.copySeedToClipboard = () => { copyToClipboard(encodeScenario(getExportData())); showCopySuccess("Seed kopiert!"); };
         window.generateAndCopyShareLink = () => { copyToClipboard(window.location.origin + window.location.pathname + '?scenario=' + encodeScenario(getExportData())); showCopySuccess("Link kopiert!"); };
+        
+        window.importFromUrl = async () => {
+            const url = document.getElementById('importUrlInput').value.trim();
+            if(!url) return;
+            try {
+                const response = await fetch(url);
+                if(!response.ok) throw new Error("Netzwerkantwort war nicht ok.");
+                const data = await response.json();
+                applyImportedData(data);
+                window.closeModal('importModal');
+            } catch (error) {
+                window.customAlert("Fehler beim Laden der URL: " + error.message);
+            }
+        };
+
         window.importFromSeedText = () => { const dec = decodeScenario(document.getElementById('importSeedInput').value.trim()); if(dec) { applyImportedData(JSON.parse(dec)); window.closeModal('importModal'); } };
         window.importFromJsonText = () => { try { applyImportedData(JSON.parse(document.getElementById('importJsonInput').value)); window.closeModal('importModal'); } catch(e){} };
         window.handleImport = (e) => { const f = e.target.files[0]; if(f) { const r = new FileReader(); r.onload = (ev) => { try { applyImportedData(JSON.parse(ev.target.result)); window.closeModal('importModal'); } catch(ex){} }; r.readAsText(f); } };
@@ -683,6 +697,7 @@
         window.confirmDeleteEvent = () => { const id = parseInt(document.getElementById('editId').value); window.customConfirm("Löschen?", () => { events = events.filter(e => e.id !== id); window.closeModal('editModal'); renderApp(); }); };
         function copyToClipboard(t) { const d = document.createElement("input"); document.body.appendChild(d); d.value = t; d.select(); document.execCommand("copy"); document.body.removeChild(d); }
         function showCopySuccess(t) { const m = document.getElementById('copySuccessMsg'); m.textContent = t; m.classList.remove('opacity-0'); setTimeout(() => m.classList.add('opacity-0'), 2000); }
+        window.customAlert = (msg) => { document.getElementById('dialogMessage').textContent = msg; document.getElementById('dialogButtons').innerHTML = `<button onclick="window.closeDialog()" class="px-6 py-2 bg-blue-600 rounded text-white text-sm font-bold">OK</button>`; document.getElementById('dialogModal').classList.remove('opacity-0', 'pointer-events-none'); };
         window.customConfirm = (msg, onC) => { document.getElementById('dialogMessage').textContent = msg; window._cC = onC; document.getElementById('dialogButtons').innerHTML = `<button onclick="window.closeDialog()" class="px-4 py-2 bg-gray-800 rounded text-gray-300 text-xs">Abbrechen</button><button onclick="window.exC()" class="px-4 py-2 bg-red-600 rounded text-white text-xs font-bold">Bestätigen</button>`; document.getElementById('dialogModal').classList.remove('opacity-0', 'pointer-events-none'); };
         window.closeDialog = () => { document.getElementById('dialogModal').classList.add('opacity-0', 'pointer-events-none'); };
         window.exC = () => { if(window._cC) window._cC(); window.closeDialog(); };
@@ -698,10 +713,9 @@
 
 <!--
 CHANGE LOG
-Version: 1.6.2
-- UI: Neues Terminal-Hexagon Icon im Header eingefügt.
-- UI: Mehrere Icons für Ereignisse hinzugefügt (Zap, Target, Eye, Terminal, Settings etc.).
-- UI: Schriftarten-Auswahl erweitert (Lexend, JetBrains Mono, Space Grotesk etc.).
-- UX: "Collapse All" und "Expand All" Buttons im Header integriert.
-- UX: Expansion-Logik von Single auf Multiple umgestellt (mehrere Ereignisse gleichzeitig offen haltbar).
+Version: 1.6.3
+- Fix: window.importFromUrl Funktion implementiert. URLs können nun direkt geladen werden.
+- Fix: Fehlerbehandlung für ungültige URLs oder JSON-Inhalte hinzugefügt.
 -->
+
+```
