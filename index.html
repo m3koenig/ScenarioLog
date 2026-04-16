@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Scenario Log v1.6.0</title>
+    <title>Scenario Log v1.6.1</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Markdown Parser -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
@@ -39,25 +39,38 @@
         .border-accent { border-color: rgb(var(--accent-rgb)); }
         .rounded-theme { border-radius: var(--radius); }
 
-        /* Drag and Drop Visuals */
-        .drag-over { 
-            border-top: 4px solid rgb(var(--accent-rgb)) !important;
-            padding-top: 1.5rem !important;
+        /* Drag and Drop Visuals - Fix für das Flackern */
+        [data-drag-id], .act-drop-zone {
+            position: relative;
         }
-        .dragging { opacity: 0.3; transform: scale(0.95); }
+        
+        /* Die Drop-Linie verschiebt nun nicht mehr das Layout */
+        .drag-over::before { 
+            content: '';
+            position: absolute;
+            top: -8px; 
+            left: 0;
+            right: 0;
+            height: 4px;
+            background-color: rgb(var(--accent-rgb));
+            box-shadow: 0 0 15px rgba(var(--accent-rgb), 0.5);
+            border-radius: 2px;
+            z-index: 50;
+            pointer-events: none;
+        }
+
+        .dragging { opacity: 0.2; transform: scale(0.98); }
         .dragging * { pointer-events: none !important; }
 
         .act-drop-zone {
-            height: 40px;
-            margin-top: -20px;
+            height: 30px;
+            margin-top: -10px;
             transition: all 0.2s;
-        }
-        .act-drop-zone.drag-over {
-            height: 60px;
-            background: rgba(var(--accent-rgb), 0.05);
-            border: 2px dashed rgba(var(--accent-rgb), 0.3);
-            margin-bottom: 1rem;
             border-radius: var(--radius);
+        }
+        
+        .act-drop-zone.drag-over {
+            background: rgba(var(--accent-rgb), 0.05);
         }
 
         /* Markdown Styling */
@@ -286,7 +299,7 @@
     </div>
 
     <div id="dialogModal" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-300">
-        <div class="bg-surface border border-gray-600 rounded-theme max-w-sm w-full mx-4 p-6 text-center shadow-2xl">
+        <div class="bg-surface border border-gray-600 rounded-theme max-sm w-full mx-4 p-6 text-center shadow-2xl">
             <p id="dialogMessage" class="mb-6"></p>
             <div class="flex justify-center gap-3" id="dialogButtons"></div>
         </div>
@@ -499,11 +512,59 @@
             document.getElementById('headerModal').classList.remove('opacity-0', 'pointer-events-none'); 
         };
 
-        window.handleDragStart = (e, id) => { draggedEventId = id; e.target.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move'; };
-        window.handleDragOver = (e) => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; const t = e.target.closest('[data-drag-id], .act-drop-zone'); if (t) t.classList.add('drag-over'); };
-        window.handleDragLeave = (e) => { const t = e.target.closest('[data-drag-id], .act-drop-zone'); if (t) t.classList.remove('drag-over'); };
-        window.handleDrop = (e, targetId, targetAct) => { e.preventDefault(); document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over')); if (draggedEventId === null) return; const draggedIdx = events.findIndex(ev => ev.id === draggedEventId); const targetIdx = targetId ? events.findIndex(ev => ev.id === targetId) : -1; if (draggedIdx === -1) return; const [item] = events.splice(draggedIdx, 1); if (targetAct) item.act = targetAct; if (targetIdx !== -1) { const newIdx = events.findIndex(ev => ev.id === targetId); events.splice(newIdx, 0, item); } else { events.push(item); } draggedEventId = null; renderApp(); };
-        window.handleDragEnd = (e) => { e.target.classList.remove('dragging'); };
+        window.handleDragStart = (e, id) => { 
+            draggedEventId = id; 
+            e.target.classList.add('dragging'); 
+            e.dataTransfer.effectAllowed = 'move'; 
+        };
+        
+        window.handleDragOver = (e) => { 
+            e.preventDefault(); 
+            e.dataTransfer.dropEffect = 'move'; 
+            const t = e.target.closest('[data-drag-id], .act-drop-zone'); 
+            if (t && !t.classList.contains('drag-over')) {
+                // Nur ein Element darf das Highlight haben
+                document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+                t.classList.add('drag-over');
+            }
+        };
+
+        window.handleDragLeave = (e) => { 
+            const t = e.target.closest('[data-drag-id], .act-drop-zone'); 
+            // Nur entfernen, wenn wir wirklich das gesamte Container-Element verlassen
+            if (t && !t.contains(e.relatedTarget)) {
+                t.classList.remove('drag-over');
+            }
+        };
+
+        window.handleDrop = (e, targetId, targetAct) => { 
+            e.preventDefault(); 
+            document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over')); 
+            if (draggedEventId === null) return; 
+            
+            const draggedIdx = events.findIndex(ev => ev.id === draggedEventId); 
+            const targetIdx = targetId ? events.findIndex(ev => ev.id === targetId) : -1; 
+            
+            if (draggedIdx === -1) return; 
+            
+            const [item] = events.splice(draggedIdx, 1); 
+            if (targetAct) item.act = targetAct; 
+            
+            if (targetIdx !== -1) { 
+                const newIdx = events.findIndex(ev => ev.id === targetId); 
+                events.splice(newIdx, 0, item); 
+            } else { 
+                events.push(item); 
+            } 
+            draggedEventId = null; 
+            renderApp(); 
+        };
+
+        window.handleDragEnd = (e) => { 
+            e.target.classList.remove('dragging'); 
+            document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+        };
+
         window.openExportModal = () => { document.getElementById('exportTextarea').value = getExportData(); document.getElementById('exportModal').classList.remove('opacity-0', 'pointer-events-none'); };
         window.copyExportToClipboard = () => { const tx = document.getElementById('exportTextarea'); tx.select(); document.execCommand('copy'); showCopySuccess("In Zwischenablage kopiert!"); };
         window.copySeedToClipboard = () => { copyToClipboard(encodeScenario(getExportData())); showCopySuccess("Seed kopiert!"); };
@@ -540,8 +601,9 @@
 
 <!--
 CHANGE LOG
-Version: 1.6.0
-- Fix: "+"-Button (Ereignis hinzufügen) repariert.
-- Restore: Datalist-Funktionalität für Akt-Auswahl, Schauplätze und Figuren im Edit-Modus wiederhergestellt.
-- UI: Dropdowns im Bearbeitungsmodus funktionieren nun wieder wie gewohnt.
+Version: 1.6.1
+- Fix: Drag and Drop Mechanik überarbeitet. Kein "wildes Blinken" mehr.
+- Fix: Drop-Indikator (Linie) wird jetzt über ein Pseudo-Element gerendert, um Layout-Shifts zu verhindern.
+- Fix: handleDragLeave Logik verbessert, um flackernde UI bei Child-Elementen zu vermeiden.
+- UX: Größere und stabilere Drop-Zonen am Ende von Akten.
 -->
