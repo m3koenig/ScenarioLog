@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Scenario Log v1.8.0</title>
+    <title>Scenario Log v1.9.0</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Markdown Parser -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
@@ -117,6 +117,9 @@
         <button onclick="window.openFactionModal()" title="Figuren & Fraktionen" class="p-4 bg-orange-600 hover:opacity-90 rounded-full shadow-lg transition-transform hover:scale-110 flex items-center justify-center">
             <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle></svg>
         </button>
+        <button onclick="window.openLocationManager()" title="Schauplatz-Verwaltung" class="p-4 bg-emerald-700 hover:opacity-90 rounded-full shadow-lg transition-transform hover:scale-110 flex items-center justify-center">
+            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+        </button>
         <div class="h-px bg-gray-800 my-2"></div>
         <button onclick="window.openExportModal()" title="Export" class="p-3 bg-gray-700 hover:opacity-90 rounded-full transition-transform hover:scale-110 flex items-center justify-center">
             <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"></path></svg>
@@ -134,8 +137,8 @@
         <button onclick="window.startSlideshow()" class="p-3 bg-accent rounded-full text-white shadow-lg"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"></path></svg></button>
         <button onclick="window.openEditModal()" class="p-3 bg-blue-600 rounded-full text-white shadow-lg"><svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"></path></svg></button>
         <button onclick="window.openFactionModal()" class="p-3 bg-orange-600 rounded-full text-white shadow-lg"><svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle></svg></button>
+        <button onclick="window.openLocationManager()" class="p-3 bg-emerald-700 rounded-full text-white shadow-lg"><svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path></svg></button>
         <button onclick="window.openExportModal()" class="p-3 bg-gray-700 rounded-full text-white"><svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1M12 12l-4-4m4 4l4-4m-4 4V3"></path></svg></button>
-        <button onclick="window.resetApp()" class="p-3 bg-red-900/50 rounded-full text-red-200"><svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path></svg></button>
     </nav>
 
     <div id="app" class="app-container p-4 md:p-8"></div>
@@ -211,6 +214,7 @@
     </div>
 
     <!-- Modals -->
+    <!-- Event Details Viewer -->
     <div id="eventModal" class="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-300">
         <div class="bg-surface border border-accent rounded-theme max-w-2xl w-full mx-4 shadow-2xl flex flex-col max-h-[90vh]">
             <div class="p-4 border-b border-gray-800 flex justify-between items-center rounded-t-theme shrink-0">
@@ -220,9 +224,39 @@
             <div class="p-6 overflow-y-auto space-y-6 flex-1">
                 <div id="modalFluffContainer" class="hidden"><h4 class="text-gray-500 text-sm uppercase tracking-wider mb-2 border-b border-gray-800 pb-1">Vorlesetext</h4><div class="bg-black/20 border-l-4 border-blue-500/70 p-4 rounded text-blue-200/90 italic text-sm leading-relaxed markdown-content"><div id="modalFluff"></div></div></div>
                 <div><h4 class="text-gray-500 text-sm uppercase tracking-wider mb-2 border-b border-gray-800 pb-1">GM Informationen</h4><div id="modalDesc" class="leading-relaxed text-sm markdown-content"></div></div>
-                <div><h4 class="text-gray-500 text-sm uppercase tracking-wider mb-2 border-b border-gray-800 pb-1">Schauplätze</h4><p id="modalLocations" class="opacity-70 text-sm"></p></div>
+                <div><h4 class="text-gray-500 text-sm uppercase tracking-wider mb-2 border-b border-gray-800 pb-1">Schauplätze</h4><div id="modalLocations" class="flex flex-wrap gap-2"></div></div>
                 <div><h4 class="text-gray-500 text-sm uppercase tracking-wider mb-2 border-b border-gray-800 pb-1">Figuren</h4><ul id="modalFigures" class="text-sm space-y-2"></ul></div>
                 <div><h4 class="text-gray-500 text-sm uppercase tracking-wider mb-2 border-b border-gray-800 pb-1">SL Notizen</h4><textarea id="modalNotes" class="w-full bg-black/20 border border-gray-700 rounded-theme p-3 focus:border-accent outline-none min-h-[150px] resize-y" placeholder="Notizen..."></textarea></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Location Manager Modal (Edit Descriptions) -->
+    <div id="locationManagerModal" class="fixed inset-0 z-[70] flex items-center justify-center bg-black/90 backdrop-blur-md opacity-0 pointer-events-none transition-opacity duration-300">
+        <div class="bg-surface border border-emerald-500/50 rounded-theme max-w-3xl w-full mx-4 shadow-2xl flex flex-col max-h-[90vh]">
+            <div class="p-4 border-b border-gray-800 flex justify-between items-center shrink-0">
+                <h3 class="text-xl font-bold text-emerald-400 uppercase tracking-wider">Schauplatz-Verwaltung</h3>
+                <button onclick="window.closeModal('locationManagerModal')" class="text-gray-500 hover:text-red-500 p-1"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-width="2"></path></svg></button>
+            </div>
+            <div class="p-6 overflow-y-auto flex-1 space-y-6">
+                <p class="text-xs text-gray-400 italic">Hier kannst du Beschreibungen für alle Schauplätze hinterlegen. Diese erscheinen, wenn du auf einen Orts-Tag klickst.</p>
+                <div id="locationManagerList" class="space-y-4"></div>
+            </div>
+            <div class="p-4 border-t border-gray-800 flex justify-end gap-3 shrink-0">
+                <button onclick="window.closeModal('locationManagerModal')" class="px-6 py-2 bg-emerald-600 rounded font-bold text-white">Fertig</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick View Location Modal (Read Only) -->
+    <div id="locationViewModal" class="fixed inset-0 z-[80] flex items-center justify-center bg-black/80 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-300">
+        <div class="bg-surface border border-emerald-500 rounded-theme max-w-xl w-full mx-4 shadow-2xl flex flex-col max-h-[80vh]">
+            <div class="p-4 border-b border-gray-800 flex justify-between items-center shrink-0">
+                <h3 id="locViewTitle" class="text-lg font-bold text-emerald-400 uppercase tracking-widest"></h3>
+                <button onclick="window.closeModal('locationViewModal')" class="text-gray-500 hover:text-red-500 p-1"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-width="2"></path></svg></button>
+            </div>
+            <div class="p-6 overflow-y-auto flex-1">
+                <div id="locViewDesc" class="markdown-content text-sm leading-relaxed text-gray-300"></div>
             </div>
         </div>
     </div>
@@ -376,6 +410,7 @@
         let checkedIds = new Set();
         let collapsedActs = new Set();
         let factions = {};
+        let locationsData = {}; // Stores descriptions for locations: { "LocationName": "Markdown description" }
         let events = [];
         let eventNotes = {};
         let actData = {};
@@ -447,7 +482,7 @@
 
         function encodeScenario(str) { return btoa(unescape(encodeURIComponent(str))); }
         function decodeScenario(b64) { try { return decodeURIComponent(escape(atob(b64))); } catch(e) { return null; } }
-        function getExportData() { return JSON.stringify({ appTitle, appSubtitle, appFontHeading, appFontBody, themeSettings, factions, events, actData, eventNotes, checkedIds: Array.from(checkedIds), collapsedActs: Array.from(collapsedActs), expandedIds: Array.from(expandedIds) }, null, 2); }
+        function getExportData() { return JSON.stringify({ appTitle, appSubtitle, appFontHeading, appFontBody, themeSettings, factions, locationsData, events, actData, eventNotes, checkedIds: Array.from(checkedIds), collapsedActs: Array.from(collapsedActs), expandedIds: Array.from(expandedIds) }, null, 2); }
 
         function applyImportedData(data) {
             if(!data) return;
@@ -457,6 +492,7 @@
             appFontBody = data.appFontBody || "Inter";
             themeSettings = data.themeSettings || { ...THEME_PRESETS.classic };
             factions = data.factions || {};
+            locationsData = data.locationsData || {};
             actData = data.actData || {};
             eventNotes = data.eventNotes || {};
             checkedIds = new Set(data.checkedIds || []);
@@ -468,14 +504,11 @@
         }
 
         /**
-         * Berechnet die Farbpalette basierend auf der FRAKTION der Figur,
-         * damit alle Mitglieder einer Fraktion die gleiche Farbe haben.
+         * Berechnet die Farbpalette basierend auf der FRAKTION der Figur.
          */
         function getFactionPalette(figureName) {
             const factionName = factions[figureName];
-            // Fallback für Figuren ohne Fraktionszuordnung
             if (!factionName) return { bg: "rgba(100,100,100,0.1)", text: "text-gray-400", border: "rgba(100,100,100,0.3)" };
-            
             const palettes = [
                 {bg:"rgba(239,68,68,0.15)", text:"text-red-400", b:"rgba(239,68,68,0.4)"},
                 {bg:"rgba(59,130,246,0.15)", text:"text-blue-400", b:"rgba(59,130,246,0.4)"},
@@ -486,13 +519,8 @@
                 {bg:"rgba(236,72,153,0.15)", text:"text-pink-400", b:"rgba(236,72,153,0.4)"},
                 {bg:"rgba(250,204,21,0.15)", text:"text-yellow-400", b:"rgba(250,204,21,0.4)"}
             ];
-
-            // Hash basierend auf dem Fraktionsnamen (statt dem Personennamen)
             let hash = 0; 
-            for (let i = 0; i < factionName.length; i++) {
-                hash = factionName.charCodeAt(i) + ((hash << 5) - hash);
-            }
-            
+            for (let i = 0; i < factionName.length; i++) hash = factionName.charCodeAt(i) + ((hash << 5) - hash);
             return palettes[Math.abs(hash) % palettes.length];
         }
 
@@ -513,10 +541,10 @@
                 html += `<div><div onclick="window.toggleAct('${actName}')" class="sticky top-0 z-10 py-4 mb-6 cursor-pointer flex items-center gap-3 no-select" style="background-color: var(--bg)"><div class="opacity-40">${isC ? icons.ChevronRight : icons.ChevronDown}</div><h2 class="text-xl md:text-2xl font-bold uppercase border-l-4 border-accent pl-4 text-accent font-heading">${actName}</h2></div><div class="border-l-2 border-gray-800 ml-4 md:ml-8 space-y-6 ${isC ? 'hidden' : ''}">`;
                 actEvents.forEach(e => {
                     const isO = e.type === 'Optional';
-                    const locs = (e.locations || []).join(', ');
+                    const locs = e.locations || [];
                     const figs = (e.figures || []);
                     const isExpanded = expandedIds.has(e.id);
-                    html += `<div class="relative pl-8 md:pl-12 group" data-drag-id="${e.id}" draggable="true" ondragstart="window.handleDragStart(event, ${e.id})" ondragover="window.handleDragOver(event)" ondragleave="window.handleDragLeave(event)" ondrop="window.handleDrop(event, ${e.id}, '${actName}')" ondragend="window.handleDragEnd(event)"><div class="absolute left-0 top-6 opacity-20 md:group-hover:opacity-100 transition-opacity cursor-grab">${icons.DragVertical}</div><div class="absolute -left-[17px] top-4 w-8 h-8 rounded-full border-2 flex items-center justify-center bg-surface ${isO ? 'border-dashed opacity-40' : 'border-accent text-accent'}">${icons[e.icon] || icons.Rocket}</div><button onclick="window.handleInteraction(event, ${e.id})" class="w-full text-left p-4 rounded-theme border border-gray-800 transition-all hover:border-accent/40 no-select bg-surface/40"><div class="flex justify-between gap-4"><div class="flex items-start gap-3"><div onclick="window.toggleCheckbox(event, ${e.id})" class="mt-1 opacity-50 hover:text-accent hover:opacity-100">${checkedIds.has(e.id) ? icons.CheckSquare : icons.Square}</div><div><h3 class="text-base md:text-lg font-bold font-heading ${checkedIds.has(e.id) ? 'line-through opacity-40' : ''}">${e.title}</h3><div class="flex items-center gap-3 mt-1 flex-wrap"><span class="text-[9px] px-1.5 py-0.5 rounded-theme uppercase font-bold bg-accent/10 text-accent ${isO?'opacity-40':''}">${e.type}</span>${locs ? `<span class="text-[9px] opacity-40 italic">📍 ${locs}</span>` : ''}</div></div></div><div class="flex items-center gap-2"><div onclick="window.openEditModal(${e.id}); event.stopPropagation();" class="opacity-20 hover:text-blue-400 hover:opacity-100 p-1">${icons.Pencil}</div><div class="opacity-30">${isExpanded ? icons.ChevronUp : icons.ChevronDown}</div></div></div><div class="${isExpanded ? 'mt-4 max-h-[2500px]' : 'max-h-0'} overflow-hidden transition-all duration-300"><div class="border-t border-gray-800 pt-4 text-sm opacity-80 markdown-content">${marked.parse(e.description || "")}</div>${figs.length > 0 ? `<div class="flex flex-wrap gap-2 mt-4">${figs.map(f => { const p = getFactionPalette(f); return `<span class="text-[10px] px-2 py-0.5 rounded-theme border ${p.text} font-bold" style="background:${p.bg}; border-color:${p.b}">👤 ${f}</span>`; }).join('')}</div>` : ''}</div></button></div>`;
+                    html += `<div class="relative pl-8 md:pl-12 group" data-drag-id="${e.id}" draggable="true" ondragstart="window.handleDragStart(event, ${e.id})" ondragover="window.handleDragOver(event)" ondragleave="window.handleDragLeave(event)" ondrop="window.handleDrop(event, ${e.id}, '${actName}')" ondragend="window.handleDragEnd(event)"><div class="absolute left-0 top-6 opacity-20 md:group-hover:opacity-100 transition-opacity cursor-grab">${icons.DragVertical}</div><div class="absolute -left-[17px] top-4 w-8 h-8 rounded-full border-2 flex items-center justify-center bg-surface ${isO ? 'border-dashed opacity-40' : 'border-accent text-accent'}">${icons[e.icon] || icons.Rocket}</div><button onclick="window.handleInteraction(event, ${e.id})" class="w-full text-left p-4 rounded-theme border border-gray-800 transition-all hover:border-accent/40 no-select bg-surface/40"><div class="flex justify-between gap-4"><div class="flex items-start gap-3"><div onclick="window.toggleCheckbox(event, ${e.id})" class="mt-1 opacity-50 hover:text-accent hover:opacity-100">${checkedIds.has(e.id) ? icons.CheckSquare : icons.Square}</div><div><h3 class="text-base md:text-lg font-bold font-heading ${checkedIds.has(e.id) ? 'line-through opacity-40' : ''}">${e.title}</h3><div class="flex items-center gap-3 mt-1 flex-wrap"><span class="text-[9px] px-1.5 py-0.5 rounded-theme uppercase font-bold bg-accent/10 text-accent ${isO?'opacity-40':''}">${e.type}</span>${locs.map(l => `<span onclick="window.viewLocationDetails(event, '${l}')" class="text-[9px] opacity-40 italic hover:text-emerald-400 transition-colors cursor-help">📍 ${l}</span>`).join('')}</div></div></div><div class="flex items-center gap-2"><div onclick="window.openEditModal(${e.id}); event.stopPropagation();" class="opacity-20 hover:text-blue-400 hover:opacity-100 p-1">${icons.Pencil}</div><div class="opacity-30">${isExpanded ? icons.ChevronUp : icons.ChevronDown}</div></div></div><div class="${isExpanded ? 'mt-4 max-h-[2500px]' : 'max-h-0'} overflow-hidden transition-all duration-300"><div class="border-t border-gray-800 pt-4 text-sm opacity-80 markdown-content">${marked.parse(e.description || "")}</div>${figs.length > 0 ? `<div class="flex flex-wrap gap-2 mt-4">${figs.map(f => { const p = getFactionPalette(f); return `<span class="text-[10px] px-2 py-0.5 rounded-theme border ${p.text} font-bold" style="background:${p.bg}; border-color:${p.b}">👤 ${f}</span>`; }).join('')}</div>` : ''}</div></button></div>`;
                 });
                 html += `<div class="act-drop-zone" ondragover="window.handleDragOver(event)" ondragleave="window.handleDragLeave(event)" ondrop="window.handleDrop(event, null, '${actName}')"></div></div></div>`;
             }
@@ -526,51 +554,25 @@
         window.startSlideshow = () => {
             flatEvents = [];
             const grouped = events.reduce((acc, e) => { if (!acc[e.act]) acc[e.act] = []; acc[e.act].push(e); return acc; }, {});
-            Object.keys(grouped).forEach(act => {
-                grouped[act].forEach(e => {
-                    flatEvents.push({ ...e, actName: act });
-                });
-            });
-
-            if (flatEvents.length === 0) {
-                window.customAlert("Keine Ereignisse zum Anzeigen vorhanden.");
-                return;
-            }
-
-            slideshowIndex = 0;
-            slideshowIsAuto = true;
+            Object.keys(grouped).forEach(act => { grouped[act].forEach(e => { flatEvents.push({ ...e, actName: act }); }); });
+            if (flatEvents.length === 0) { window.customAlert("Keine Ereignisse zum Anzeigen vorhanden."); return; }
+            slideshowIndex = 0; slideshowIsAuto = true;
             document.getElementById('slideshowModal').classList.remove('opacity-0', 'pointer-events-none');
             updateSlideshowView();
         };
 
         function startAutoScroll() {
             clearInterval(autoScrollInterval);
-            const area = document.getElementById('slideScrollArea');
-            if (!area) return;
-            
-            area.scrollTop = 0;
-            scrollDirection = 1; 
-            scrollPause = 60; 
-
+            const area = document.getElementById('slideScrollArea'); if (!area) return;
+            area.scrollTop = 0; scrollDirection = 1; scrollPause = 60; 
             autoScrollInterval = setInterval(() => {
-                if (scrollPause > 0) {
-                    scrollPause--;
-                    return;
-                }
-
+                if (scrollPause > 0) { scrollPause--; return; }
                 const max = Math.ceil(area.scrollHeight - area.clientHeight);
                 if (max <= 0) return;
-
                 const speed = scrollDirection > 0 ? 0.6 : 1.8; 
                 area.scrollTop += scrollDirection * speed;
-
-                if (scrollDirection > 0 && area.scrollTop >= max - 1) {
-                    scrollDirection = -1;
-                    scrollPause = 140; 
-                } else if (scrollDirection < 0 && area.scrollTop <= 1) {
-                    scrollDirection = 1;
-                    scrollPause = 70; 
-                }
+                if (scrollDirection > 0 && area.scrollTop >= max - 1) { scrollDirection = -1; scrollPause = 140; } 
+                else if (scrollDirection < 0 && area.scrollTop <= 1) { scrollDirection = 1; scrollPause = 70; }
             }, 30);
         }
 
@@ -581,38 +583,21 @@
         }
 
         function updateSlideshowView() {
-            const e = flatEvents[slideshowIndex];
-            if (!e) return;
-
+            const e = flatEvents[slideshowIndex]; if (!e) return;
             document.getElementById('slideActTitle').textContent = e.actName.toUpperCase();
             document.getElementById('slideEventTitle').textContent = e.title;
             document.getElementById('slideEventIcon').innerHTML = icons[e.icon] || icons.Rocket;
             document.getElementById('slideshowIconContainer').innerHTML = icons.AppIcon;
-            
-            const locs = (e.locations || []).join(', ');
-            document.getElementById('slideLocationsHeader').textContent = locs ? `📍 ${locs}` : "KEIN STANDORT VERZEICHNET";
-
+            const locs = e.locations || [];
+            const locH = document.getElementById('slideLocationsHeader');
+            locH.innerHTML = locs.length > 0 ? locs.map(l => `<span>📍 ${l}</span>`).join(' ') : "KEIN STANDORT VERZEICHNET";
             const fluffCol = document.getElementById('slideFluffCol');
             const layoutGrid = document.getElementById('slideLayoutGrid');
-
-            if (e.fluff) {
-                fluffCol.classList.remove('hidden');
-                document.getElementById('slideFluff').innerHTML = marked.parse(e.fluff);
-                layoutGrid.className = "grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12";
-            } else {
-                fluffCol.classList.add('hidden');
-                layoutGrid.className = "grid grid-cols-1 gap-8 md:gap-12 max-w-2xl mx-auto";
-            }
-
+            if (e.fluff) { fluffCol.classList.remove('hidden'); document.getElementById('slideFluff').innerHTML = marked.parse(e.fluff); layoutGrid.className = "grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12"; } 
+            else { fluffCol.classList.add('hidden'); layoutGrid.className = "grid grid-cols-1 gap-8 md:gap-12 max-w-2xl mx-auto"; }
             document.getElementById('slideDesc').innerHTML = marked.parse(e.description || "");
-
-            document.getElementById('slideCard').onclick = () => {
-                window.closeSlideshow();
-                window.openEditModal(e.id);
-            };
-
-            const facList = document.getElementById('slideFactions');
-            facList.innerHTML = "";
+            document.getElementById('slideCard').onclick = () => { window.closeSlideshow(); window.openEditModal(e.id); };
+            const facList = document.getElementById('slideFactions'); facList.innerHTML = "";
             const figures = e.figures || [];
             if (figures.length > 0) {
                 document.getElementById('slideMeta').classList.remove('hidden');
@@ -620,104 +605,148 @@
                     const p = getFactionPalette(f);
                     facList.insertAdjacentHTML('beforeend', `<span class="text-[12px] px-4 py-1.5 rounded-theme border ${p.text} font-bold shadow-sm" style="background:${p.bg}; border-color:${p.b}">👤 ${f}</span>`);
                 });
-            } else {
-                document.getElementById('slideMeta').classList.add('hidden');
-            }
-
+            } else document.getElementById('slideMeta').classList.add('hidden');
             document.getElementById('slideCounter').textContent = `${slideshowIndex + 1} / ${flatEvents.length}`;
-            const prog = ((slideshowIndex + 1) / flatEvents.length) * 100;
-            document.getElementById('slideProgress').style.width = prog + "%";
-
-            const card = document.getElementById('slideCard');
-            card.style.opacity = "0";
-            card.style.transform = "translateY(20px)";
+            document.getElementById('slideProgress').style.width = ((slideshowIndex + 1) / flatEvents.length) * 100 + "%";
+            const card = document.getElementById('slideCard'); card.style.opacity = "0"; card.style.transform = "translateY(20px)";
             setTimeout(() => { card.style.opacity = "1"; card.style.transform = "translateY(0)"; }, 50);
-            
-            setTimeout(startAutoScroll, 1000);
-            if (slideshowIsAuto) startSlideshowTimer();
+            setTimeout(startAutoScroll, 1000); if (slideshowIsAuto) startSlideshowTimer();
         }
 
         function startSlideshowTimer() {
-            clearInterval(slideshowInterval);
-            if (!slideshowIsAuto) return;
-            const currentEvent = flatEvents[slideshowIndex];
-            const delay = calculateDynamicSlideTime(currentEvent);
+            clearInterval(slideshowInterval); if (!slideshowIsAuto) return;
+            const delay = calculateDynamicSlideTime(flatEvents[slideshowIndex]);
             slideshowInterval = setInterval(() => { window.nextSlide(); }, delay);
             updateSlideshowPlayBtn();
         }
 
-        window.toggleSlideshowAuto = () => {
-            slideshowIsAuto = !slideshowIsAuto;
-            if (slideshowIsAuto) startSlideshowTimer();
-            else clearInterval(slideshowInterval);
-            updateSlideshowPlayBtn();
-        };
-
+        window.toggleSlideshowAuto = () => { slideshowIsAuto = !slideshowIsAuto; if (slideshowIsAuto) startSlideshowTimer(); else clearInterval(slideshowInterval); updateSlideshowPlayBtn(); };
         function updateSlideshowPlayBtn() {
             const btn = document.getElementById('slidePlayIcon');
-            if (slideshowIsAuto) { btn.innerHTML = `<svg class="w-8 h-8 md:w-10 md:h-10" fill="currentColor" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"></path></svg>`; }
-            else { btn.innerHTML = `<svg class="w-8 h-8 md:w-10 md:h-10 ml-1" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"></path></svg>`; }
+            btn.innerHTML = slideshowIsAuto ? `<svg class="w-8 h-8 md:w-10 md:h-10" fill="currentColor" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"></path></svg>` : `<svg class="w-8 h-8 md:w-10 md:h-10 ml-1" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"></path></svg>`;
         }
+        window.nextSlide = () => { slideshowIndex = (slideshowIndex < flatEvents.length - 1) ? slideshowIndex + 1 : 0; updateSlideshowView(); };
+        window.prevSlide = () => { slideshowIndex = (slideshowIndex > 0) ? slideshowIndex - 1 : flatEvents.length - 1; updateSlideshowView(); };
+        window.closeSlideshow = () => { clearInterval(slideshowInterval); clearInterval(autoScrollInterval); document.getElementById('slideshowModal').classList.add('opacity-0', 'pointer-events-none'); };
 
-        window.nextSlide = () => {
-            if (slideshowIndex < flatEvents.length - 1) slideshowIndex++;
-            else slideshowIndex = 0;
-            updateSlideshowView();
+        // Location Management Logic
+        window.openLocationManager = () => {
+            const l = document.getElementById('locationManagerList'); l.innerHTML = "";
+            const allUsedLocations = [...new Set(events.flatMap(e => e.locations || []))];
+            // Ensure used locations exist in our data
+            allUsedLocations.forEach(loc => { if(!locationsData[loc]) locationsData[loc] = ""; });
+            
+            Object.keys(locationsData).forEach(locName => {
+                const desc = locationsData[locName] || "";
+                l.insertAdjacentHTML('beforeend', `
+                    <div class="bg-black/20 p-4 border border-gray-800 rounded-theme">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-emerald-400 font-bold uppercase text-xs tracking-widest">📍 ${locName}</span>
+                            <button onclick="window.deleteLocation('${locName}')" class="text-red-500/50 hover:text-red-500 text-xs">Entfernen</button>
+                        </div>
+                        <textarea placeholder="Schreibe hier Infos über diesen Ort (Markdown unterstützt)..." 
+                            oninput="window.updateLocationDesc('${locName}', this.value)"
+                            class="w-full bg-surface border border-gray-700 rounded p-2 text-sm text-gray-300 min-h-[80px] outline-none focus:border-emerald-500">${desc}</textarea>
+                    </div>
+                `);
+            });
+            document.getElementById('locationManagerModal').classList.remove('opacity-0', 'pointer-events-none');
         };
 
-        window.prevSlide = () => {
-            if (slideshowIndex > 0) slideshowIndex--;
-            else slideshowIndex = flatEvents.length - 1;
-            updateSlideshowView();
+        window.updateLocationDesc = (name, val) => { locationsData[name] = val; };
+        window.deleteLocation = (name) => { window.customConfirm(`Beschreibung für "${name}" löschen?`, () => { delete locationsData[name]; window.openLocationManager(); }); };
+        
+        window.viewLocationDetails = (ev, name) => {
+            if(ev) ev.stopPropagation();
+            const desc = locationsData[name] || "*Keine Beschreibung hinterlegt.*";
+            document.getElementById('locViewTitle').textContent = name;
+            document.getElementById('locViewDesc').innerHTML = marked.parse(desc);
+            document.getElementById('locationViewModal').classList.remove('opacity-0', 'pointer-events-none');
         };
 
-        window.closeSlideshow = () => { 
-            clearInterval(slideshowInterval); 
-            clearInterval(autoScrollInterval);
-            document.getElementById('slideshowModal').classList.add('opacity-0', 'pointer-events-none'); 
-        };
-
-        // UI & Data Management
+        // Standard UI & Data Management
         window.closeModal = (id) => { document.getElementById(id).classList.add('opacity-0', 'pointer-events-none'); };
         window.toggleAct = (a) => { collapsedActs.has(a) ? collapsedActs.delete(a) : collapsedActs.add(a); renderApp(); };
         window.toggleCheckbox = (ev, id) => { ev.stopPropagation(); checkedIds.has(id) ? checkedIds.delete(id) : checkedIds.add(id); renderApp(); };
         window.expandAllEvents = () => { events.forEach(e => expandedIds.add(e.id)); renderApp(); };
         window.collapseAllEvents = () => { expandedIds.clear(); renderApp(); };
-        window.handleInteraction = (ev, id) => { const t = Date.now(); if(t - (clickTimers[id] || 0) < 300) { clearTimeout(clickTimers['t'+id]); window.openEventModal(id); } else { clickTimers[id] = t; clickTimers['t'+id] = setTimeout(() => { expandedIds.has(id) ? expandedIds.delete(id) : expandedIds.add(id); renderApp(); }, 300); } };
-        
-        window.openEventModal = (id) => { const e = events.find(ev => ev.id === id); if(!e) return; currentOpenEventId = id; document.getElementById('modalTitle').textContent = e.title; document.getElementById('modalDesc').innerHTML = marked.parse(e.description || ""); document.getElementById('modalFluffContainer').className = e.fluff ? "" : "hidden"; document.getElementById('modalFluff').innerHTML = e.fluff ? marked.parse(e.fluff) : ""; document.getElementById('modalLocations').textContent = (e.locations || []).join(', ') || "N/A"; document.getElementById('modalNotes').value = eventNotes[id] || ""; const fl = document.getElementById('modalFigures'); fl.innerHTML = ""; (e.figures || []).forEach(f => { const p = getFactionPalette(f); fl.insertAdjacentHTML('beforeend', `<li class="flex justify-between items-center border-b border-gray-800 text-xs py-2"><span class="px-2 py-0.5 rounded-theme border ${p.text} font-bold" style="background:${p.bg}; border-color:${p.b}">${f}</span><span class="opacity-40 font-mono text-[10px] uppercase">${factions[f]||"Divers"}</span></li>`); }); document.getElementById('eventModal').classList.remove('opacity-0', 'pointer-events-none'); };
-        window.openEditModal = (id=null) => { const uniqueActs = [...new Set(events.map(ev => ev.act))]; const defaultAct = uniqueActs.length > 0 ? uniqueActs[0] : "Akt I"; const e = events.find(ev => ev.id === id) || { act: defaultAct, title: "", type: "Notwendig", icon: "Rocket", description: "", locations: [], figures: [] }; document.getElementById('editId').value = id || ""; document.getElementById('editAct').value = e.act; document.getElementById('editTitle').value = e.title; document.getElementById('editTypeCheckbox').checked = e.type === "Notwendig"; document.getElementById('editDesc').value = e.description || ""; document.getElementById('editFluff').value = e.fluff || ""; document.getElementById('editIcon').value = e.icon || "Rocket"; currentEditingTags = { Locations: [...(e.locations || [])], Figures: [...(e.figures || [])] }; window.renderEditTags('Locations'); window.renderEditTags('Figures'); window.renderIconSelection(e.icon || "Rocket"); document.getElementById('btnDeleteEvent').style.display = id ? "block" : "none"; document.getElementById('editModal').classList.remove('opacity-0', 'pointer-events-none'); };
-        window.renderIconSelection = (s) => { const c = document.getElementById('iconSelectionContainer'); const iconsToSelect = ["Rocket", "Zap", "Target", "MapPin", "Skull", "Radio", "Crosshair", "AlertCircle", "ShieldAlert", "Eye", "Terminal", "Users", "FileText", "Lock", "Unlock", "Settings"]; c.innerHTML = iconsToSelect.map(i => `<button onclick="window.selectIcon('${i}')" class="p-3 border-2 rounded-theme transition-all ${s===i?'border-accent bg-accent/20 text-accent':'opacity-40 border-gray-700 hover:opacity-100'}" title="${i}">${icons[i] || icons.Rocket}</button>`).join(''); };
-        window.saveEvent = () => { const id = parseInt(document.getElementById('editId').value) || Date.now(); const data = { id, act: document.getElementById('editAct').value, title: document.getElementById('editTitle').value, type: document.getElementById('editTypeCheckbox').checked ? "Notwendig" : "Optional", icon: document.getElementById('editIcon').value, fluff: document.getElementById('editFluff').value, description: document.getElementById('editDesc').value, locations: currentEditingTags.Locations, figures: currentEditingTags.Figures }; const idx = events.findIndex(e => e.id === id); if(idx > -1) events[idx] = data; else events.push(data); window.closeModal('editModal'); renderApp(); };
-        window.saveHeader = () => { 
-            appTitle = document.getElementById('editAppTitle').value; 
-            appSubtitle = document.getElementById('editAppSubtitle').value; 
-            window.updateCustomTheme(); 
-            window.closeModal('headerModal'); 
-            renderApp(); 
+        window.handleInteraction = (ev, id) => { 
+            const t = Date.now(); 
+            if(t - (clickTimers[id] || 0) < 300) { clearTimeout(clickTimers['t'+id]); window.openEventModal(id); } 
+            else { clickTimers[id] = t; clickTimers['t'+id] = setTimeout(() => { expandedIds.has(id) ? expandedIds.delete(id) : expandedIds.add(id); renderApp(); }, 300); } 
         };
+        
+        window.openEventModal = (id) => { 
+            const e = events.find(ev => ev.id === id); if(!e) return; 
+            currentOpenEventId = id; 
+            document.getElementById('modalTitle').textContent = e.title; 
+            document.getElementById('modalDesc').innerHTML = marked.parse(e.description || ""); 
+            document.getElementById('modalFluffContainer').className = e.fluff ? "" : "hidden"; 
+            document.getElementById('modalFluff').innerHTML = e.fluff ? marked.parse(e.fluff) : ""; 
+            const locEl = document.getElementById('modalLocations'); locEl.innerHTML = "";
+            (e.locations || []).forEach(l => locEl.insertAdjacentHTML('beforeend', `<span onclick="window.viewLocationDetails(null, '${l}')" class="text-xs px-2 py-1 bg-emerald-900/30 text-emerald-400 border border-emerald-800 rounded cursor-help">📍 ${l}</span>`));
+            document.getElementById('modalNotes').value = eventNotes[id] || ""; 
+            const fl = document.getElementById('modalFigures'); fl.innerHTML = ""; 
+            (e.figures || []).forEach(f => { const p = getFactionPalette(f); fl.insertAdjacentHTML('beforeend', `<li class="flex justify-between items-center border-b border-gray-800 text-xs py-2"><span class="px-2 py-0.5 rounded-theme border ${p.text} font-bold" style="background:${p.bg}; border-color:${p.b}">${f}</span><span class="opacity-40 font-mono text-[10px] uppercase">${factions[f]||"Divers"}</span></li>`); }); 
+            document.getElementById('eventModal').classList.remove('opacity-0', 'pointer-events-none'); 
+        };
+
+        window.openEditModal = (id=null) => { 
+            const uniqueActs = [...new Set(events.map(ev => ev.act))]; 
+            const defaultAct = uniqueActs.length > 0 ? uniqueActs[0] : "Akt I"; 
+            const e = events.find(ev => ev.id === id) || { act: defaultAct, title: "", type: "Notwendig", icon: "Rocket", description: "", locations: [], figures: [] }; 
+            document.getElementById('editId').value = id || ""; 
+            document.getElementById('editAct').value = e.act; 
+            document.getElementById('editTitle').value = e.title; 
+            document.getElementById('editTypeCheckbox').checked = e.type === "Notwendig"; 
+            document.getElementById('editDesc').value = e.description || ""; 
+            document.getElementById('editFluff').value = e.fluff || ""; 
+            document.getElementById('editIcon').value = e.icon || "Rocket"; 
+            currentEditingTags = { Locations: [...(e.locations || [])], Figures: [...(e.figures || [])] }; 
+            window.renderEditTags('Locations'); window.renderEditTags('Figures'); window.renderIconSelection(e.icon || "Rocket"); 
+            document.getElementById('btnDeleteEvent').style.display = id ? "block" : "none"; 
+            document.getElementById('editModal').classList.remove('opacity-0', 'pointer-events-none'); 
+        };
+
+        window.renderIconSelection = (s) => { 
+            const c = document.getElementById('iconSelectionContainer'); 
+            const list = ["Rocket", "Zap", "Target", "MapPin", "Skull", "Radio", "Crosshair", "AlertCircle", "ShieldAlert", "Eye", "Terminal", "Users", "FileText", "Lock", "Unlock", "Settings"]; 
+            c.innerHTML = list.map(i => `<button onclick="window.selectIcon('${i}')" class="p-3 border-2 rounded-theme transition-all ${s===i?'border-accent bg-accent/20 text-accent':'opacity-40 border-gray-700 hover:opacity-100'}">${icons[i] || icons.Rocket}</button>`).join(''); 
+        };
+
+        window.saveEvent = () => { 
+            const id = parseInt(document.getElementById('editId').value) || Date.now(); 
+            const data = { id, act: document.getElementById('editAct').value, title: document.getElementById('editTitle').value, type: document.getElementById('editTypeCheckbox').checked ? "Notwendig" : "Optional", icon: document.getElementById('editIcon').value, fluff: document.getElementById('editFluff').value, description: document.getElementById('editDesc').value, locations: currentEditingTags.Locations, figures: currentEditingTags.Figures }; 
+            const idx = events.findIndex(e => e.id === id); if(idx > -1) events[idx] = data; else events.push(data); 
+            window.closeModal('editModal'); renderApp(); 
+        };
+
+        window.saveHeader = () => { appTitle = document.getElementById('editAppTitle').value; appSubtitle = document.getElementById('editAppSubtitle').value; window.updateCustomTheme(); window.closeModal('headerModal'); renderApp(); };
         window.openHeaderModal = () => { 
-            document.getElementById('editAppTitle').value = appTitle; 
-            document.getElementById('editAppSubtitle').value = appSubtitle; 
-            document.getElementById('themeColorBg').value = themeSettings.bg; 
-            document.getElementById('themeColorSurface').value = themeSettings.surface; 
-            document.getElementById('themeColorText').value = themeSettings.text; 
-            document.getElementById('themeColorAccent').value = themeSettings.accent; 
+            document.getElementById('editAppTitle').value = appTitle; document.getElementById('editAppSubtitle').value = appSubtitle; 
+            document.getElementById('themeColorBg').value = themeSettings.bg; document.getElementById('themeColorSurface').value = themeSettings.surface; 
+            document.getElementById('themeColorText').value = themeSettings.text; document.getElementById('themeColorAccent').value = themeSettings.accent; 
             document.getElementById('themeRadius').value = themeSettings.radius; 
-            document.getElementById('selectFontHeading').value = appFontHeading;
-            document.getElementById('selectFontBody').value = appFontBody;
+            document.getElementById('selectFontHeading').value = appFontHeading; document.getElementById('selectFontBody').value = appFontBody;
             document.getElementById('headerModal').classList.remove('opacity-0', 'pointer-events-none'); 
         };
+
         window.handleDragStart = (e, id) => { draggedEventId = id; e.target.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move'; };
         window.handleDragOver = (e) => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; const t = e.target.closest('[data-drag-id], .act-drop-zone'); if (t && !t.classList.contains('drag-over')) { document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over')); t.classList.add('drag-over'); } };
-        window.handleDragLeave = (e) => { const t = e.target.closest('[data-drag-id], .act-drop-zone'); if (t && !t.contains(e.relatedTarget)) { t.classList.remove('drag-over'); } };
-        window.handleDrop = (e, targetId, targetAct) => { e.preventDefault(); document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over')); if (draggedEventId === null) return; const draggedIdx = events.findIndex(ev => ev.id === draggedEventId); const targetIdx = targetId ? events.findIndex(ev => ev.id === targetId) : -1; if (draggedIdx === -1) return; const [item] = events.splice(draggedIdx, 1); if (targetAct) item.act = targetAct; if (targetIdx !== -1) { const newIdx = events.findIndex(ev => ev.id === targetId); events.splice(newIdx, 0, item); } else { events.push(item); } draggedEventId = null; renderApp(); };
-        window.handleDragEnd = (e) => { e.target.classList.remove('dragging'); document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over')); };
+        window.handleDragLeave = (e) => { const t = e.target.closest('[data-drag-id], .act-drop-zone'); if (t && !t.contains(e.relatedTarget)) t.classList.remove('drag-over'); };
+        window.handleDrop = (e, targetId, targetAct) => { 
+            e.preventDefault(); document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over')); if (draggedEventId === null) return; 
+            const dIdx = events.findIndex(ev => ev.id === draggedEventId); const tIdx = targetId ? events.findIndex(ev => ev.id === targetId) : -1; 
+            if (dIdx === -1) return; const [item] = events.splice(dIdx, 1); if (targetAct) item.act = targetAct; 
+            if (tIdx !== -1) { const nIdx = events.findIndex(ev => ev.id === targetId); events.splice(nIdx, 0, item); } else events.push(item); 
+            draggedEventId = null; renderApp(); 
+        };
+
         window.openExportModal = () => { document.getElementById('exportTextarea').value = getExportData(); document.getElementById('exportModal').classList.remove('opacity-0', 'pointer-events-none'); };
         window.copyExportToClipboard = () => { const tx = document.getElementById('exportTextarea'); tx.select(); document.execCommand('copy'); showCopySuccess("In Zwischenablage kopiert!"); };
         window.copySeedToClipboard = () => { copyToClipboard(encodeScenario(getExportData())); showCopySuccess("Seed kopiert!"); };
         window.generateAndCopyShareLink = () => { copyToClipboard(window.location.origin + window.location.pathname + '?scenario=' + encodeScenario(getExportData())); showCopySuccess("Link kopiert!"); };
-        window.importFromUrl = async () => { const url = document.getElementById('importUrlInput').value.trim(); if(!url) return; try { const response = await fetch(url); if(!response.ok) throw new Error("Fehler."); const data = await response.json(); applyImportedData(data); window.closeModal('importModal'); } catch (error) { window.customAlert("Fehler: " + error.message); } };
+        window.importFromUrl = async () => { const url = document.getElementById('importUrlInput').value.trim(); if(!url) return; try { const res = await fetch(url); if(!res.ok) throw new Error(); applyImportedData(await res.json()); window.closeModal('importModal'); } catch(e){ window.customAlert("Fehler."); } };
         window.importFromSeedText = () => { const dec = decodeScenario(document.getElementById('importSeedInput').value.trim()); if(dec) { applyImportedData(JSON.parse(dec)); window.closeModal('importModal'); } };
         window.importFromJsonText = () => { try { applyImportedData(JSON.parse(document.getElementById('importJsonInput').value)); window.closeModal('importModal'); } catch(e){} };
         window.handleImport = (e) => { const f = e.target.files[0]; if(f) { const r = new FileReader(); r.onload = (ev) => { try { applyImportedData(JSON.parse(ev.target.result)); window.closeModal('importModal'); } catch(ex){} }; r.readAsText(f); } };
@@ -748,10 +777,10 @@
 
 <!--
 CHANGE LOG
-Version: 1.8.0
-- Feature: Schriftarten-Selektor im Theme-Designer integriert.
-- Feature: Unterstützung für kuratierte Google Fonts (Cyber, Tech, Modern, Code).
-- Feature: Themen-Presets direkt im Modal abrufbar (Classic, Bright, Deep Sea, Hazard).
-- UI: Überarbeitung des "Scenario Styles" Modals für bessere Übersichtlichkeit.
-- Logic: Synchronisierung von Fonts und Farben beim Laden von Szenarien optimiert.
+Version: 1.9.0
+- Feature: Schauplatz-Verwaltung eingeführt (Location Manager).
+- Feature: Unterstützung für detaillierte Ortsbeschreibungen mit Markdown.
+- Feature: Interaktive Orts-Tags (📍) - Ein Klick öffnet die Ortsbeschreibung in einem Quick-View-Modal.
+- UI: Neuer Map-Button in der Sidebar für den Zugriff auf den Location Manager.
+- Logic: Schauplatzdaten werden nun im Export/Import berücksichtigt.
 -->
