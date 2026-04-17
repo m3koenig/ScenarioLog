@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Scenario Log v1.16.0</title>
+    <title>Scenario Log v1.17.0</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -118,6 +118,7 @@
             transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             max-height: 100%;
             width: 100%;
+            touch-action: pan-y; /* Allow vertical scroll, but we'll handle horizontal swipe */
         }
         
         .slide-scroll-area {
@@ -173,8 +174,6 @@
 
     <div id="app" class="app-container p-4 md:p-8"></div>
 
-    <!-- Rest des HTML Inhalts bleibt identisch (Slideshow, Modale, Script) -->
-    
     <div id="slideshowModal" class="fixed inset-0 z-[100] bg-black/95 backdrop-blur-lg flex flex-col opacity-0 pointer-events-none transition-opacity duration-500 overflow-hidden">
         <div class="flex justify-between items-center p-6 md:p-8 shrink-0 no-select">
             <div class="flex items-center gap-4">
@@ -190,9 +189,9 @@
         </div>
 
         <div class="flex-1 flex items-center justify-center px-4 pt-2 pb-4 md:px-12 md:pb-6 overflow-hidden">
-            <div id="slideCard" class="slide-card bg-surface border border-accent/30 rounded-theme shadow-2xl max-w-[1600px] flex flex-col relative group cursor-pointer hover:border-accent/60 transition-colors" title="Klicken zum Bearbeiten">
+            <div id="slideCard" class="slide-card bg-surface border border-accent/30 rounded-theme shadow-2xl max-w-[1600px] flex flex-col relative group transition-colors" title="Wischen zum Navigieren / Klicken zum Bearbeiten">
                 
-                <div class="flex items-center gap-6 p-6 md:p-10 border-b border-gray-800 shrink-0 no-select">
+                <div class="flex items-center gap-6 p-6 md:p-10 border-b border-gray-800 shrink-0 no-select cursor-pointer" onclick="window.editCurrentSlide()">
                     <div id="slideEventIcon" class="p-4 bg-accent/10 border border-accent/20 text-accent rounded-full scale-110 md:scale-125"></div>
                     <div>
                         <div id="slideLocationsHeader" class="text-sm md:text-base text-accent/80 font-bold flex items-center gap-2"></div>
@@ -200,7 +199,7 @@
                     </div>
                 </div>
 
-                <div id="slideScrollArea" class="flex-1 overflow-y-auto p-6 md:px-10 md:py-8 slide-scroll-area">
+                <div id="slideScrollArea" class="flex-1 overflow-y-auto p-6 md:px-10 md:py-8 slide-scroll-area cursor-pointer" onclick="window.editCurrentSlide()">
                     <div id="slideLayoutGrid" class="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
                         <div id="slideFluffCol" class="hidden border-b md:border-b-0 md:border-r border-gray-800 pb-6 md:pb-0 md:pr-12">
                             <h4 class="text-accent text-[10px] uppercase font-bold mb-4 tracking-widest opacity-60">Vorlesetext</h4>
@@ -213,12 +212,12 @@
                     </div>
                 </div>
 
-                <div id="slideMeta" class="p-6 md:px-10 md:py-8 border-t border-gray-800 shrink-0 no-select bg-surface rounded-b-theme">
-                    <h4 class="text-accent text-[10px] uppercase font-bold mb-4 tracking-widest opacity-60 flex items-center gap-2">
+                <div id="slideMeta" class="p-4 md:px-10 md:py-4 border-t border-gray-800 shrink-0 no-select bg-surface rounded-b-theme cursor-pointer" onclick="window.editCurrentSlide()">
+                    <h4 class="text-accent text-[10px] uppercase font-bold mb-2 tracking-widest opacity-60 flex items-center gap-2">
                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" stroke-width="2.5"></path><circle cx="9" cy="7" r="4" stroke-width="2.5"></circle></svg>
                         Beteiligte Subjekte
                     </h4>
-                    <div id="slideFactions" class="flex flex-wrap gap-2 md:gap-3"></div>
+                    <div id="slideFactions" class="flex flex-wrap gap-1.5 md:gap-2"></div>
                 </div>
                 
                 <div class="absolute top-2 right-4 opacity-0 group-hover:opacity-30 transition-opacity text-[8px] uppercase tracking-widest text-accent font-bold">Edit Mode</div>
@@ -244,6 +243,8 @@
         </div>
     </div>
 
+    <!-- Andere Modale (Event, Manager, Faction etc.) bleiben funktional identisch -->
+    
     <div id="eventModal" class="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-300">
         <div class="bg-surface border border-accent rounded-theme max-w-2xl w-full mx-4 shadow-2xl flex flex-col max-h-[90vh]">
             <div class="p-4 border-b border-gray-800 flex justify-between items-center rounded-t-theme shrink-0">
@@ -520,11 +521,16 @@
         let slideshowIndex = 0;
         let slideshowInterval = null;
         let slideshowIsAuto = true;
+        let isEditingFromSlideshow = false;
         let flatEvents = [];
         
         let autoScrollInterval = null;
         let scrollDirection = 1; 
         let scrollPause = 0;
+
+        // Swipe Handling
+        let touchstartX = 0;
+        let touchendX = 0;
 
         function hexToRgb(hex) {
             const r = parseInt(hex.slice(1, 3), 16);
@@ -649,12 +655,12 @@
             app.innerHTML = html + `</div>`;
         }
 
-        window.startSlideshow = () => {
+        window.startSlideshow = (index = 0) => {
             flatEvents = [];
             const grouped = events.reduce((acc, e) => { if (!acc[e.act]) acc[e.act] = []; acc[e.act].push(e); return acc; }, {});
             Object.keys(grouped).forEach(act => { grouped[act].forEach(e => { flatEvents.push({ ...e, actName: act }); }); });
             if (flatEvents.length === 0) { window.customAlert("Keine Ereignisse zum Anzeigen vorhanden."); return; }
-            slideshowIndex = 0; slideshowIsAuto = true;
+            slideshowIndex = index; slideshowIsAuto = true;
             document.getElementById('slideshowModal').classList.remove('opacity-0', 'pointer-events-none');
             updateSlideshowView();
         };
@@ -680,6 +686,22 @@
             return Math.min(60000, Math.max(10000, words * 500 + 10000));
         }
 
+        window.editCurrentSlide = () => {
+            const e = flatEvents[slideshowIndex];
+            if(!e) return;
+            isEditingFromSlideshow = true;
+            window.closeModal('slideshowModal');
+            window.openEditModal(e.id);
+        };
+
+        function handleSwipe() {
+            const diffX = touchstartX - touchendX;
+            if (Math.abs(diffX) > 50) {
+                if (diffX > 0) window.nextSlide();
+                else window.prevSlide();
+            }
+        }
+
         function updateSlideshowView() {
             const e = flatEvents[slideshowIndex]; if (!e) return;
             document.getElementById('slideActTitle').textContent = e.actName.toUpperCase();
@@ -697,16 +719,17 @@
             if (e.fluff) { fluffCol.classList.remove('hidden'); document.getElementById('slideFluff').innerHTML = marked.parse(e.fluff); layoutGrid.className = "grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12"; } 
             else { fluffCol.classList.add('hidden'); layoutGrid.className = "grid grid-cols-1 gap-8 md:gap-12 max-w-2xl mx-auto"; }
             document.getElementById('slideDesc').innerHTML = marked.parse(e.description || "");
-            document.getElementById('slideCard').onclick = () => { window.closeModal('slideshowModal'); window.openEditModal(e.id); };
+            
             const facList = document.getElementById('slideFactions'); facList.innerHTML = "";
             const figures = e.figures || [];
             if (figures.length > 0) {
                 document.getElementById('slideMeta').classList.remove('hidden');
                 figures.forEach(f => {
                     const p = getFactionPalette(f);
-                    facList.insertAdjacentHTML('beforeend', `<span class="text-[12px] px-4 py-1.5 rounded-theme border ${p.text} font-bold shadow-sm" style="background:${p.bg}; border-color:${p.b}">👤 ${f}</span>`);
+                    facList.insertAdjacentHTML('beforeend', `<span class="text-[10px] px-2.5 py-1 rounded-theme border ${p.text} font-bold shadow-sm" style="background:${p.bg}; border-color:${p.b}">👤 ${f}</span>`);
                 });
             } else document.getElementById('slideMeta').classList.add('hidden');
+            
             document.getElementById('slideCounter').textContent = `Ereignis ${slideshowIndex + 1} / ${flatEvents.length}`;
             document.getElementById('slideProgress').style.width = ((slideshowIndex + 1) / flatEvents.length) * 100 + "%";
             const card = document.getElementById('slideCard'); card.style.opacity = "0"; card.style.transform = "translateY(20px)";
@@ -736,11 +759,8 @@
         window.openLocationManager = (targetLoc = null) => {
             const l = document.getElementById('locationManagerList'); l.innerHTML = "";
             const allUsedLocations = [...new Set(events.flatMap(e => e.locations || []))];
-            
-            // Collect all unique locations including currentEditingTags if in Edit Modal
             const editModalOpen = !document.getElementById('editModal').classList.contains('opacity-0');
             const currentEditingLocs = editModalOpen ? currentEditingTags.Locations : [];
-            
             const uniqueLocs = [...new Set([...allUsedLocations, ...currentEditingLocs])];
             uniqueLocs.forEach(loc => { if(!locationsData[loc]) locationsData[loc] = ""; });
             
@@ -763,18 +783,13 @@
             if (targetLoc) {
                 setTimeout(() => {
                     const el = document.getElementById(`loc-editor-${targetLoc.replace(/\s+/g, '-')}`);
-                    if (el) {
-                        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                        el.classList.add('ring-2', 'ring-emerald-500');
-                        setTimeout(() => el.classList.remove('ring-2', 'ring-emerald-500'), 2000);
-                    }
+                    if (el) { el.scrollIntoView({ behavior: 'smooth', block: 'center' }); el.classList.add('ring-2', 'ring-emerald-500'); setTimeout(() => el.classList.remove('ring-2', 'ring-emerald-500'), 2000); }
                 }, 100);
             }
         };
 
         window.updateLocationDesc = (name, val) => { 
             locationsData[name] = val; 
-            // Re-render tooltips in edit modal if open
             if(!document.getElementById('editModal').classList.contains('opacity-0')) window.renderEditTags('Locations');
         };
         window.deleteLocation = (name) => { window.customConfirm(`Beschreibung für "${name}" löschen?`, () => { delete locationsData[name]; window.openLocationManager(); }); };
@@ -784,13 +799,8 @@
             const desc = locationsData[name] || "*Keine Beschreibung hinterlegt.*";
             document.getElementById('locViewTitle').textContent = name;
             document.getElementById('locViewDesc').innerHTML = marked.parse(desc);
-            
             const btnEdit = document.getElementById('btnEditLocationShortcut');
-            btnEdit.onclick = () => {
-                window.closeModal('locationViewModal');
-                window.openLocationManager(name);
-            };
-            
+            btnEdit.onclick = () => { window.closeModal('locationViewModal'); window.openLocationManager(name); };
             document.getElementById('locationViewModal').classList.remove('opacity-0', 'pointer-events-none');
         };
 
@@ -835,18 +845,10 @@
             document.getElementById('eventModal').classList.remove('opacity-0', 'pointer-events-none'); 
         };
 
-        // Markdown Toolbar Helper
         function setupMDToolbar(targetId, toolbarId) {
             const tb = document.getElementById(toolbarId);
-            const tools = [
-                { label: 'Fett', pre: '**', post: '**', icon: 'B' },
-                { label: 'Kursiv', pre: '*', post: '*', icon: 'I' },
-                { label: 'Unterstrichen', pre: '<u>', post: '</u>', icon: 'U' },
-                { label: 'Code', pre: '`', post: '`', icon: '<>' },
-                { label: 'Link', pre: '[', post: '](https://)', icon: '🔗' }
-            ];
+            const tools = [{ label: 'Fett', pre: '**', post: '**', icon: 'B' }, { label: 'Kursiv', pre: '*', post: '*', icon: 'I' }, { label: 'Unterstrichen', pre: '<u>', post: '</u>', icon: 'U' }, { label: 'Code', pre: '`', post: '`', icon: '<>' }, { label: 'Link', pre: '[', post: '](https://)', icon: '🔗' }];
             tb.innerHTML = tools.map(t => `<button class="md-btn" onclick="window.applyMD('${targetId}', '${t.pre}', '${t.post}')">${t.icon}</button>`).join('');
-            
             const area = document.getElementById(targetId);
             area.onkeydown = (e) => {
                 if(e.ctrlKey) {
@@ -859,16 +861,7 @@
         }
 
         window.applyMD = (id, pre, post) => {
-            const el = document.getElementById(id);
-            const start = el.selectionStart;
-            const end = el.selectionEnd;
-            const text = el.value;
-            const selected = text.substring(start, end);
-            const newVal = text.substring(0, start) + pre + selected + post + text.substring(end);
-            el.value = newVal;
-            el.focus();
-            const offset = pre.length;
-            el.setSelectionRange(start + offset, end + offset);
+            const el = document.getElementById(id); const start = el.selectionStart; const end = el.selectionEnd; const text = el.value; const selected = text.substring(start, end); const newVal = text.substring(0, start) + pre + selected + post + text.substring(end); el.value = newVal; el.focus(); const offset = pre.length; el.setSelectionRange(start + offset, end + offset);
         };
 
         window.openEditModal = (id=null) => { 
@@ -884,17 +877,13 @@
             document.getElementById('editIcon').value = e.icon || "Rocket"; 
             currentEditingTags = { Locations: [...(e.locations || [])], Figures: [...(e.figures || [])] }; 
             window.renderEditTags('Locations'); window.renderEditTags('Figures'); window.renderIconSelection(e.icon || "Rocket"); 
-            
-            setupMDToolbar('editFluff', 'tb_fluff');
-            setupMDToolbar('editDesc', 'tb_desc');
-
+            setupMDToolbar('editFluff', 'tb_fluff'); setupMDToolbar('editDesc', 'tb_desc');
             document.getElementById('btnDeleteEvent').style.display = id ? "block" : "none"; 
             document.getElementById('editModal').classList.remove('opacity-0', 'pointer-events-none'); 
         };
 
         window.renderIconSelection = (s) => { 
-            const c = document.getElementById('iconSelectionContainer'); 
-            const list = ["Rocket", "Zap", "Target", "MapPin", "Skull", "Radio", "Crosshair", "AlertCircle", "ShieldAlert", "Eye", "Terminal", "Users", "FileText", "Lock", "Unlock", "Settings"]; 
+            const c = document.getElementById('iconSelectionContainer'); const list = ["Rocket", "Zap", "Target", "MapPin", "Skull", "Radio", "Crosshair", "AlertCircle", "ShieldAlert", "Eye", "Terminal", "Users", "FileText", "Lock", "Unlock", "Settings"]; 
             c.innerHTML = list.map(i => `<button onclick="window.selectIcon('${i}')" class="p-3 border-2 rounded-theme transition-all ${s===i?'border-accent bg-accent/20 text-accent':'opacity-40 border-gray-700 hover:opacity-100'}">${icons[i] || icons.Rocket}</button>`).join(''); 
         };
 
@@ -904,21 +893,15 @@
             const data = { id, act: document.getElementById('editAct').value, title: document.getElementById('editTitle').value, type: document.getElementById('editTypeCheckbox').checked ? "Notwendig" : "Optional", icon: document.getElementById('editIcon').value, fluff: document.getElementById('editFluff').value, description: document.getElementById('editDesc').value, locations: currentEditingTags.Locations, figures: currentEditingTags.Figures }; 
             const idx = events.findIndex(e => e.id === id); if(idx > -1) events[idx] = data; else events.push(data); 
             renderApp(); 
+            if(isEditingFromSlideshow) {
+                isEditingFromSlideshow = false;
+                window.startSlideshow(slideshowIndex);
+            }
         };
 
-        window.saveHeader = () => { 
-            appTitle = document.getElementById('editAppTitle').value; 
-            appSubtitle = document.getElementById('editAppSubtitle').value; 
-            window.updateCustomTheme(); 
-            renderApp(); 
-        };
-
+        window.saveHeader = () => { appTitle = document.getElementById('editAppTitle').value; appSubtitle = document.getElementById('editAppSubtitle').value; window.updateCustomTheme(); renderApp(); };
         window.openHeaderModal = () => { 
-            document.getElementById('editAppTitle').value = appTitle; document.getElementById('editAppSubtitle').value = appSubtitle; 
-            document.getElementById('themeColorBg').value = themeSettings.bg; document.getElementById('themeColorSurface').value = themeSettings.surface; 
-            document.getElementById('themeColorText').value = themeSettings.text; document.getElementById('themeColorAccent').value = themeSettings.accent; 
-            document.getElementById('themeRadius').value = themeSettings.radius; 
-            document.getElementById('selectFontHeading').value = appFontHeading; document.getElementById('selectFontBody').value = appFontBody;
+            document.getElementById('editAppTitle').value = appTitle; document.getElementById('editAppSubtitle').value = appSubtitle; document.getElementById('themeColorBg').value = themeSettings.bg; document.getElementById('themeColorSurface').value = themeSettings.surface; document.getElementById('themeColorText').value = themeSettings.text; document.getElementById('themeColorAccent').value = themeSettings.accent; document.getElementById('themeRadius').value = themeSettings.radius; document.getElementById('selectFontHeading').value = appFontHeading; document.getElementById('selectFontBody').value = appFontBody;
             document.getElementById('headerModal').classList.remove('opacity-0', 'pointer-events-none'); 
         };
 
@@ -927,10 +910,7 @@
         window.handleDragLeave = (e) => { const t = e.target.closest('[data-drag-id], .act-drop-zone'); if (t && !t.contains(e.relatedTarget)) t.classList.remove('drag-over'); };
         window.handleDrop = (e, targetId, targetAct) => { 
             e.preventDefault(); document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over')); if (draggedEventId === null) return; 
-            const dIdx = events.findIndex(ev => ev.id === draggedEventId); const tIdx = targetId ? events.findIndex(ev => ev.id === targetId) : -1; 
-            if (dIdx === -1) return; const [item] = events.splice(dIdx, 1); if (targetAct) item.act = targetAct; 
-            if (tIdx !== -1) { const nIdx = events.findIndex(ev => ev.id === targetId); events.splice(nIdx, 0, item); } else events.push(item); 
-            draggedEventId = null; renderApp(); 
+            const dIdx = events.findIndex(ev => ev.id === draggedEventId); const tIdx = targetId ? events.findIndex(ev => ev.id === targetId) : -1; if (dIdx === -1) return; const [item] = events.splice(dIdx, 1); if (targetAct) item.act = targetAct; if (tIdx !== -1) { const nIdx = events.findIndex(ev => ev.id === targetId); events.splice(nIdx, 0, item); } else events.push(item); draggedEventId = null; renderApp(); 
         };
 
         window.openExportModal = () => { document.getElementById('exportTextarea').value = getExportData(); document.getElementById('exportModal').classList.remove('opacity-0', 'pointer-events-none'); };
@@ -942,33 +922,12 @@
         window.importFromJsonText = () => { try { applyImportedData(JSON.parse(document.getElementById('importJsonInput').value)); window.closeModal('importModal'); } catch(e){} };
         window.handleImport = (e) => { const f = e.target.files[0]; if(f) { const r = new FileReader(); r.onload = (ev) => { try { applyImportedData(JSON.parse(ev.target.result)); window.closeModal('importModal'); } catch(ex){} }; r.readAsText(f); } };
         window.triggerDownloadFile = function() { const blob = new Blob([getExportData()], { type: 'application/json' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `${appTitle.replace(/\s+/g, '_')}_Save.json`; a.click(); URL.revokeObjectURL(url); };
-        window.addTag = (t) => { 
-            const i = document.getElementById(`tagInput${t}`); 
-            const v = i.value.trim(); 
-            if(v && !currentEditingTags[t].includes(v)){ 
-                currentEditingTags[t].push(v); 
-                i.value=""; 
-                window.renderEditTags(t); 
-                // Ensure new location exists in manager data
-                if(t === 'Locations' && !locationsData[v]) locationsData[v] = "";
-            } 
-        };
+        window.addTag = (t) => { const i = document.getElementById(`tagInput${t}`); const v = i.value.trim(); if(v && !currentEditingTags[t].includes(v)){ currentEditingTags[t].push(v); i.value=""; window.renderEditTags(t); if(t === 'Locations' && !locationsData[v]) locationsData[v] = ""; } };
         window.removeTag = (t, idx) => { currentEditingTags[t].splice(idx,1); window.renderEditTags(t); };
-        window.renderEditTags = (t) => { 
-            document.getElementById(`tagList${t}`).innerHTML = currentEditingTags[t].map((tag, i) => {
-                const isLoc = t === 'Locations';
-                const info = isLoc ? (locationsData[tag] || "Keine Information hinterlegt.") : "";
-                const clickAttr = isLoc ? `onclick="window.openLocationManager('${tag}')"` : '';
-                const styleAttr = isLoc ? 'cursor: pointer; text-decoration: underline; text-underline-offset: 2px;' : '';
-                return `<span class="bg-accent/10 border border-accent/20 text-accent px-2 py-1 rounded text-[10px] flex items-center gap-2" style="${styleAttr}" ${clickAttr} title="${info}">${tag}<button onclick="event.stopPropagation(); window.removeTag('${t}', ${i})" class="hover:text-red-400 font-bold ml-1">×</button></span>`;
-            }).join(''); 
-        };
+        window.renderEditTags = (t) => { document.getElementById(`tagList${t}`).innerHTML = currentEditingTags[t].map((tag, i) => { const isLoc = t === 'Locations'; const info = isLoc ? (locationsData[tag] || "Keine Information hinterlegt.") : ""; const clickAttr = isLoc ? `onclick="window.openLocationManager('${tag}')"` : ''; const styleAttr = isLoc ? 'cursor: pointer; text-decoration: underline; text-underline-offset: 2px;' : ''; return `<span class="bg-accent/10 border border-accent/20 text-accent px-2 py-1 rounded text-[10px] flex items-center gap-2" style="${styleAttr}" ${clickAttr} title="${info}">${tag}<button onclick="event.stopPropagation(); window.removeTag('${t}', ${i})" class="hover:text-red-400 font-bold ml-1">×</button></span>`; }).join(''); };
         window.selectIcon = (i) => { document.getElementById('editIcon').value = i; window.renderIconSelection(i); };
         window.openFactionModal = () => { const l = document.getElementById('factionList'); l.innerHTML = ""; Object.entries(factions).forEach(([n, f]) => l.insertAdjacentHTML('beforeend', window.createFactionRow(n, f))); document.getElementById('factionModal').classList.remove('opacity-0', 'pointer-events-none'); };
-        window.createFactionRow = (n='', f='') => `<div class="faction-row grid grid-cols-12 gap-2 mb-2">
-            <div class="col-span-5 input-container"><input type="text" placeholder="Name" class="faction-name w-full bg-black/20 border border-gray-700 rounded p-1 text-xs outline-none" value="${n}"></div>
-            <div class="col-span-6 input-container"><input type="text" placeholder="Fraktion" class="faction-value w-full bg-black/20 border border-gray-700 rounded p-1 text-xs outline-none" value="${f}"></div>
-            <button onclick="this.parentElement.remove()" class="text-red-500 font-bold">×</button></div>`;
+        window.createFactionRow = (n='', f='') => `<div class="faction-row grid grid-cols-12 gap-2 mb-2"><div class="col-span-5 input-container"><input type="text" placeholder="Name" class="faction-name w-full bg-black/20 border border-gray-700 rounded p-1 text-xs outline-none" value="${n}"></div><div class="col-span-6 input-container"><input type="text" placeholder="Fraktion" class="faction-value w-full bg-black/20 border border-gray-700 rounded p-1 text-xs outline-none" value="${f}"></div><button onclick="this.parentElement.remove()" class="text-red-500 font-bold">×</button></div>`;
         window.addFactionRow = () => document.getElementById('factionList').insertAdjacentHTML('beforeend', window.createFactionRow());
         window.saveFactions = () => { factions = {}; document.querySelectorAll('.faction-row').forEach(r => { const n = r.querySelector('.faction-name').value; if(n) factions[n] = r.querySelector('.faction-value').value; }); renderApp(); };
         window.resetApp = () => { window.customConfirm("Alles löschen?", () => location.reload()); };
@@ -980,14 +939,23 @@
         window.closeDialog = () => { document.getElementById('dialogModal').classList.add('opacity-0', 'pointer-events-none'); };
         window.exC = () => { if(window._cC) window._cC(); window.closeDialog(); };
         document.getElementById('modalNotes').addEventListener('input', e => { if(currentOpenEventId) eventNotes[currentOpenEventId] = e.target.value; });
+        
+        // Swipe Event Listeners
+        const slideCard = document.getElementById('slideCard');
+        slideCard.addEventListener('touchstart', e => { touchstartX = e.changedTouches[0].screenX; }, false);
+        slideCard.addEventListener('touchend', e => { touchendX = e.changedTouches[0].screenX; handleSwipe(); }, false);
+        slideCard.addEventListener('mousedown', e => { touchstartX = e.screenX; }, false);
+        slideCard.addEventListener('mouseup', e => { touchendX = e.screenX; handleSwipe(); }, false);
+
         window.addEventListener('load', () => { const s = new URLSearchParams(window.location.search).get('scenario'); if(s) { const dec = decodeScenario(s); if(dec) applyImportedData(JSON.parse(dec)); window.history.replaceState({}, "", window.location.pathname); } });
         applyFontsAndTheme(appFontHeading, appFontBody, themeSettings);
         renderApp();
     </script>
     
-    <!-- CHANGE LOG v1.16.0
-    - Hinzugefügt: Import-Button in die mobile Navigationsleiste (`nav-container`) integriert.
-    - Verbessert: Abstände der mobilen Navigation für 6 Buttons optimiert.
+    <!-- CHANGE LOG v1.17.0
+    - Hinzugefügt: Swipe-Gesten (Wischen) zur Navigation in der Diashow (Mobil & Desktop).
+    - Hinzugefügt: "Resume"-Logik. Beim Speichern eines Events aus der Diashow kehrt man direkt zum aktuellen Slide zurück.
+    - Verbessert: Diashow-Layout optimiert (kleinere Figuren-Chips, weniger Padding) für deutlich mehr Platz für Vorlesetexte.
     -->
 </body>
 </html>
