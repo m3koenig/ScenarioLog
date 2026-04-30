@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Scenario Log v1.17.1</title>
+    <title>Scenario Log v1.18.0</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -262,7 +262,7 @@
     </div>
 
     <div id="locationManagerModal" class="fixed inset-0 z-[70] flex items-center justify-center bg-black/90 backdrop-blur-md opacity-0 pointer-events-none transition-opacity duration-300">
-        <div class="bg-surface border border-emerald-500/50 rounded-theme max-3xl w-full mx-4 shadow-2xl flex flex-col max-h-[90vh]">
+        <div class="bg-surface border border-emerald-500/50 rounded-theme max-w-3xl w-full mx-4 shadow-2xl flex flex-col max-h-[90vh]">
             <div class="p-4 border-b border-gray-800 flex justify-between items-center shrink-0">
                 <h3 class="text-xl font-bold text-emerald-400 uppercase tracking-wider">Schauplatz-Verwaltung</h3>
                 <button onclick="window.closeModal('locationManagerModal')" class="text-gray-500 hover:text-red-500 p-1"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-width="2"></path></svg></button>
@@ -461,7 +461,23 @@
         <div class="bg-surface border border-gray-600 rounded-theme max-sm w-full mx-4 p-6 text-center shadow-2xl"><p id="dialogMessage" class="mb-6"></p><div class="flex justify-center gap-3" id="dialogButtons"></div></div>
     </div>
 
-    <script>
+    <!-- Firebase SDK Imports -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Firebase Configuration
+        const firebaseConfig = JSON.parse(__firebase_config);
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+
+        // State Tracking for Persistence
+        let currentUser = null;
+        let isInitialLoad = true;
+
         marked.setOptions({ breaks: true, gfm: true });
 
         const icons = {
@@ -528,9 +544,42 @@
         let scrollDirection = 1; 
         let scrollPause = 0;
 
-        // Swipe Handling
         let touchstartX = 0;
         let touchendX = 0;
+
+        // Persistence Logic (Firestore)
+        const saveToCloud = async () => {
+            if (!currentUser || isInitialLoad) return;
+            const data = JSON.parse(getExportData());
+            try {
+                await setDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'settings', 'state'), data);
+            } catch (error) {
+                console.error("Fehler beim Speichern:", error);
+            }
+        };
+
+        const initAuth = async () => {
+            if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                await signInWithCustomToken(auth, __initial_auth_token);
+            } else {
+                await signInAnonymously(auth);
+            }
+        };
+
+        const loadFromCloud = async (user) => {
+            if (!user) return;
+            try {
+                const docRef = doc(db, 'artifacts', appId, 'users', user.uid, 'settings', 'state');
+                const docSnap = await getDoc(docRef);
+                if (docSnap.exists()) {
+                    applyImportedData(docSnap.data());
+                }
+            } catch (error) {
+                console.error("Fehler beim Laden:", error);
+            } finally {
+                isInitialLoad = false;
+            }
+        };
 
         function hexToRgb(hex) {
             const r = parseInt(hex.slice(1, 3), 16);
@@ -587,14 +636,6 @@
         function encodeScenario(str) { return btoa(unescape(encodeURIComponent(str))); }
         function decodeScenario(b64) { try { return decodeURIComponent(escape(atob(b64))); } catch(e) { return null; } }
         function getExportData() { return JSON.stringify({ appTitle, appSubtitle, appFontHeading, appFontBody, themeSettings, factions, locationsData, events, actData, eventNotes, checkedIds: Array.from(checkedIds), collapsedActs: Array.from(collapsedActs), expandedIds: Array.from(expandedIds) }, null, 2); }
-
-        /**
-         * Speichert den aktuellen Status lokal im Browser
-         */
-        window.autoSave = () => {
-            const data = getExportData();
-            localStorage.setItem('scenario_log_last_session', data);
-        };
 
         function applyImportedData(data) {
             if(!data) return;
@@ -661,6 +702,7 @@
                 html += `<div class="act-drop-zone" ondragover="window.handleDragOver(event)" ondragleave="window.handleDragLeave(event)" ondrop="window.handleDrop(event, null, '${actName}')"></div></div></div>`;
             }
             app.innerHTML = html + `</div>`;
+            saveToCloud(); // Auto-Save
         }
 
         window.startSlideshow = (index = 0) => {
@@ -710,7 +752,7 @@
             }
         }
 
-        updateSlideshowView = function() {
+        function updateSlideshowView() {
             const e = flatEvents[slideshowIndex]; if (!e) return;
             document.getElementById('slideActTitle').textContent = e.actName.toUpperCase();
             document.getElementById('slideEventTitle').textContent = e.title;
@@ -760,10 +802,8 @@
         window.nextSlide = () => { slideshowIndex = (slideshowIndex < flatEvents.length - 1) ? slideshowIndex + 1 : 0; updateSlideshowView(); };
         window.prevSlide = () => { slideshowIndex = (slideshowIndex > 0) ? slideshowIndex - 1 : flatEvents.length - 1; updateSlideshowView(); };
 
-        // Clear Input Helper
         window.clearInput = (id) => { const el = document.getElementById(id); if(el) { el.value = ""; el.focus(); } };
 
-        // Location Management Logic
         window.openLocationManager = (targetLoc = null) => {
             const l = document.getElementById('locationManagerList'); l.innerHTML = "";
             const allUsedLocations = [...new Set(events.flatMap(e => e.locations || []))];
@@ -799,15 +839,9 @@
         window.updateLocationDesc = (name, val) => { 
             locationsData[name] = val; 
             if(!document.getElementById('editModal').classList.contains('opacity-0')) window.renderEditTags('Locations');
-            window.autoSave();
+            saveToCloud();
         };
-        window.deleteLocation = (name) => { 
-            window.customConfirm(`Beschreibung für "${name}" löschen?`, () => { 
-                delete locationsData[name]; 
-                window.openLocationManager(); 
-                window.autoSave();
-            }); 
-        };
+        window.deleteLocation = (name) => { window.customConfirm(`Beschreibung für "${name}" löschen?`, () => { delete locationsData[name]; window.openLocationManager(); saveToCloud(); }); };
         
         window.viewLocationDetails = (ev, name) => {
             if(ev) ev.stopPropagation();
@@ -819,7 +853,6 @@
             document.getElementById('locationViewModal').classList.remove('opacity-0', 'pointer-events-none');
         };
 
-        // Standard UI & Data Management
         window.closeModal = (id, skipSave = false) => { 
             if(!skipSave) {
                 if(id === 'factionModal') window.saveFactions();
@@ -832,38 +865,14 @@
             document.getElementById(id).classList.add('opacity-0', 'pointer-events-none'); 
         };
         
-        window.toggleAct = (a) => { 
-            collapsedActs.has(a) ? collapsedActs.delete(a) : collapsedActs.add(a); 
-            renderApp(); 
-            window.autoSave();
-        };
-        window.toggleCheckbox = (ev, id) => { 
-            ev.stopPropagation(); 
-            checkedIds.has(id) ? checkedIds.delete(id) : checkedIds.add(id); 
-            renderApp(); 
-            window.autoSave();
-        };
-        window.expandAllEvents = () => { 
-            events.forEach(e => expandedIds.add(e.id)); 
-            renderApp(); 
-            window.autoSave();
-        };
-        window.collapseAllEvents = () => { 
-            expandedIds.clear(); 
-            renderApp(); 
-            window.autoSave();
-        };
+        window.toggleAct = (a) => { collapsedActs.has(a) ? collapsedActs.delete(a) : collapsedActs.add(a); renderApp(); };
+        window.toggleCheckbox = (ev, id) => { ev.stopPropagation(); checkedIds.has(id) ? checkedIds.delete(id) : checkedIds.add(id); renderApp(); };
+        window.expandAllEvents = () => { events.forEach(e => expandedIds.add(e.id)); renderApp(); };
+        window.collapseAllEvents = () => { expandedIds.clear(); renderApp(); };
         window.handleInteraction = (ev, id) => { 
             const t = Date.now(); 
             if(t - (clickTimers[id] || 0) < 300) { clearTimeout(clickTimers['t'+id]); window.openEventModal(id); } 
-            else { 
-                clickTimers[id] = t; 
-                clickTimers['t'+id] = setTimeout(() => { 
-                    expandedIds.has(id) ? expandedIds.delete(id) : expandedIds.add(id); 
-                    renderApp(); 
-                    window.autoSave();
-                }, 300); 
-            } 
+            else { clickTimers[id] = t; clickTimers['t'+id] = setTimeout(() => { expandedIds.has(id) ? expandedIds.delete(id) : expandedIds.add(id); renderApp(); }, 300); } 
         };
         
         window.openEventModal = (id) => { 
@@ -936,16 +945,9 @@
                 isEditingFromSlideshow = false;
                 window.startSlideshow(slideshowIndex);
             }
-            window.autoSave();
         };
 
-        window.saveHeader = () => { 
-            appTitle = document.getElementById('editAppTitle').value; 
-            appSubtitle = document.getElementById('editAppSubtitle').value; 
-            window.updateCustomTheme(); 
-            renderApp(); 
-            window.autoSave();
-        };
+        window.saveHeader = () => { appTitle = document.getElementById('editAppTitle').value; appSubtitle = document.getElementById('editAppSubtitle').value; window.updateCustomTheme(); renderApp(); };
         window.openHeaderModal = () => { 
             document.getElementById('editAppTitle').value = appTitle; document.getElementById('editAppSubtitle').value = appSubtitle; document.getElementById('themeColorBg').value = themeSettings.bg; document.getElementById('themeColorSurface').value = themeSettings.surface; document.getElementById('themeColorText').value = themeSettings.text; document.getElementById('themeColorAccent').value = themeSettings.accent; document.getElementById('themeRadius').value = themeSettings.radius; document.getElementById('selectFontHeading').value = appFontHeading; document.getElementById('selectFontBody').value = appFontBody;
             document.getElementById('headerModal').classList.remove('opacity-0', 'pointer-events-none'); 
@@ -956,19 +958,17 @@
         window.handleDragLeave = (e) => { const t = e.target.closest('[data-drag-id], .act-drop-zone'); if (t && !t.contains(e.relatedTarget)) t.classList.remove('drag-over'); };
         window.handleDrop = (e, targetId, targetAct) => { 
             e.preventDefault(); document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over')); if (draggedEventId === null) return; 
-            const dIdx = events.findIndex(ev => ev.id === draggedEventId); const tIdx = targetId ? events.findIndex(ev => ev.id === targetId) : -1; if (dIdx === -1) return; const [item] = events.splice(dIdx, 1); if (targetAct) item.act = targetAct; if (tIdx !== -1) { const nIdx = events.findIndex(ev => ev.id === targetId); events.splice(nIdx, 0, item); } else events.push(item); draggedEventId = null; 
-            renderApp(); 
-            window.autoSave();
+            const dIdx = events.findIndex(ev => ev.id === draggedEventId); const tIdx = targetId ? events.findIndex(ev => ev.id === targetId) : -1; if (dIdx === -1) return; const [item] = events.splice(dIdx, 1); if (targetAct) item.act = targetAct; if (tIdx !== -1) { const nIdx = events.findIndex(ev => ev.id === targetId); events.splice(nIdx, 0, item); } else events.push(item); draggedEventId = null; renderApp(); 
         };
 
         window.openExportModal = () => { document.getElementById('exportTextarea').value = getExportData(); document.getElementById('exportModal').classList.remove('opacity-0', 'pointer-events-none'); };
         window.copyExportToClipboard = () => { const tx = document.getElementById('exportTextarea'); tx.select(); document.execCommand('copy'); showCopySuccess("In Zwischenablage kopiert!"); };
         window.copySeedToClipboard = () => { copyToClipboard(encodeScenario(getExportData())); showCopySuccess("Seed kopiert!"); };
         window.generateAndCopyShareLink = () => { copyToClipboard(window.location.origin + window.location.pathname + '?scenario=' + encodeScenario(getExportData())); showCopySuccess("Link kopiert!"); };
-        window.importFromUrl = async () => { const url = document.getElementById('importUrlInput').value.trim(); if(!url) return; try { const res = await fetch(url); if(!res.ok) throw new Error(); applyImportedData(await res.json()); window.closeModal('importModal'); window.autoSave(); } catch(e){ window.customAlert("Fehler."); } };
-        window.importFromSeedText = () => { const dec = decodeScenario(document.getElementById('importSeedInput').value.trim()); if(dec) { applyImportedData(JSON.parse(dec)); window.closeModal('importModal'); window.autoSave(); } };
-        window.importFromJsonText = () => { try { applyImportedData(JSON.parse(document.getElementById('importJsonInput').value)); window.closeModal('importModal'); window.autoSave(); } catch(e){} };
-        window.handleImport = (e) => { const f = e.target.files[0]; if(f) { const r = new FileReader(); r.onload = (ev) => { try { applyImportedData(JSON.parse(ev.target.result)); window.closeModal('importModal'); window.autoSave(); } catch(ex){} }; r.readAsText(f); } };
+        window.importFromUrl = async () => { const url = document.getElementById('importUrlInput').value.trim(); if(!url) return; try { const res = await fetch(url); if(!res.ok) throw new Error(); applyImportedData(await res.json()); window.closeModal('importModal'); } catch(e){ window.customAlert("Fehler."); } };
+        window.importFromSeedText = () => { const dec = decodeScenario(document.getElementById('importSeedInput').value.trim()); if(dec) { applyImportedData(JSON.parse(dec)); window.closeModal('importModal'); } };
+        window.importFromJsonText = () => { try { applyImportedData(JSON.parse(document.getElementById('importJsonInput').value)); window.closeModal('importModal'); } catch(e){} };
+        window.handleImport = (e) => { const f = e.target.files[0]; if(f) { const r = new FileReader(); r.onload = (ev) => { try { applyImportedData(JSON.parse(ev.target.result)); window.closeModal('importModal'); } catch(ex){} }; r.readAsText(f); } };
         window.triggerDownloadFile = function() { const blob = new Blob([getExportData()], { type: 'application/json' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `${appTitle.replace(/\s+/g, '_')}_Save.json`; a.click(); URL.revokeObjectURL(url); };
         window.addTag = (t) => { const i = document.getElementById(`tagInput${t}`); const v = i.value.trim(); if(v && !currentEditingTags[t].includes(v)){ currentEditingTags[t].push(v); i.value=""; window.renderEditTags(t); if(t === 'Locations' && !locationsData[v]) locationsData[v] = ""; } };
         window.removeTag = (t, idx) => { currentEditingTags[t].splice(idx,1); window.renderEditTags(t); };
@@ -977,72 +977,46 @@
         window.openFactionModal = () => { const l = document.getElementById('factionList'); l.innerHTML = ""; Object.entries(factions).forEach(([n, f]) => l.insertAdjacentHTML('beforeend', window.createFactionRow(n, f))); document.getElementById('factionModal').classList.remove('opacity-0', 'pointer-events-none'); };
         window.createFactionRow = (n='', f='') => `<div class="faction-row grid grid-cols-12 gap-2 mb-2"><div class="col-span-5 input-container"><input type="text" placeholder="Name" class="faction-name w-full bg-black/20 border border-gray-700 rounded p-1 text-xs outline-none" value="${n}"></div><div class="col-span-6 input-container"><input type="text" placeholder="Fraktion" class="faction-value w-full bg-black/20 border border-gray-700 rounded p-1 text-xs outline-none" value="${f}"></div><button onclick="this.parentElement.remove()" class="text-red-500 font-bold">×</button></div>`;
         window.addFactionRow = () => document.getElementById('factionList').insertAdjacentHTML('beforeend', window.createFactionRow());
-        window.saveFactions = () => { factions = {}; document.querySelectorAll('.faction-row').forEach(r => { const n = r.querySelector('.faction-name').value; if(n) factions[n] = r.querySelector('.faction-value').value; }); renderApp(); window.autoSave(); };
-        window.resetApp = () => { 
-            window.customConfirm("Alles löschen?", () => {
-                localStorage.removeItem('scenario_log_last_session');
-                location.reload();
-            }); 
-        };
-        window.confirmDeleteEvent = () => { 
-            const id = parseInt(document.getElementById('editId').value); 
-            window.customConfirm("Löschen?", () => { 
-                events = events.filter(e => e.id !== id); 
-                document.getElementById('editId').value = ""; 
-                window.closeModal('editModal', true); 
-                renderApp(); 
-                window.autoSave();
-            }); 
-        };
+        window.saveFactions = () => { factions = {}; document.querySelectorAll('.faction-row').forEach(r => { const n = r.querySelector('.faction-name').value; if(n) factions[n] = r.querySelector('.faction-value').value; }); renderApp(); };
+        window.resetApp = () => { window.customConfirm("Alles löschen?", () => { events = []; factions = {}; locationsData = {}; renderApp(); }); };
+        window.confirmDeleteEvent = () => { const id = parseInt(document.getElementById('editId').value); window.customConfirm("Löschen?", () => { events = events.filter(e => e.id !== id); document.getElementById('editId').value = ""; window.closeModal('editModal', true); renderApp(); }); };
         function copyToClipboard(t) { const d = document.createElement("input"); document.body.appendChild(d); d.value = t; d.select(); document.execCommand("copy"); document.body.removeChild(d); }
         function showCopySuccess(t) { const m = document.getElementById('copySuccessMsg'); m.textContent = t; m.classList.remove('opacity-0'); setTimeout(() => m.classList.add('opacity-0'), 2000); }
         window.customAlert = (msg) => { document.getElementById('dialogMessage').textContent = msg; document.getElementById('dialogButtons').innerHTML = `<button onclick="window.closeDialog()" class="px-6 py-2 bg-blue-600 rounded text-white text-sm font-bold">OK</button>`; document.getElementById('dialogModal').classList.remove('opacity-0', 'pointer-events-none'); };
         window.customConfirm = (msg, onC) => { document.getElementById('dialogMessage').textContent = msg; window._cC = onC; document.getElementById('dialogButtons').innerHTML = `<button onclick="window.closeDialog()" class="px-4 py-2 bg-gray-800 rounded text-gray-300 text-xs">Abbrechen</button><button onclick="window.exC()" class="px-4 py-2 bg-red-600 rounded text-white text-xs font-bold">Bestätigen</button>`; document.getElementById('dialogModal').classList.remove('opacity-0', 'pointer-events-none'); };
         window.closeDialog = () => { document.getElementById('dialogModal').classList.add('opacity-0', 'pointer-events-none'); };
         window.exC = () => { if(window._cC) window._cC(); window.closeDialog(); };
-        document.getElementById('modalNotes').addEventListener('input', e => { 
-            if(currentOpenEventId) {
-                eventNotes[currentOpenEventId] = e.target.value;
-                window.autoSave();
-            }
-        });
+        document.getElementById('modalNotes').addEventListener('input', e => { if(currentOpenEventId) { eventNotes[currentOpenEventId] = e.target.value; saveToCloud(); } });
         
-        // Swipe Event Listeners
         const slideCard = document.getElementById('slideCard');
         slideCard.addEventListener('touchstart', e => { touchstartX = e.changedTouches[0].screenX; }, false);
         slideCard.addEventListener('touchend', e => { touchendX = e.changedTouches[0].screenX; handleSwipe(); }, false);
         slideCard.addEventListener('mousedown', e => { touchstartX = e.screenX; }, false);
         slideCard.addEventListener('mouseup', e => { touchendX = e.screenX; handleSwipe(); }, false);
 
-        window.addEventListener('load', () => { 
-            // 1. Check für URL-Parameter (Priorität)
+        window.addEventListener('load', async () => { 
+            await initAuth();
+            onAuthStateChanged(auth, (user) => {
+                currentUser = user;
+                if (user) loadFromCloud(user);
+            });
+
             const s = new URLSearchParams(window.location.search).get('scenario'); 
             if(s) { 
                 const dec = decodeScenario(s); 
                 if(dec) applyImportedData(JSON.parse(dec)); 
                 window.history.replaceState({}, "", window.location.pathname); 
-                window.autoSave();
-            } else {
-                // 2. Check für lokalen Browser-Speicher
-                const saved = localStorage.getItem('scenario_log_last_session');
-                if(saved) {
-                    try {
-                        applyImportedData(JSON.parse(saved));
-                    } catch(e) {
-                        console.error("Fehler beim Laden der letzten Sitzung", e);
-                    }
-                }
-            }
+            } 
         });
 
         applyFontsAndTheme(appFontHeading, appFontBody, themeSettings);
         renderApp();
     </script>
     
-    <!-- CHANGE LOG v1.17.1
-    - Hinzugefügt: Automatische lokale Speicherung (Auto-Save).
-    - Hinzugefügt: Automatisches Laden der letzten Sitzung beim Start via localStorage.
-    - Verbessert: Datenintegrität durch konsistentes Speichern bei Status-Änderungen (Checks, Notizen, Themen).
+    <!-- CHANGE LOG v1.18.0
+    - Hinzugefügt: Automatisches Speichern deines Fortschritts (Persistenz).
+    - Hinzugefügt: Automatisches Laden des letzten Stands beim App-Start.
+    - Hinzugefügt: Cloud-Anbindung zur sicheren Datenspeicherung.
     -->
 </body>
 </html>
