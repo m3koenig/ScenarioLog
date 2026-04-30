@@ -3,11 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Scenario Log v1.17.0</title>
+    <title>Scenario Log v1.19.0 - Local</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
     <style>
         :root {
             --bg: #030712;
@@ -60,7 +61,7 @@
         .markdown-content u { text-decoration: underline; text-underline-offset: 4px; }
 
         /* Input Clear Wrapper */
-        .input-container { position: relative; display: flex; items-center: center; width: 100%; }
+        .input-container { position: relative; display: flex; align-items: center; width: 100%; }
         .clear-btn { 
             position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
             width: 20px; height: 20px; display: none; align-items: center; justify-content: center;
@@ -68,12 +69,7 @@
             font-size: 12px; cursor: pointer; border: none; transition: all 0.2s;
             z-index: 10;
         }
-        .input-container input[list]:not(:placeholder-shown) + .clear-btn { 
-            display: flex; 
-            right: 28px; 
-        }
-        .input-container input:not([list]):not(:placeholder-shown) + .clear-btn { display: flex; }
-        
+        .input-container input:not(:placeholder-shown) + .clear-btn { display: flex; }
         .input-container:hover .clear-btn { opacity: 1; }
         .clear-btn:hover { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
 
@@ -110,15 +106,12 @@
             }
         }
 
-        .color-preview { width: 100%; height: 38px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.1); cursor: pointer; padding: 2px; background: #000; }
-        .color-preview::-webkit-color-swatch { border-radius: 4px; border: none; }
-
         /* Slideshow Specific */
         #slideshowModal .slide-card {
             transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             max-height: 100%;
             width: 100%;
-            touch-action: pan-y; /* Allow vertical scroll, but we'll handle horizontal swipe */
+            touch-action: pan-y;
         }
         
         .slide-scroll-area {
@@ -152,10 +145,10 @@
             <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
         </button>
         <div class="h-px bg-gray-800 my-2"></div>
-        <button onclick="window.openExportModal()" title="Export" class="p-3 bg-gray-700 hover:opacity-90 rounded-full transition-transform hover:scale-110 flex items-center justify-center">
+        <button onclick="window.exportToJSON()" title="Export als Datei" class="p-3 bg-gray-700 hover:opacity-90 rounded-full transition-transform hover:scale-110 flex items-center justify-center">
             <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"></path></svg>
         </button>
-        <button onclick="document.getElementById('importModal').classList.remove('opacity-0', 'pointer-events-none')" title="Import" class="p-3 bg-gray-700 hover:opacity-90 rounded-full transition-transform hover:scale-110 flex items-center justify-center">
+        <button onclick="document.getElementById('importFile').click()" title="Import aus Datei" class="p-3 bg-gray-700 hover:opacity-90 rounded-full transition-transform hover:scale-110 flex items-center justify-center">
             <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"></path></svg>
         </button>
         <button onclick="window.resetApp()" title="Reset" class="p-3 bg-red-900/50 hover:bg-red-800 rounded-full transition-transform hover:scale-110 flex items-center justify-center">
@@ -168,12 +161,12 @@
         <button onclick="window.openEditModal()" class="p-3 bg-blue-600 rounded-full text-white shadow-lg"><svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"></path></svg></button>
         <button onclick="window.openFactionModal()" class="p-3 bg-orange-600 rounded-full text-white shadow-lg"><svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle></svg></button>
         <button onclick="window.openLocationManager()" class="p-3 bg-emerald-700 rounded-full text-white shadow-lg"><svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path></svg></button>
-        <button onclick="window.openExportModal()" class="p-3 bg-gray-700 rounded-full text-white"><svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1M12 12l-4-4m4 4l4-4m-4 4V3"></path></svg></button>
-        <button onclick="document.getElementById('importModal').classList.remove('opacity-0', 'pointer-events-none')" class="p-3 bg-gray-700 rounded-full text-white"><svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"></path></svg></button>
+        <button onclick="window.exportToJSON()" class="p-3 bg-gray-700 rounded-full text-white"><svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1M12 12l-4-4m4 4l4-4m-4 4V3"></path></svg></button>
     </nav>
 
     <div id="app" class="app-container p-4 md:p-8"></div>
 
+    <!-- Modals -->
     <div id="slideshowModal" class="fixed inset-0 z-[100] bg-black/95 backdrop-blur-lg flex flex-col opacity-0 pointer-events-none transition-opacity duration-500 overflow-hidden">
         <div class="flex justify-between items-center p-6 md:p-8 shrink-0 no-select">
             <div class="flex items-center gap-4">
@@ -187,21 +180,18 @@
                 <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-width="2"></path></svg>
             </button>
         </div>
-
         <div class="flex-1 flex items-center justify-center px-4 pt-2 pb-4 md:px-12 md:pb-6 overflow-hidden">
-            <div id="slideCard" class="slide-card bg-surface border border-accent/30 rounded-theme shadow-2xl max-w-[1600px] flex flex-col relative group transition-colors" title="Wischen zum Navigieren / Klicken zum Bearbeiten">
-                
-                <div class="flex items-center gap-6 p-6 md:p-10 border-b border-gray-800 shrink-0 no-select cursor-pointer" onclick="window.editCurrentSlide()">
+            <div id="slideCard" class="slide-card bg-surface border border-accent/30 rounded-theme shadow-2xl max-w-[1600px] flex flex-col relative group transition-colors">
+                <div class="flex items-center gap-6 p-6 md:p-10 border-b border-gray-800 shrink-0 no-select cursor-pointer">
                     <div id="slideEventIcon" class="p-4 bg-accent/10 border border-accent/20 text-accent rounded-full scale-110 md:scale-125"></div>
                     <div>
                         <div id="slideLocationsHeader" class="text-sm md:text-base text-accent/80 font-bold flex items-center gap-2"></div>
                         <div class="text-[10px] opacity-40 uppercase tracking-tighter mt-1">Einsatzort & Parameter</div>
                     </div>
                 </div>
-
-                <div id="slideScrollArea" class="flex-1 overflow-y-auto p-6 md:px-10 md:py-8 slide-scroll-area cursor-pointer" onclick="window.editCurrentSlide()">
+                <div id="slideScrollArea" class="flex-1 overflow-y-auto p-6 md:px-10 md:py-8 slide-scroll-area">
                     <div id="slideLayoutGrid" class="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
-                        <div id="slideFluffCol" class="hidden border-b md:border-b-0 md:border-r border-gray-800 pb-6 md:pb-0 md:pr-12">
+                        <div id="slideFluffCol" class="border-b md:border-b-0 md:border-r border-gray-800 pb-6 md:pb-0 md:pr-12">
                             <h4 class="text-accent text-[10px] uppercase font-bold mb-4 tracking-widest opacity-60">Vorlesetext</h4>
                             <div id="slideFluff" class="text-blue-200 italic text-base md:text-lg leading-relaxed markdown-content"></div>
                         </div>
@@ -211,254 +201,82 @@
                         </div>
                     </div>
                 </div>
-
-                <div id="slideMeta" class="p-4 md:px-10 md:py-4 border-t border-gray-800 shrink-0 no-select bg-surface rounded-b-theme cursor-pointer" onclick="window.editCurrentSlide()">
-                    <h4 class="text-accent text-[10px] uppercase font-bold mb-2 tracking-widest opacity-60 flex items-center gap-2">
-                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" stroke-width="2.5"></path><circle cx="9" cy="7" r="4" stroke-width="2.5"></circle></svg>
-                        Beteiligte Subjekte
-                    </h4>
-                    <div id="slideFactions" class="flex flex-wrap gap-1.5 md:gap-2"></div>
-                </div>
-                
-                <div class="absolute top-2 right-4 opacity-0 group-hover:opacity-30 transition-opacity text-[8px] uppercase tracking-widest text-accent font-bold">Edit Mode</div>
             </div>
         </div>
-
         <div class="p-4 md:p-6 shrink-0 flex flex-col items-center gap-3 bg-black/40 backdrop-blur-md pb-6 md:pb-8 no-select">
             <div class="flex items-center gap-6">
-                <button onclick="window.prevSlide()" class="p-2 md:p-3 rounded-full bg-white/5 hover:bg-white/10 text-white transition-all transform hover:scale-110">
-                    <svg class="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7" stroke-width="2"></path></svg>
-                </button>
-                <button id="slidePlayBtn" onclick="window.toggleSlideshowAuto()" class="p-4 md:p-5 rounded-full bg-accent text-white shadow-xl transform transition-all hover:scale-110">
-                    <div id="slidePlayIcon"><svg class="w-6 h-6 md:w-8 md:h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"></path></svg></div>
-                </button>
-                <button onclick="window.nextSlide()" class="p-2 md:p-3 rounded-full bg-white/5 hover:bg-white/10 text-white transition-all transform hover:scale-110">
-                    <svg class="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" stroke-width="2"></path></svg>
-                </button>
-            </div>
-            <div class="w-full max-w-[200px] bg-gray-800 h-1 rounded-full overflow-hidden">
-                <div id="slideProgress" class="bg-accent h-full transition-all duration-500" style="width: 0%"></div>
+                <button onclick="window.prevSlide()" class="p-2 md:p-3 rounded-full bg-white/5 hover:bg-white/10 text-white"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7" stroke-width="2"></path></svg></button>
+                <button id="slidePlayBtn" onclick="window.toggleSlideshowAuto()" class="p-4 md:p-5 rounded-full bg-accent text-white shadow-xl"><div id="slidePlayIcon"><svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"></path></svg></div></button>
+                <button onclick="window.nextSlide()" class="p-2 md:p-3 rounded-full bg-white/5 hover:bg-white/10 text-white"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" stroke-width="2"></path></svg></button>
             </div>
             <div id="slideCounter" class="text-[10px] font-mono opacity-40 uppercase">Ereignis 1 / 10</div>
         </div>
     </div>
 
-    <!-- Andere Modale (Event, Manager, Faction etc.) bleiben funktional identisch -->
-    
-    <div id="eventModal" class="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-300">
-        <div class="bg-surface border border-accent rounded-theme max-w-2xl w-full mx-4 shadow-2xl flex flex-col max-h-[90vh]">
-            <div class="p-4 border-b border-gray-800 flex justify-between items-center rounded-t-theme shrink-0">
-                <h3 id="modalTitle" class="text-xl font-bold text-accent uppercase tracking-wider"></h3>
-                <button onclick="window.closeModal('eventModal')" class="text-gray-500 hover:text-red-500 p-1"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-width="2"></path></svg></button>
+    <!-- Edit Modal -->
+    <div id="editModal" class="fixed inset-0 z-[60] flex items-center justify-center bg-black/90 backdrop-blur-md opacity-0 pointer-events-none transition-opacity duration-300">
+        <div class="bg-surface border border-blue-500/50 rounded-theme max-w-3xl w-full mx-4 shadow-2xl flex flex-col max-h-[95vh]">
+            <div class="p-4 border-b border-gray-800 flex justify-between items-center shrink-0">
+                <h3 class="text-xl font-bold text-blue-400 uppercase tracking-wider">Event Bearbeiten</h3>
+                <button onclick="window.closeModal('editModal')" class="text-gray-500 hover:text-red-500"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-width="2"></path></svg></button>
             </div>
-            <div class="p-6 overflow-y-auto space-y-6 flex-1">
-                <div id="modalFluffContainer" class="hidden"><h4 class="text-gray-500 text-sm uppercase tracking-wider mb-2 border-b border-gray-800 pb-1">Vorlesetext</h4><div class="bg-black/20 border-l-4 border-blue-500/70 p-4 rounded text-blue-200/90 italic text-sm leading-relaxed markdown-content"><div id="modalFluff"></div></div></div>
-                <div><h4 class="text-gray-500 text-sm uppercase tracking-wider mb-2 border-b border-gray-800 pb-1">GM Informationen</h4><div id="modalDesc" class="leading-relaxed text-sm markdown-content"></div></div>
-                <div><h4 class="text-gray-500 text-sm uppercase tracking-wider mb-2 border-b border-gray-800 pb-1">Schauplätze</h4><div id="modalLocations" class="flex flex-wrap gap-2"></div></div>
-                <div><h4 class="text-gray-500 text-sm uppercase tracking-wider mb-2 border-b border-gray-800 pb-1">Figuren</h4><ul id="modalFigures" class="text-sm space-y-2"></ul></div>
-                <div><h4 class="text-gray-500 text-sm uppercase tracking-wider mb-2 border-b border-gray-800 pb-1">SL Notizen</h4><textarea id="modalNotes" class="w-full bg-black/20 border border-gray-700 rounded-theme p-3 focus:border-accent outline-none min-h-[150px] resize-y" placeholder="Notizen..."></textarea></div>
+            <div class="p-6 overflow-y-auto space-y-5 flex-1 text-sm">
+                <input type="hidden" id="editId">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div>
+                        <label class="block text-gray-400 text-xs mb-1 uppercase font-bold">Akt</label>
+                        <input type="text" id="editAct" list="actDatalist" class="w-full bg-black/20 border border-gray-700 rounded p-2 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-gray-400 text-xs mb-1 uppercase font-bold">Titel</label>
+                        <input type="text" id="editTitle" class="w-full bg-black/20 border border-gray-700 rounded p-2 outline-none">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-gray-400 text-xs mb-2 uppercase font-bold tracking-wider">Symbol</label>
+                    <div id="iconSelectionContainer" class="flex flex-wrap gap-2 p-2 bg-black/20 rounded-theme border border-gray-800"></div>
+                    <input type="hidden" id="editIcon">
+                </div>
+                <div>
+                    <label class="block text-blue-400/80 text-xs mb-1 uppercase font-bold">Vorlesetext (Markdown)</label>
+                    <textarea id="editFluff" class="w-full bg-black/20 border border-gray-700 rounded p-2 text-blue-200 italic min-h-[100px]"></textarea>
+                </div>
+                <div>
+                    <label class="block text-gray-400 text-xs mb-1 uppercase font-bold">GM Info (Markdown)</label>
+                    <textarea id="editDesc" class="w-full bg-black/20 border border-gray-700 rounded p-2 min-h-[150px]"></textarea>
+                </div>
+            </div>
+            <div class="p-4 border-t border-gray-800 flex justify-between items-center">
+                <button id="btnDeleteEvent" onclick="window.confirmDeleteEvent()" class="px-4 py-2 bg-red-900/30 text-red-400 rounded hover:bg-red-800/60 transition-colors">Löschen</button>
+                <div class="flex gap-3">
+                    <button onclick="window.closeModal('editModal')" class="px-4 py-2 bg-gray-800 text-gray-300 rounded">Abbrechen</button>
+                    <button onclick="window.saveEvent(); window.closeModal('editModal')" class="px-6 py-2 bg-blue-600 font-bold text-white rounded">Speichern</button>
+                </div>
             </div>
         </div>
     </div>
 
+    <!-- Location Manager -->
     <div id="locationManagerModal" class="fixed inset-0 z-[70] flex items-center justify-center bg-black/90 backdrop-blur-md opacity-0 pointer-events-none transition-opacity duration-300">
-        <div class="bg-surface border border-emerald-500/50 rounded-theme max-w-3xl w-full mx-4 shadow-2xl flex flex-col max-h-[90vh]">
-            <div class="p-4 border-b border-gray-800 flex justify-between items-center shrink-0">
-                <h3 class="text-xl font-bold text-emerald-400 uppercase tracking-wider">Schauplatz-Verwaltung</h3>
-                <button onclick="window.closeModal('locationManagerModal')" class="text-gray-500 hover:text-red-500 p-1"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-width="2"></path></svg></button>
+        <div class="bg-surface border border-emerald-500/50 rounded-theme max-w-2xl w-full mx-4 shadow-2xl flex flex-col max-h-[90vh]">
+            <div class="p-4 border-b border-gray-800 flex justify-between items-center">
+                <h3 class="text-xl font-bold text-emerald-400 uppercase tracking-wider">Schauplätze</h3>
+                <button onclick="window.closeModal('locationManagerModal')" class="text-gray-500 hover:text-red-500"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-width="2"></path></svg></button>
             </div>
-            <div class="p-6 overflow-y-auto flex-1 space-y-6">
-                <p class="text-xs text-gray-400 italic">Hier kannst du Beschreibungen für alle Schauplätze hinterlegen. Diese erscheinen, wenn du auf einen Orts-Tag klickst.</p>
-                <div id="locationManagerList" class="space-y-4"></div>
-            </div>
-            <div class="p-4 border-t border-gray-800 flex justify-end gap-3 shrink-0">
+            <div class="p-6 overflow-y-auto flex-1 space-y-6" id="locationManagerList"></div>
+            <div class="p-4 border-t border-gray-800 flex justify-end">
                 <button onclick="window.closeModal('locationManagerModal')" class="px-6 py-2 bg-emerald-600 rounded font-bold text-white">Fertig</button>
             </div>
         </div>
     </div>
 
-    <div id="locationViewModal" class="fixed inset-0 z-[80] flex items-center justify-center bg-black/80 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-300">
-        <div class="bg-surface border border-emerald-500 rounded-theme max-xl w-full mx-4 shadow-2xl flex flex-col max-h-[80vh]">
-            <div class="p-4 border-b border-gray-800 flex justify-between items-center shrink-0">
-                <h3 id="locViewTitle" class="text-lg font-bold text-emerald-400 uppercase tracking-widest"></h3>
-                <div class="flex items-center gap-2">
-                    <button id="btnEditLocationShortcut" class="p-2 text-emerald-400 hover:bg-emerald-500/10 rounded transition-colors flex items-center gap-2 text-xs uppercase font-bold" title="Diesen Ort bearbeiten">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" stroke-width="2"></path></svg>
-                        Bearbeiten
-                    </button>
-                    <button onclick="window.closeModal('locationViewModal')" class="text-gray-500 hover:text-red-500 p-1"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-width="2"></path></svg></button>
-                </div>
-            </div>
-            <div class="p-6 overflow-y-auto flex-1">
-                <div id="locViewDesc" class="markdown-content text-sm leading-relaxed text-gray-300"></div>
-            </div>
-        </div>
-    </div>
-
-    <div id="headerModal" class="fixed inset-0 z-[60] flex items-center justify-center bg-black/90 backdrop-blur-md opacity-0 pointer-events-none transition-opacity duration-300">
-        <div class="bg-surface border border-accent rounded-theme max-w-2xl w-full mx-4 shadow-2xl flex flex-col max-h-[90vh]">
-            <div class="p-4 border-b border-gray-800 flex justify-between items-center shrink-0">
-                <h3 class="text-xl font-bold text-accent uppercase tracking-wider font-heading">Scenario Styles</h3>
-                <button onclick="window.closeModal('headerModal')" class="text-gray-500 hover:text-red-500 p-1"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-width="2"></path></svg></button>
-            </div>
-            <div class="p-6 space-y-6 flex-1 overflow-y-auto">
-                <div>
-                    <label class="block text-gray-400 uppercase text-[10px] mb-3 font-bold tracking-[0.2em]">Themen-Presets</label>
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
-                        <button onclick="window.applyThemePreset('classic')" class="py-2 text-[10px] font-bold uppercase bg-gray-800 border border-gray-700 rounded hover:border-accent transition-colors">Classic</button>
-                        <button onclick="window.applyThemePreset('light')" class="py-2 text-[10px] font-bold uppercase bg-white text-gray-900 rounded border border-gray-200 hover:border-accent transition-colors">Bright</button>
-                        <button onclick="window.applyThemePreset('deepsea')" class="py-2 text-[10px] font-bold uppercase bg-slate-900 text-blue-400 rounded border border-blue-900 hover:border-blue-400 transition-colors">Deep Sea</button>
-                        <button onclick="window.applyThemePreset('hazard')" class="py-2 text-[10px] font-bold uppercase bg-stone-900 text-yellow-500 rounded border border-orange-800 hover:border-yellow-500 transition-colors">Hazard</button>
-                    </div>
-                </div>
-
-                <div class="h-px bg-gray-800"></div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <label class="block text-gray-400 uppercase text-[10px] mb-1 font-bold">Terminal Titel</label>
-                        <div class="input-container">
-                            <input type="text" id="editAppTitle" placeholder="Titel..." class="w-full bg-black/20 border border-gray-700 rounded-theme p-2 focus:border-accent outline-none">
-                            <button class="clear-btn" onclick="window.clearInput('editAppTitle')">×</button>
-                        </div>
-                    </div>
-                    <div>
-                        <label class="block text-gray-400 uppercase text-[10px] mb-1 font-bold">Untertitel</label>
-                        <div class="input-container">
-                            <input type="text" id="editAppSubtitle" placeholder="Untertitel..." class="w-full bg-black/20 border border-gray-700 rounded-theme p-2 focus:border-accent outline-none">
-                            <button class="clear-btn" onclick="window.clearInput('editAppSubtitle')">×</button>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <label class="block text-gray-400 uppercase text-[10px] mb-1 font-bold">Überschriften-Font</label>
-                        <select id="selectFontHeading" onchange="window.updateCustomTheme()" class="w-full bg-black/20 border border-gray-700 rounded-theme p-2 outline-none text-sm">
-                            <option value="Orbitron">Orbitron (Cyber)</option>
-                            <option value="Bebas Neue">Bebas Neue (Impact)</option>
-                            <option value="Rajdhani">Rajdhani (Tech)</option>
-                            <option value="Space Grotesk">Space Grotesk (Modern)</option>
-                            <option value="JetBrains Mono">JetBrains Mono (Code)</option>
-                            <option value="Montserrat">Montserrat (Standard)</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-gray-400 uppercase text-[10px] mb-1 font-bold">Text-Font</label>
-                        <select id="selectFontBody" onchange="window.updateCustomTheme()" class="w-full bg-black/20 border border-gray-700 rounded-theme p-2 outline-none text-sm">
-                            <option value="Inter">Inter (Clean)</option>
-                            <option value="Roboto">Roboto (Classic)</option>
-                            <option value="Lexend">Lexend (Readable)</option>
-                            <option value="JetBrains Mono">JetBrains Mono (Monospace)</option>
-                            <option value="Fira Code">Fira Code (Terminal)</option>
-                            <option value="Open Sans">Open Sans (Sans)</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="h-px bg-gray-800"></div>
-
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div><label class="block text-gray-400 text-[10px] mb-1 uppercase">Hintergrund</label><input type="color" id="themeColorBg" oninput="window.updateCustomTheme()" class="color-preview"></div>
-                    <div><label class="block text-gray-400 text-[10px] mb-1 uppercase">Oberfläche</label><input type="color" id="themeColorSurface" oninput="window.updateCustomTheme()" class="color-preview"></div>
-                    <div><label class="block text-gray-400 text-[10px] mb-1 uppercase">Schrift</label><input type="color" id="themeColorText" oninput="window.updateCustomTheme()" class="color-preview"></div>
-                    <div><label class="block text-gray-400 text-[10px] mb-1 uppercase">Akzent</label><input type="color" id="themeColorAccent" oninput="window.updateCustomTheme()" class="color-preview"></div>
-                </div>
-                <div><label class="block text-gray-400 text-[10px] mb-1 uppercase font-bold tracking-widest">Radius: <span id="radiusLabel">8px</span></label><input type="range" id="themeRadius" min="0" max="24" step="2" oninput="window.updateCustomTheme()" class="w-full accent-blue-600"></div>
-            </div>
-            <div class="p-4 border-t border-gray-800 bg-black/20 flex justify-end gap-3 shrink-0"><button onclick="window.closeModal('headerModal', true)" class="px-4 py-2 bg-gray-800 text-gray-300 rounded text-sm">Abbrechen</button><button onclick="window.saveHeader(); window.closeModal('headerModal')" class="px-6 py-2 bg-accent hover:opacity-90 rounded-theme font-bold text-white transition-opacity">Design Speichern</button></div>
-        </div>
-    </div>
-
-    <div id="exportModal" class="fixed inset-0 z-[60] flex items-center justify-center bg-black/90 backdrop-blur-md opacity-0 pointer-events-none transition-opacity duration-300">
-        <div class="bg-surface border border-gray-500/50 rounded-theme max-w-2xl w-full mx-4 shadow-2xl flex flex-col max-h-[90vh]">
-            <div class="p-4 border-b border-gray-800 flex justify-between items-center shrink-0"><h3 class="text-xl font-bold text-gray-300 uppercase tracking-wider">Export</h3><button onclick="window.closeModal('exportModal')" class="text-gray-500 hover:text-red-500 p-1"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-width="2"></path></svg></button></div>
-            <div class="p-6 flex-1 flex flex-col gap-4"><textarea id="exportTextarea" readonly class="w-full h-32 bg-black/20 border border-gray-700 rounded p-3 text-xs text-accent/80 font-mono outline-none resize-none"></textarea><div id="copySuccessMsg" class="text-accent text-sm font-bold opacity-0 transition-opacity text-center">Kopiert!</div></div>
-            <div class="p-4 border-t border-gray-800 flex flex-wrap justify-end gap-2"><button onclick="window.closeModal('exportModal')" class="px-4 py-2 bg-gray-800 text-gray-300 text-xs rounded">Schließen</button><button onclick="window.generateAndCopyShareLink()" class="px-4 py-2 bg-purple-600 rounded text-white text-xs">Link</button><button onclick="window.copySeedToClipboard()" class="px-4 py-2 bg-purple-900/40 text-purple-300 text-xs rounded">Seed</button><button onclick="window.copyExportToClipboard()" class="px-4 py-2 bg-gray-700 text-white text-xs rounded">JSON</button><button onclick="window.triggerDownloadFile()" class="px-4 py-2 bg-accent rounded text-white text-xs">Download</button></div>
-        </div>
-    </div>
-
-    <div id="importModal" class="fixed inset-0 z-[60] flex items-center justify-center bg-black/90 backdrop-blur-md opacity-0 pointer-events-none transition-opacity duration-300">
-        <div class="bg-surface border border-blue-500/50 rounded-theme max-xl w-full mx-4 shadow-2xl flex flex-col max-h-[90vh]">
-            <div class="p-4 border-b border-gray-800 flex justify-between items-center shrink-0"><h3 class="text-xl font-bold text-gray-300 uppercase tracking-wider">Import</h3><button onclick="window.closeModal('importModal')" class="text-gray-500 hover:text-red-500 p-1"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-width="2"></path></svg></button></div>
-            <div class="p-6 space-y-6 flex-1 overflow-y-auto"><button onclick="document.getElementById('importFile').click()" class="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded text-gray-200">JSON Datei auswählen</button><div class="flex gap-2"><input type="text" id="importUrlInput" class="flex-1 bg-black/20 border border-gray-700 rounded p-2 text-sm" placeholder="URL..."><button onclick="window.importFromUrl()" class="px-4 bg-blue-900/40 rounded text-blue-400 font-bold text-xs uppercase">Laden</button></div><div class="space-y-3"><div class="flex gap-2"><input type="text" id="importSeedInput" class="flex-1 bg-black/20 border border-gray-700 rounded p-2 text-xs text-purple-400" placeholder="Seed..."><button onclick="window.importFromSeedText()" class="px-4 bg-purple-900/40 rounded text-purple-300 font-bold text-xs uppercase">OK</button></div><textarea id="importJsonInput" class="w-full h-24 bg-black/20 border border-gray-700 rounded p-2 text-xs text-green-500/70 font-mono" placeholder='JSON Text...'></textarea><button onclick="window.importFromJsonText()" class="w-full py-2 bg-gray-800 rounded text-gray-300 font-bold text-xs">JSON laden</button></div></div>
-        </div>
-    </div>
-
-    <div id="editModal" class="fixed inset-0 z-[60] flex items-center justify-center bg-black/90 backdrop-blur-md opacity-0 pointer-events-none transition-opacity duration-300">
-        <div class="bg-surface border border-blue-500/50 rounded-theme max-w-3xl w-full mx-4 shadow-2xl flex flex-col max-h-[95vh]">
-            <div class="p-4 border-b border-gray-800 flex justify-between items-center shrink-0"><h3 class="text-xl font-bold text-blue-400 uppercase tracking-wider">Bearbeiten</h3><button onclick="window.closeModal('editModal', true)" class="text-gray-500 hover:text-red-500 p-1"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-width="2"></path></svg></button></div>
-            <div class="p-6 overflow-y-auto space-y-5 flex-1 text-sm"><input type="hidden" id="editId">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                    <div>
-                        <label class="block text-gray-400 text-xs mb-1 uppercase font-bold">Akt</label>
-                        <div class="input-container">
-                            <input type="text" id="editAct" list="actDatalist" placeholder="Akt Name..." class="w-full bg-black/20 border border-gray-700 rounded p-2 outline-none">
-                            <button class="clear-btn" onclick="window.clearInput('editAct')">×</button>
-                        </div>
-                    </div>
-                    <div>
-                        <label class="block text-gray-400 text-xs mb-1 uppercase font-bold">Titel</label>
-                        <div class="input-container">
-                            <input type="text" id="editTitle" placeholder="Event Titel..." class="w-full bg-black/20 border border-gray-700 rounded p-2 outline-none">
-                            <button class="clear-btn" onclick="window.clearInput('editTitle')">×</button>
-                        </div>
-                    </div>
-                </div>
-                <div class="flex items-center gap-3"><input type="checkbox" id="editTypeCheckbox" class="w-5 h-5 rounded bg-black/20 border-gray-700 text-blue-600"><span class="text-gray-400 font-bold uppercase text-xs">Notwendig</span></div>
-                <div><label class="block text-gray-400 text-xs mb-2 uppercase font-bold tracking-wider">Symbol auswählen</label><div id="iconSelectionContainer" class="flex flex-wrap gap-2 p-2 bg-black/20 rounded-theme border border-gray-800"></div><input type="hidden" id="editIcon"></div>
-                
-                <div>
-                    <label class="block text-blue-400/80 text-xs mb-1 uppercase font-bold">Vorlesetext (MD)</label>
-                    <div id="tb_fluff" class="md-toolbar"></div>
-                    <textarea id="editFluff" class="w-full bg-black/20 border border-gray-700 rounded-b p-2 text-blue-200 italic min-h-[100px]"></textarea>
-                </div>
-                
-                <div>
-                    <label class="block text-gray-400 text-xs mb-1 uppercase font-bold">GM Info (MD)</label>
-                    <div id="tb_desc" class="md-toolbar"></div>
-                    <textarea id="editDesc" class="w-full bg-black/20 border border-gray-700 rounded-b p-2 min-h-[150px]"></textarea>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                    <div>
-                        <label class="block text-gray-400 text-xs mb-1 uppercase">Schauplätze (Klick zum Editieren)</label>
-                        <div class="flex gap-2 mb-2">
-                            <div class="input-container">
-                                <input type="text" id="tagInputLocations" list="locationsDatalist" placeholder="Ort..." class="flex-1 bg-black/20 border border-gray-700 rounded p-2 w-full">
-                                <button class="clear-btn" onclick="window.clearInput('tagInputLocations')">×</button>
-                            </div>
-                            <button onclick="window.addTag('Locations')" class="px-3 bg-gray-800 rounded">+</button>
-                        </div>
-                        <div id="tagListLocations" class="flex flex-wrap gap-2"></div>
-                    </div>
-                    <div>
-                        <label class="block text-gray-400 text-xs mb-1 uppercase">Figuren</label>
-                        <div class="flex gap-2 mb-2">
-                            <div class="input-container">
-                                <input type="text" id="tagInputFigures" list="factionsDatalist" placeholder="Figur..." class="flex-1 bg-black/20 border border-gray-700 rounded p-2 w-full">
-                                <button class="clear-btn" onclick="window.clearInput('tagInputFigures')">×</button>
-                            </div>
-                            <button onclick="window.addTag('Figures')" class="px-3 bg-gray-800 rounded">+</button>
-                        </div>
-                        <div id="tagListFigures" class="flex flex-wrap gap-2"></div>
-                    </div>
-                </div>
-            </div>
-            <div class="p-4 border-t border-gray-800 flex justify-between items-center"><button id="btnDeleteEvent" onclick="window.confirmDeleteEvent()" class="px-4 py-2 bg-red-900/30 text-red-400 rounded hover:bg-red-800/60 transition-colors">Löschen</button><div class="flex gap-3"><button onclick="window.closeModal('editModal', true)" class="px-4 py-2 bg-gray-800 text-gray-300 rounded">Abbrechen</button><button onclick="window.saveEvent(); window.closeModal('editModal', true)" class="px-6 py-2 bg-blue-600 font-bold text-white rounded">Speichern</button></div></div>
-        </div>
-    </div>
-
+    <!-- Faction Modal -->
     <div id="factionModal" class="fixed inset-0 z-[60] flex items-center justify-center bg-black/90 backdrop-blur-md opacity-0 pointer-events-none transition-opacity duration-300">
         <div class="bg-surface border border-orange-500/50 rounded-theme max-w-2xl w-full mx-4 shadow-2xl flex flex-col max-h-[90vh]">
-            <div class="p-4 border-b border-gray-800 flex justify-between items-center shrink-0"><h3 class="text-xl font-bold text-orange-400 uppercase tracking-wider">Figuren</h3><button onclick="window.closeModal('factionModal')" class="text-gray-500 hover:text-red-500 p-1"><svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-width="2"></path></svg></button></div>
+            <div class="p-4 border-b border-gray-800 flex justify-between items-center shrink-0"><h3 class="text-xl font-bold text-orange-400 uppercase tracking-wider">Figuren</h3><button onclick="window.closeModal('factionModal')" class="text-gray-500 hover:text-red-500"><svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-width="2"></path></svg></button></div>
             <div class="p-6 overflow-y-auto flex-1"><div id="factionList" class="space-y-2"></div><button onclick="window.addFactionRow()" class="mt-5 px-4 py-2 bg-gray-800 border border-gray-600 text-sm rounded">+ Neue Figur</button></div>
-            <div class="p-4 border-t border-gray-800 flex justify-end gap-3"><button onclick="window.closeModal('factionModal', true)" class="px-4 py-2 bg-gray-800 text-gray-300 rounded">Abbrechen</button><button onclick="window.saveFactions(); window.closeModal('factionModal')" class="px-6 py-2 bg-orange-600 rounded font-bold text-white">Speichern</button></div>
+            <div class="p-4 border-t border-gray-800 flex justify-end gap-3"><button onclick="window.closeModal('factionModal')" class="px-4 py-2 bg-gray-800 text-gray-300 rounded">Abbrechen</button><button onclick="window.saveFactions(); window.closeModal('factionModal')" class="px-6 py-2 bg-orange-600 rounded font-bold text-white">Speichern</button></div>
         </div>
-    </div>
-
-    <div id="dialogModal" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-300">
-        <div class="bg-surface border border-gray-600 rounded-theme max-sm w-full mx-4 p-6 text-center shadow-2xl"><p id="dialogMessage" class="mb-6"></p><div class="flex justify-center gap-3" id="dialogButtons"></div></div>
     </div>
 
     <script>
@@ -476,7 +294,6 @@
             ChevronDown: `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6" stroke-width="2"></path></svg>`,
             ChevronUp: `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="m18 15-6-6-6 6" stroke-width="2"></path></svg>`,
             ChevronRight: `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6" stroke-width="2"></path></svg>`,
-            Pencil: `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" stroke-width="2"></path></svg>`,
             Skull: `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 12h.01M15 12h.01M8 20v2h8v-2M16 20a2 2 0 0 0 1.56-3.25 8 8 0 1 0-11.12 0A2 2 0 0 0 8 20" stroke-width="2"></path></svg>`,
             Radio: `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4.9 19.1C1 15.2 1 8.8 4.9 4.9M7.8 16.2c-2.3-2.3-2.3-6.1 0-8.5M12 12m-2 0a2 2 0 1 0 4 0 2 2 0 1 0-4 0M16.2 7.8c2.3 2.3 2.3 6.1 0 8.5M19.1 4.9C23 8.8 23 15.1 19.1 19" stroke-width="2"></path></svg>`,
             Crosshair: `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="2"></circle><path d="M22 12h-4M6 12H2M12 6V2M12 22v-4" stroke-width="2"></path></svg>`,
@@ -488,142 +305,23 @@
             Lock: `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2" stroke-width="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4" stroke-width="2"></path></svg>`,
             Unlock: `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2" stroke-width="2"></rect><path d="M7 11V7a5 5 0 0 1 9.9-1" stroke-width="2"></path></svg>`,
             Terminal: `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 17l6-6-6-6M12 19h8" stroke-width="2"></path></svg>`,
-            Users: `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" stroke-width="2"></path><circle cx="9" cy="7" r="4" stroke-width="2"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" stroke-width="2"></path></svg>`,
-            FileText: `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke-width="2"></path><polyline points="14 2 14 8 20 8" stroke-width="2"></polyline><line x1="16" y1="13" x2="8" y2="13" stroke-width="2"></line><line x1="16" y1="17" x2="8" y2="17" stroke-width="2"></line><polyline points="10 9 9 9 8 9" stroke-width="2"></polyline></svg>`,
-            Settings: `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3" stroke-width="2"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1-2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" stroke-width="2"></path></svg>`
+            Users: `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" stroke-width="2"></path><circle cx="9" cy="7" r="4" stroke-width="2"></circle></svg>`,
+            Settings: `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3" stroke-width="2"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33a1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09" stroke-width="2"></path></svg>`
         };
 
-        const THEME_PRESETS = {
-            classic: { bg: "#030712", surface: "#111827", text: "#f3f4f6", accent: "#22c55e", radius: "8", fontH: "Orbitron", fontB: "Inter" },
-            light: { bg: "#ffffff", surface: "#f9fafb", text: "#111827", accent: "#2563eb", radius: "12", fontH: "Montserrat", fontB: "Roboto" },
-            deepsea: { bg: "#020617", surface: "#0f172a", text: "#e2e8f0", accent: "#38bdf8", radius: "20", fontH: "Rajdhani", fontB: "Inter" },
-            hazard: { bg: "#1c1917", surface: "#292524", text: "#fde047", accent: "#ea580c", radius: "0", fontH: "Bebas Neue", fontB: "JetBrains Mono" }
-        };
-
+        // Persistent State (Local Memory Only)
         let appTitle = "Scenario Log";
         let appSubtitle = "INCIDENT PROTOCOL // SYSTEM ONLINE";
-        let appFontHeading = "Orbitron"; 
-        let appFontBody = "Inter";
-        let themeSettings = { ...THEME_PRESETS.classic };
+        let events = [];
+        let factions = {};
+        let locationsData = {};
         let expandedIds = new Set();
         let checkedIds = new Set();
         let collapsedActs = new Set();
-        let factions = {};
-        let locationsData = {}; 
-        let events = [];
-        let eventNotes = {};
-        let actData = {};
         let draggedEventId = null;
-        let currentEditingTags = { Locations: [], Figures: [] };
         let clickTimers = {};
-        let currentOpenEventId = null;
-
         let slideshowIndex = 0;
         let slideshowInterval = null;
-        let slideshowIsAuto = true;
-        let isEditingFromSlideshow = false;
-        let flatEvents = [];
-        
-        let autoScrollInterval = null;
-        let scrollDirection = 1; 
-        let scrollPause = 0;
-
-        // Swipe Handling
-        let touchstartX = 0;
-        let touchendX = 0;
-
-        function hexToRgb(hex) {
-            const r = parseInt(hex.slice(1, 3), 16);
-            const g = parseInt(hex.slice(3, 5), 16);
-            const b = parseInt(hex.slice(5, 7), 16);
-            return `${r}, ${g}, ${b}`;
-        }
-
-        function applyFontsAndTheme(h, b, theme) {
-            appFontHeading = h;
-            appFontBody = b;
-            themeSettings = theme;
-            document.querySelectorAll('.dynamic-styles').forEach(e => e.remove());
-            const uniqueFonts = [h, b, "Orbitron", "Inter", "Rajdhani", "Roboto", "Lexend", "Space Grotesk", "Bebas Neue", "Montserrat", "JetBrains Mono", "Fira Code", "Open Sans"];
-            const link = document.createElement('link'); link.rel = 'stylesheet'; link.className = 'dynamic-styles'; 
-            link.href = `https://fonts.googleapis.com/css2?${[...new Set(uniqueFonts)].map(f => `family=${f.replace(/ /g,'+')}:wght@400;700`).join('&')}&display=swap`; 
-            document.head.appendChild(link);
-            const style = document.createElement('style'); style.className = 'dynamic-styles';
-            const rgb = hexToRgb(theme.accent);
-            style.textContent = `
-                :root { --bg: ${theme.bg}; --surface: ${theme.surface}; --text: ${theme.text}; --accent-rgb: ${rgb}; --radius: ${theme.radius}px; }
-                body { font-family: "${b}", sans-serif !important; }
-                h1,h2,h3,h4,.font-heading { font-family: "${h}", sans-serif !important; }
-            `;
-            document.head.appendChild(style);
-        }
-
-        window.applyThemePreset = (p) => {
-            const t = THEME_PRESETS[p];
-            document.getElementById('themeColorBg').value = t.bg;
-            document.getElementById('themeColorSurface').value = t.surface;
-            document.getElementById('themeColorText').value = t.text;
-            document.getElementById('themeColorAccent').value = t.accent;
-            document.getElementById('themeRadius').value = t.radius;
-            document.getElementById('selectFontHeading').value = t.fontH;
-            document.getElementById('selectFontBody').value = t.fontB;
-            window.updateCustomTheme();
-        };
-
-        window.updateCustomTheme = () => {
-            const t = { 
-                bg: document.getElementById('themeColorBg').value, 
-                surface: document.getElementById('themeColorSurface').value, 
-                text: document.getElementById('themeColorText').value, 
-                accent: document.getElementById('themeColorAccent').value, 
-                radius: document.getElementById('themeRadius').value 
-            };
-            const h = document.getElementById('selectFontHeading').value;
-            const b = document.getElementById('selectFontBody').value;
-            document.getElementById('radiusLabel').textContent = t.radius + "px";
-            applyFontsAndTheme(h, b, t);
-        };
-
-        function encodeScenario(str) { return btoa(unescape(encodeURIComponent(str))); }
-        function decodeScenario(b64) { try { return decodeURIComponent(escape(atob(b64))); } catch(e) { return null; } }
-        function getExportData() { return JSON.stringify({ appTitle, appSubtitle, appFontHeading, appFontBody, themeSettings, factions, locationsData, events, actData, eventNotes, checkedIds: Array.from(checkedIds), collapsedActs: Array.from(collapsedActs), expandedIds: Array.from(expandedIds) }, null, 2); }
-
-        function applyImportedData(data) {
-            if(!data) return;
-            appTitle = data.appTitle || "Scenario Log";
-            appSubtitle = data.appSubtitle || "";
-            appFontHeading = data.appFontHeading || "Orbitron";
-            appFontBody = data.appFontBody || "Inter";
-            themeSettings = data.themeSettings || { ...THEME_PRESETS.classic };
-            factions = data.factions || {};
-            locationsData = data.locationsData || {};
-            actData = data.actData || {};
-            eventNotes = data.eventNotes || {};
-            checkedIds = new Set(data.checkedIds || []);
-            collapsedActs = new Set(data.collapsedActs || []);
-            expandedIds = new Set(data.expandedIds || []);
-            events = (data.events || []).map(ev => ({ ...ev }));
-            applyFontsAndTheme(appFontHeading, appFontBody, themeSettings);
-            renderApp();
-        }
-
-        function getFactionPalette(figureName) {
-            const factionName = factions[figureName];
-            if (!factionName) return { bg: "rgba(100,100,100,0.1)", text: "text-gray-400", border: "rgba(100,100,100,0.3)" };
-            const palettes = [
-                {bg:"rgba(239,68,68,0.15)", text:"text-red-400", b:"rgba(239,68,68,0.4)"},
-                {bg:"rgba(59,130,246,0.15)", text:"text-blue-400", b:"rgba(59,130,246,0.4)"},
-                {bg:"rgba(245,158,11,0.15)", text:"text-orange-400", b:"rgba(245,158,11,0.4)"},
-                {bg:"rgba(168,85,247,0.15)", text:"text-purple-400", b:"rgba(168,85,247,0.4)"},
-                {bg:"rgba(6,182,212,0.15)", text:"text-cyan-400", b:"rgba(6,182,212,0.4)"},
-                {bg:"rgba(34,197,94,0.15)", text:"text-green-400", b:"rgba(34,197,94,0.4)"},
-                {bg:"rgba(236,72,153,0.15)", text:"text-pink-400", b:"rgba(236,72,153,0.4)"},
-                {bg:"rgba(250,204,21,0.15)", text:"text-yellow-400", b:"rgba(250,204,21,0.4)"}
-            ];
-            let hash = 0; 
-            for (let i = 0; i < factionName.length; i++) hash = factionName.charCodeAt(i) + ((hash << 5) - hash);
-            return palettes[Math.abs(hash) % palettes.length];
-        }
 
         function renderApp() {
             const app = document.getElementById('app');
@@ -633,329 +331,144 @@
             document.getElementById('factionsDatalist').innerHTML = Object.keys(factions).map(f => `<option value="${f}">`).join('');
             document.getElementById('locationsDatalist').innerHTML = [...new Set(events.flatMap(e => e.locations || []))].map(l => `<option value="${l}">`).join('');
 
-            let html = `<div class="max-w-4xl mx-auto"><header class="mb-12 border-b border-gray-800 pb-6 no-select"><div class="flex flex-col md:flex-row md:items-center justify-between gap-6"><div class="flex items-center gap-4 group cursor-pointer" onclick="window.openHeaderModal()"><div class="text-accent group-hover:scale-110 transition-transform">${icons.AppIcon}</div><div class="text-left"><h1 class="text-3xl md:text-5xl font-bold text-accent uppercase font-heading tracking-tighter leading-none">${appTitle}</h1><p class="opacity-60 text-[10px] md:text-xs uppercase tracking-[0.2em] font-bold mt-1">${appSubtitle}</p></div></div><div class="flex items-center gap-2"><button onclick="window.expandAllEvents()" title="Alle ausklappen" class="p-2 bg-accent/10 border border-accent/20 text-accent rounded hover:bg-accent/20 transition-colors">${icons.ExpandAll}</button><button onclick="window.collapseAllEvents()" title="Alle einklappen" class="p-2 bg-gray-800 border border-gray-700 text-gray-400 rounded hover:bg-gray-700 transition-colors">${icons.CollapseAll}</button></div></div></header><div class="space-y-12">`;
+            let html = `<div class="max-w-4xl mx-auto"><header class="mb-12 border-b border-gray-800 pb-6 no-select"><div class="flex items-center gap-4 group cursor-pointer"><div class="text-accent">${icons.AppIcon}</div><div><h1 class="text-3xl md:text-5xl font-bold text-accent uppercase font-heading tracking-tighter leading-none">${appTitle}</h1><p class="opacity-60 text-[10px] md:text-xs uppercase tracking-[0.2em] font-bold mt-1">${appSubtitle}</p></div></div></header><div class="space-y-12">`;
 
-            if (Object.keys(grouped).length === 0) html += `<div class="text-center py-20 border-2 border-dashed border-gray-800 rounded-theme opacity-50">Keine Daten vorhanden.</div>`;
+            if (Object.keys(grouped).length === 0) {
+                html += `<div class="text-center py-20 border-2 border-dashed border-gray-800 rounded-theme opacity-50">Keine Ereignisse vorhanden. Nutze das Plus-Icon, um zu starten.</div>`;
+            }
 
             for (const [actName, actEvents] of Object.entries(grouped)) {
                 const isC = collapsedActs.has(actName);
                 html += `<div><div onclick="window.toggleAct('${actName}')" class="sticky top-0 z-10 py-4 mb-6 cursor-pointer flex items-center gap-3 no-select" style="background-color: var(--bg)"><div class="opacity-40">${isC ? icons.ChevronRight : icons.ChevronDown}</div><h2 class="text-xl md:text-2xl font-bold uppercase border-l-4 border-accent pl-4 text-accent font-heading">${actName}</h2></div><div class="border-l-2 border-gray-800 ml-4 md:ml-8 space-y-6 ${isC ? 'hidden' : ''}">`;
                 actEvents.forEach(e => {
-                    const isO = e.type === 'Optional';
-                    const locs = e.locations || [];
-                    const figs = (e.figures || []);
                     const isExpanded = expandedIds.has(e.id);
-                    html += `<div class="relative pl-8 md:pl-12 group" data-drag-id="${e.id}" draggable="true" ondragstart="window.handleDragStart(event, ${e.id})" ondragover="window.handleDragOver(event)" ondragleave="window.handleDragLeave(event)" ondrop="window.handleDrop(event, ${e.id}, '${actName}')" ondragend="window.handleDragEnd(event)"><div class="absolute left-0 top-6 opacity-20 md:group-hover:opacity-100 transition-opacity cursor-grab">${icons.DragVertical}</div><div class="absolute -left-[17px] top-4 w-8 h-8 rounded-full border-2 flex items-center justify-center bg-surface ${isO ? 'border-dashed opacity-40' : 'border-accent text-accent'}">${icons[e.icon] || icons.Rocket}</div><button onclick="window.handleInteraction(event, ${e.id})" class="w-full text-left p-4 rounded-theme border border-gray-800 transition-all hover:border-accent/40 no-select bg-surface/40"><div class="flex justify-between gap-4"><div class="flex items-start gap-3"><div onclick="window.toggleCheckbox(event, ${e.id})" class="mt-1 opacity-50 hover:text-accent hover:opacity-100">${checkedIds.has(e.id) ? icons.CheckSquare : icons.Square}</div><div><h3 class="text-base md:text-lg font-bold font-heading ${checkedIds.has(e.id) ? 'line-through opacity-40' : ''}">${e.title}</h3><div class="flex items-center gap-3 mt-1 flex-wrap"><span class="text-[9px] px-1.5 py-0.5 rounded-theme uppercase font-bold bg-accent/10 text-accent ${isO?'opacity-40':''}">${e.type}</span>${locs.map(l => {
-                        const info = locationsData[l] || "Keine Information hinterlegt.";
-                        return `<span onclick="window.viewLocationDetails(event, '${l}')" title="${info}" class="text-[9px] opacity-40 italic hover:text-emerald-400 transition-colors cursor-help">📍 ${l}</span>`;
-                    }).join('')}</div></div></div><div class="flex items-center gap-2"><div onclick="window.openEditModal(${e.id}); event.stopPropagation();" class="opacity-20 hover:text-blue-400 hover:opacity-100 p-1">${icons.Pencil}</div><div class="opacity-30">${isExpanded ? icons.ChevronUp : icons.ChevronDown}</div></div></div><div class="${isExpanded ? 'mt-4 max-h-[2500px]' : 'max-h-0'} overflow-hidden transition-all duration-300"><div class="border-t border-gray-800 pt-4 text-sm opacity-80 markdown-content">${marked.parse(e.description || "")}</div>${figs.length > 0 ? `<div class="flex flex-wrap gap-2 mt-4">${figs.map(f => { const p = getFactionPalette(f); return `<span class="text-[10px] px-2 py-0.5 rounded-theme border ${p.text} font-bold" style="background:${p.bg}; border-color:${p.b}">👤 ${f}</span>`; }).join('')}</div>` : ''}</div></button></div>`;
+                    html += `<div class="relative pl-8 md:pl-12 group" data-drag-id="${e.id}" draggable="true" ondragstart="window.handleDragStart(event, ${e.id})" ondragover="window.handleDragOver(event)" ondragleave="window.handleDragLeave(event)" ondrop="window.handleDrop(event, ${e.id}, '${actName}')" ondragend="window.handleDragEnd(event)"><div class="absolute left-0 top-6 opacity-20 md:group-hover:opacity-100 cursor-grab">${icons.DragVertical}</div><div class="absolute -left-[17px] top-4 w-8 h-8 rounded-full border-2 flex items-center justify-center bg-surface ${e.type === 'Optional' ? 'border-dashed opacity-40' : 'border-accent text-accent'}">${icons[e.icon] || icons.Rocket}</div><div onclick="window.handleInteraction(event, ${e.id})" class="w-full text-left p-4 rounded-theme border border-gray-800 transition-all hover:border-accent/40 no-select bg-surface/40 cursor-pointer"><div class="flex justify-between gap-4"><div class="flex items-start gap-3"><div onclick="window.toggleCheckbox(event, ${e.id})" class="mt-1 opacity-50 hover:text-accent">${checkedIds.has(e.id) ? icons.CheckSquare : icons.Square}</div><div><h3 class="text-base md:text-lg font-bold font-heading ${checkedIds.has(e.id) ? 'line-through opacity-40' : ''}">${e.title}</h3></div></div></div><div class="${isExpanded ? 'mt-4' : 'hidden'}"><div class="text-blue-200 italic mb-4 markdown-content">${marked.parse(e.fluff || "")}</div><div class="text-gray-300 markdown-content">${marked.parse(e.description || "")}</div><button onclick="window.openEditModal(${e.id})" class="mt-4 px-3 py-1 bg-gray-800 rounded text-xs hover:bg-gray-700">Bearbeiten</button></div></div></div>`;
                 });
                 html += `<div class="act-drop-zone" ondragover="window.handleDragOver(event)" ondragleave="window.handleDragLeave(event)" ondrop="window.handleDrop(event, null, '${actName}')"></div></div></div>`;
             }
             app.innerHTML = html + `</div>`;
         }
 
-        window.startSlideshow = (index = 0) => {
-            flatEvents = [];
-            const grouped = events.reduce((acc, e) => { if (!acc[e.act]) acc[e.act] = []; acc[e.act].push(e); return acc; }, {});
-            Object.keys(grouped).forEach(act => { grouped[act].forEach(e => { flatEvents.push({ ...e, actName: act }); }); });
-            if (flatEvents.length === 0) { window.customAlert("Keine Ereignisse zum Anzeigen vorhanden."); return; }
-            slideshowIndex = index; slideshowIsAuto = true;
-            document.getElementById('slideshowModal').classList.remove('opacity-0', 'pointer-events-none');
-            updateSlideshowView();
-        };
-
-        function startAutoScroll() {
-            clearInterval(autoScrollInterval);
-            const area = document.getElementById('slideScrollArea'); if (!area) return;
-            area.scrollTop = 0; scrollDirection = 1; scrollPause = 60; 
-            autoScrollInterval = setInterval(() => {
-                if (scrollPause > 0) { scrollPause--; return; }
-                const max = Math.ceil(area.scrollHeight - area.clientHeight);
-                if (max <= 0) return;
-                const speed = scrollDirection > 0 ? 0.6 : 1.8; 
-                area.scrollTop += scrollDirection * speed;
-                if (scrollDirection > 0 && area.scrollTop >= max - 1) { scrollDirection = -1; scrollPause = 140; } 
-                else if (scrollDirection < 0 && area.scrollTop <= 1) { scrollDirection = 1; scrollPause = 70; }
-            }, 30);
-        }
-
-        function calculateDynamicSlideTime(e) {
-            const text = (e.description || "") + (e.fluff || "");
-            const words = text.split(/\s+/).filter(w => w.length > 0).length;
-            return Math.min(60000, Math.max(10000, words * 500 + 10000));
-        }
-
-        window.editCurrentSlide = () => {
-            const e = flatEvents[slideshowIndex];
-            if(!e) return;
-            isEditingFromSlideshow = true;
-            window.closeModal('slideshowModal');
-            window.openEditModal(e.id);
-        };
-
-        function handleSwipe() {
-            const diffX = touchstartX - touchendX;
-            if (Math.abs(diffX) > 50) {
-                if (diffX > 0) window.nextSlide();
-                else window.prevSlide();
-            }
-        }
-
-        function updateSlideshowView() {
-            const e = flatEvents[slideshowIndex]; if (!e) return;
-            document.getElementById('slideActTitle').textContent = e.actName.toUpperCase();
-            document.getElementById('slideEventTitle').textContent = e.title;
-            document.getElementById('slideEventIcon').innerHTML = icons[e.icon] || icons.Rocket;
-            document.getElementById('slideshowIconContainer').innerHTML = icons.AppIcon;
-            const locs = e.locations || [];
-            const locH = document.getElementById('slideLocationsHeader');
-            locH.innerHTML = locs.length > 0 ? locs.map(l => {
-                const info = locationsData[l] || "Keine Information hinterlegt.";
-                return `<span title="${info}">📍 ${l}</span>`;
-            }).join(' ') : "KEIN STANDORT VERZEICHNET";
-            const fluffCol = document.getElementById('slideFluffCol');
-            const layoutGrid = document.getElementById('slideLayoutGrid');
-            if (e.fluff) { fluffCol.classList.remove('hidden'); document.getElementById('slideFluff').innerHTML = marked.parse(e.fluff); layoutGrid.className = "grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12"; } 
-            else { fluffCol.classList.add('hidden'); layoutGrid.className = "grid grid-cols-1 gap-8 md:gap-12 max-w-2xl mx-auto"; }
-            document.getElementById('slideDesc').innerHTML = marked.parse(e.description || "");
-            
-            const facList = document.getElementById('slideFactions'); facList.innerHTML = "";
-            const figures = e.figures || [];
-            if (figures.length > 0) {
-                document.getElementById('slideMeta').classList.remove('hidden');
-                figures.forEach(f => {
-                    const p = getFactionPalette(f);
-                    facList.insertAdjacentHTML('beforeend', `<span class="text-[10px] px-2.5 py-1 rounded-theme border ${p.text} font-bold shadow-sm" style="background:${p.bg}; border-color:${p.b}">👤 ${f}</span>`);
-                });
-            } else document.getElementById('slideMeta').classList.add('hidden');
-            
-            document.getElementById('slideCounter').textContent = `Ereignis ${slideshowIndex + 1} / ${flatEvents.length}`;
-            document.getElementById('slideProgress').style.width = ((slideshowIndex + 1) / flatEvents.length) * 100 + "%";
-            const card = document.getElementById('slideCard'); card.style.opacity = "0"; card.style.transform = "translateY(20px)";
-            setTimeout(() => { card.style.opacity = "1"; card.style.transform = "translateY(0)"; }, 50);
-            setTimeout(startAutoScroll, 1000); if (slideshowIsAuto) startSlideshowTimer();
-        }
-
-        function startSlideshowTimer() {
-            clearInterval(slideshowInterval); if (!slideshowIsAuto) return;
-            const delay = calculateDynamicSlideTime(flatEvents[slideshowIndex]);
-            slideshowInterval = setInterval(() => { window.nextSlide(); }, delay);
-            updateSlideshowPlayBtn();
-        }
-
-        window.toggleSlideshowAuto = () => { slideshowIsAuto = !slideshowIsAuto; if (slideshowIsAuto) startSlideshowTimer(); else clearInterval(slideshowInterval); updateSlideshowPlayBtn(); };
-        function updateSlideshowPlayBtn() {
-            const btn = document.getElementById('slidePlayIcon');
-            btn.innerHTML = slideshowIsAuto ? `<svg class="w-6 h-6 md:w-8 md:h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"></path></svg>` : `<svg class="w-6 h-6 md:w-8 md:h-8 ml-1" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"></path></svg>`;
-        }
-        window.nextSlide = () => { slideshowIndex = (slideshowIndex < flatEvents.length - 1) ? slideshowIndex + 1 : 0; updateSlideshowView(); };
-        window.prevSlide = () => { slideshowIndex = (slideshowIndex > 0) ? slideshowIndex - 1 : flatEvents.length - 1; updateSlideshowView(); };
-
-        // Clear Input Helper
-        window.clearInput = (id) => { const el = document.getElementById(id); if(el) { el.value = ""; el.focus(); } };
-
-        // Location Management Logic
-        window.openLocationManager = (targetLoc = null) => {
-            const l = document.getElementById('locationManagerList'); l.innerHTML = "";
-            const allUsedLocations = [...new Set(events.flatMap(e => e.locations || []))];
-            const editModalOpen = !document.getElementById('editModal').classList.contains('opacity-0');
-            const currentEditingLocs = editModalOpen ? currentEditingTags.Locations : [];
-            const uniqueLocs = [...new Set([...allUsedLocations, ...currentEditingLocs])];
-            uniqueLocs.forEach(loc => { if(!locationsData[loc]) locationsData[loc] = ""; });
-            
-            uniqueLocs.sort().forEach(locName => {
-                const desc = locationsData[locName] || "";
-                l.insertAdjacentHTML('beforeend', `
-                    <div id="loc-editor-${locName.replace(/\s+/g, '-')}" class="bg-black/20 p-4 border border-gray-800 rounded-theme">
-                        <div class="flex justify-between items-center mb-2">
-                            <span class="text-emerald-400 font-bold uppercase text-xs tracking-widest">📍 ${locName}</span>
-                            <button onclick="window.deleteLocation('${locName}')" class="text-red-500/50 hover:text-red-500 text-xs">Entfernen</button>
-                        </div>
-                        <textarea placeholder="Schreibe hier Infos über diesen Ort..." 
-                            oninput="window.updateLocationDesc('${locName}', this.value)"
-                            class="w-full bg-surface border border-gray-700 rounded p-2 text-sm text-gray-300 min-h-[80px] outline-none focus:border-emerald-500">${desc}</textarea>
-                    </div>
-                `);
-            });
-            document.getElementById('locationManagerModal').classList.remove('opacity-0', 'pointer-events-none');
-            
-            if (targetLoc) {
-                setTimeout(() => {
-                    const el = document.getElementById(`loc-editor-${targetLoc.replace(/\s+/g, '-')}`);
-                    if (el) { el.scrollIntoView({ behavior: 'smooth', block: 'center' }); el.classList.add('ring-2', 'ring-emerald-500'); setTimeout(() => el.classList.remove('ring-2', 'ring-emerald-500'), 2000); }
-                }, 100);
-            }
-        };
-
-        window.updateLocationDesc = (name, val) => { 
-            locationsData[name] = val; 
-            if(!document.getElementById('editModal').classList.contains('opacity-0')) window.renderEditTags('Locations');
-        };
-        window.deleteLocation = (name) => { window.customConfirm(`Beschreibung für "${name}" löschen?`, () => { delete locationsData[name]; window.openLocationManager(); }); };
-        
-        window.viewLocationDetails = (ev, name) => {
-            if(ev) ev.stopPropagation();
-            const desc = locationsData[name] || "*Keine Beschreibung hinterlegt.*";
-            document.getElementById('locViewTitle').textContent = name;
-            document.getElementById('locViewDesc').innerHTML = marked.parse(desc);
-            const btnEdit = document.getElementById('btnEditLocationShortcut');
-            btnEdit.onclick = () => { window.closeModal('locationViewModal'); window.openLocationManager(name); };
-            document.getElementById('locationViewModal').classList.remove('opacity-0', 'pointer-events-none');
-        };
-
-        // Standard UI & Data Management
-        window.closeModal = (id, skipSave = false) => { 
-            if(!skipSave) {
-                if(id === 'factionModal') window.saveFactions();
-                if(id === 'headerModal') window.saveHeader();
-            }
-            if(id === 'slideshowModal') {
-                clearInterval(slideshowInterval); 
-                clearInterval(autoScrollInterval);
-            }
-            document.getElementById(id).classList.add('opacity-0', 'pointer-events-none'); 
-        };
-        
-        window.toggleAct = (a) => { collapsedActs.has(a) ? collapsedActs.delete(a) : collapsedActs.add(a); renderApp(); };
-        window.toggleCheckbox = (ev, id) => { ev.stopPropagation(); checkedIds.has(id) ? checkedIds.delete(id) : checkedIds.add(id); renderApp(); };
-        window.expandAllEvents = () => { events.forEach(e => expandedIds.add(e.id)); renderApp(); };
-        window.collapseAllEvents = () => { expandedIds.clear(); renderApp(); };
-        window.handleInteraction = (ev, id) => { 
-            const t = Date.now(); 
-            if(t - (clickTimers[id] || 0) < 300) { clearTimeout(clickTimers['t'+id]); window.openEventModal(id); } 
-            else { clickTimers[id] = t; clickTimers['t'+id] = setTimeout(() => { expandedIds.has(id) ? expandedIds.delete(id) : expandedIds.add(id); renderApp(); }, 300); } 
-        };
-        
-        window.openEventModal = (id) => { 
-            const e = events.find(ev => ev.id === id); if(!e) return; 
-            currentOpenEventId = id; 
-            document.getElementById('modalTitle').textContent = e.title; 
-            document.getElementById('modalDesc').innerHTML = marked.parse(e.description || ""); 
-            document.getElementById('modalFluffContainer').className = e.fluff ? "" : "hidden"; 
-            document.getElementById('modalFluff').innerHTML = e.fluff ? marked.parse(e.fluff) : ""; 
-            const locEl = document.getElementById('modalLocations'); locEl.innerHTML = "";
-            (e.locations || []).forEach(l => {
-                const info = locationsData[l] || "Keine Information hinterlegt.";
-                locEl.insertAdjacentHTML('beforeend', `<span onclick="window.viewLocationDetails(null, '${l}')" title="${info}" class="text-xs px-2 py-1 bg-emerald-900/30 text-emerald-400 border border-emerald-800 rounded cursor-help">📍 ${l}</span>`);
-            });
-            document.getElementById('modalNotes').value = eventNotes[id] || ""; 
-            const fl = document.getElementById('modalFigures'); fl.innerHTML = ""; 
-            (e.figures || []).forEach(f => { const p = getFactionPalette(f); fl.insertAdjacentHTML('beforeend', `<li class="flex justify-between items-center border-b border-gray-800 text-xs py-2"><span class="px-2 py-0.5 rounded-theme border ${p.text} font-bold" style="background:${p.bg}; border-color:${p.b}">${f}</span><span class="opacity-40 font-mono text-[10px] uppercase">${factions[f]||"Divers"}</span></li>`); }); 
-            document.getElementById('eventModal').classList.remove('opacity-0', 'pointer-events-none'); 
-        };
-
-        function setupMDToolbar(targetId, toolbarId) {
-            const tb = document.getElementById(toolbarId);
-            const tools = [{ label: 'Fett', pre: '**', post: '**', icon: 'B' }, { label: 'Kursiv', pre: '*', post: '*', icon: 'I' }, { label: 'Unterstrichen', pre: '<u>', post: '</u>', icon: 'U' }, { label: 'Code', pre: '`', post: '`', icon: '<>' }, { label: 'Link', pre: '[', post: '](https://)', icon: '🔗' }];
-            tb.innerHTML = tools.map(t => `<button class="md-btn" onclick="window.applyMD('${targetId}', '${t.pre}', '${t.post}')">${t.icon}</button>`).join('');
-            const area = document.getElementById(targetId);
-            area.onkeydown = (e) => {
-                if(e.ctrlKey) {
-                    if(e.key === 'b') { e.preventDefault(); window.applyMD(targetId, '**', '**'); }
-                    if(e.key === 'i') { e.preventDefault(); window.applyMD(targetId, '*', '*'); }
-                    if(e.key === 'u') { e.preventDefault(); window.applyMD(targetId, '<u>', '</u>'); }
-                    if(e.key === 'k') { e.preventDefault(); window.applyMD(targetId, '[', '](https://)'); }
-                }
-            };
-        }
-
-        window.applyMD = (id, pre, post) => {
-            const el = document.getElementById(id); const start = el.selectionStart; const end = el.selectionEnd; const text = el.value; const selected = text.substring(start, end); const newVal = text.substring(0, start) + pre + selected + post + text.substring(end); el.value = newVal; el.focus(); const offset = pre.length; el.setSelectionRange(start + offset, end + offset);
-        };
-
-        window.openEditModal = (id=null) => { 
-            const uniqueActs = [...new Set(events.map(ev => ev.act))]; 
-            const defaultAct = uniqueActs.length > 0 ? uniqueActs[0] : "Akt I"; 
-            const e = events.find(ev => ev.id === id) || { act: defaultAct, title: "", type: "Notwendig", icon: "Rocket", description: "", locations: [], figures: [] }; 
-            document.getElementById('editId').value = id || ""; 
-            document.getElementById('editAct').value = e.act; 
-            document.getElementById('editTitle').value = e.title; 
-            document.getElementById('editTypeCheckbox').checked = e.type === "Notwendig"; 
-            document.getElementById('editDesc').value = e.description || ""; 
-            document.getElementById('editFluff').value = e.fluff || ""; 
-            document.getElementById('editIcon').value = e.icon || "Rocket"; 
-            currentEditingTags = { Locations: [...(e.locations || [])], Figures: [...(e.figures || [])] }; 
-            window.renderEditTags('Locations'); window.renderEditTags('Figures'); window.renderIconSelection(e.icon || "Rocket"); 
-            setupMDToolbar('editFluff', 'tb_fluff'); setupMDToolbar('editDesc', 'tb_desc');
-            document.getElementById('btnDeleteEvent').style.display = id ? "block" : "none"; 
-            document.getElementById('editModal').classList.remove('opacity-0', 'pointer-events-none'); 
-        };
-
-        window.renderIconSelection = (s) => { 
-            const c = document.getElementById('iconSelectionContainer'); const list = ["Rocket", "Zap", "Target", "MapPin", "Skull", "Radio", "Crosshair", "AlertCircle", "ShieldAlert", "Eye", "Terminal", "Users", "FileText", "Lock", "Unlock", "Settings"]; 
-            c.innerHTML = list.map(i => `<button onclick="window.selectIcon('${i}')" class="p-3 border-2 rounded-theme transition-all ${s===i?'border-accent bg-accent/20 text-accent':'opacity-40 border-gray-700 hover:opacity-100'}">${icons[i] || icons.Rocket}</button>`).join(''); 
-        };
-
-        window.saveEvent = () => { 
+        // Action Handlers
+        window.saveEvent = () => {
             const idVal = document.getElementById('editId').value;
-            const id = idVal ? parseInt(idVal) : Date.now(); 
-            const data = { id, act: document.getElementById('editAct').value, title: document.getElementById('editTitle').value, type: document.getElementById('editTypeCheckbox').checked ? "Notwendig" : "Optional", icon: document.getElementById('editIcon').value, fluff: document.getElementById('editFluff').value, description: document.getElementById('editDesc').value, locations: currentEditingTags.Locations, figures: currentEditingTags.Figures }; 
-            const idx = events.findIndex(e => e.id === id); if(idx > -1) events[idx] = data; else events.push(data); 
-            renderApp(); 
-            if(isEditingFromSlideshow) {
-                isEditingFromSlideshow = false;
-                window.startSlideshow(slideshowIndex);
-            }
+            const id = idVal ? parseInt(idVal) : Date.now();
+            const data = {
+                id,
+                act: document.getElementById('editAct').value || "Akt I",
+                title: document.getElementById('editTitle').value || "Unbenanntes Ereignis",
+                icon: document.getElementById('editIcon').value || "Rocket",
+                fluff: document.getElementById('editFluff').value,
+                description: document.getElementById('editDesc').value,
+                locations: [], figures: []
+            };
+            const idx = events.findIndex(e => e.id === id);
+            if (idx > -1) events[idx] = data; else events.push(data);
+            renderApp();
         };
 
-        window.saveHeader = () => { appTitle = document.getElementById('editAppTitle').value; appSubtitle = document.getElementById('editAppSubtitle').value; window.updateCustomTheme(); renderApp(); };
-        window.openHeaderModal = () => { 
-            document.getElementById('editAppTitle').value = appTitle; document.getElementById('editAppSubtitle').value = appSubtitle; document.getElementById('themeColorBg').value = themeSettings.bg; document.getElementById('themeColorSurface').value = themeSettings.surface; document.getElementById('themeColorText').value = themeSettings.text; document.getElementById('themeColorAccent').value = themeSettings.accent; document.getElementById('themeRadius').value = themeSettings.radius; document.getElementById('selectFontHeading').value = appFontHeading; document.getElementById('selectFontBody').value = appFontBody;
-            document.getElementById('headerModal').classList.remove('opacity-0', 'pointer-events-none'); 
+        window.toggleCheckbox = (ev, id) => {
+            ev.stopPropagation();
+            checkedIds.has(id) ? checkedIds.delete(id) : checkedIds.add(id);
+            renderApp();
         };
 
-        window.handleDragStart = (e, id) => { draggedEventId = id; e.target.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move'; };
-        window.handleDragOver = (e) => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; const t = e.target.closest('[data-drag-id], .act-drop-zone'); if (t && !t.classList.contains('drag-over')) { document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over')); t.classList.add('drag-over'); } };
-        window.handleDragLeave = (e) => { const t = e.target.closest('[data-drag-id], .act-drop-zone'); if (t && !t.contains(e.relatedTarget)) t.classList.remove('drag-over'); };
-        window.handleDrop = (e, targetId, targetAct) => { 
-            e.preventDefault(); document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over')); if (draggedEventId === null) return; 
-            const dIdx = events.findIndex(ev => ev.id === draggedEventId); const tIdx = targetId ? events.findIndex(ev => ev.id === targetId) : -1; if (dIdx === -1) return; const [item] = events.splice(dIdx, 1); if (targetAct) item.act = targetAct; if (tIdx !== -1) { const nIdx = events.findIndex(ev => ev.id === targetId); events.splice(nIdx, 0, item); } else events.push(item); draggedEventId = null; renderApp(); 
+        window.handleInteraction = (ev, id) => {
+            expandedIds.has(id) ? expandedIds.delete(id) : expandedIds.add(id);
+            renderApp();
         };
 
-        window.openExportModal = () => { document.getElementById('exportTextarea').value = getExportData(); document.getElementById('exportModal').classList.remove('opacity-0', 'pointer-events-none'); };
-        window.copyExportToClipboard = () => { const tx = document.getElementById('exportTextarea'); tx.select(); document.execCommand('copy'); showCopySuccess("In Zwischenablage kopiert!"); };
-        window.copySeedToClipboard = () => { copyToClipboard(encodeScenario(getExportData())); showCopySuccess("Seed kopiert!"); };
-        window.generateAndCopyShareLink = () => { copyToClipboard(window.location.origin + window.location.pathname + '?scenario=' + encodeScenario(getExportData())); showCopySuccess("Link kopiert!"); };
-        window.importFromUrl = async () => { const url = document.getElementById('importUrlInput').value.trim(); if(!url) return; try { const res = await fetch(url); if(!res.ok) throw new Error(); applyImportedData(await res.json()); window.closeModal('importModal'); } catch(e){ window.customAlert("Fehler."); } };
-        window.importFromSeedText = () => { const dec = decodeScenario(document.getElementById('importSeedInput').value.trim()); if(dec) { applyImportedData(JSON.parse(dec)); window.closeModal('importModal'); } };
-        window.importFromJsonText = () => { try { applyImportedData(JSON.parse(document.getElementById('importJsonInput').value)); window.closeModal('importModal'); } catch(e){} };
-        window.handleImport = (e) => { const f = e.target.files[0]; if(f) { const r = new FileReader(); r.onload = (ev) => { try { applyImportedData(JSON.parse(ev.target.result)); window.closeModal('importModal'); } catch(ex){} }; r.readAsText(f); } };
-        window.triggerDownloadFile = function() { const blob = new Blob([getExportData()], { type: 'application/json' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `${appTitle.replace(/\s+/g, '_')}_Save.json`; a.click(); URL.revokeObjectURL(url); };
-        window.addTag = (t) => { const i = document.getElementById(`tagInput${t}`); const v = i.value.trim(); if(v && !currentEditingTags[t].includes(v)){ currentEditingTags[t].push(v); i.value=""; window.renderEditTags(t); if(t === 'Locations' && !locationsData[v]) locationsData[v] = ""; } };
-        window.removeTag = (t, idx) => { currentEditingTags[t].splice(idx,1); window.renderEditTags(t); };
-        window.renderEditTags = (t) => { document.getElementById(`tagList${t}`).innerHTML = currentEditingTags[t].map((tag, i) => { const isLoc = t === 'Locations'; const info = isLoc ? (locationsData[tag] || "Keine Information hinterlegt.") : ""; const clickAttr = isLoc ? `onclick="window.openLocationManager('${tag}')"` : ''; const styleAttr = isLoc ? 'cursor: pointer; text-decoration: underline; text-underline-offset: 2px;' : ''; return `<span class="bg-accent/10 border border-accent/20 text-accent px-2 py-1 rounded text-[10px] flex items-center gap-2" style="${styleAttr}" ${clickAttr} title="${info}">${tag}<button onclick="event.stopPropagation(); window.removeTag('${t}', ${i})" class="hover:text-red-400 font-bold ml-1">×</button></span>`; }).join(''); };
-        window.selectIcon = (i) => { document.getElementById('editIcon').value = i; window.renderIconSelection(i); };
-        window.openFactionModal = () => { const l = document.getElementById('factionList'); l.innerHTML = ""; Object.entries(factions).forEach(([n, f]) => l.insertAdjacentHTML('beforeend', window.createFactionRow(n, f))); document.getElementById('factionModal').classList.remove('opacity-0', 'pointer-events-none'); };
-        window.createFactionRow = (n='', f='') => `<div class="faction-row grid grid-cols-12 gap-2 mb-2"><div class="col-span-5 input-container"><input type="text" placeholder="Name" class="faction-name w-full bg-black/20 border border-gray-700 rounded p-1 text-xs outline-none" value="${n}"></div><div class="col-span-6 input-container"><input type="text" placeholder="Fraktion" class="faction-value w-full bg-black/20 border border-gray-700 rounded p-1 text-xs outline-none" value="${f}"></div><button onclick="this.parentElement.remove()" class="text-red-500 font-bold">×</button></div>`;
-        window.addFactionRow = () => document.getElementById('factionList').insertAdjacentHTML('beforeend', window.createFactionRow());
-        window.saveFactions = () => { factions = {}; document.querySelectorAll('.faction-row').forEach(r => { const n = r.querySelector('.faction-name').value; if(n) factions[n] = r.querySelector('.faction-value').value; }); renderApp(); };
-        window.resetApp = () => { window.customConfirm("Alles löschen?", () => location.reload()); };
-        window.confirmDeleteEvent = () => { const id = parseInt(document.getElementById('editId').value); window.customConfirm("Löschen?", () => { events = events.filter(e => e.id !== id); document.getElementById('editId').value = ""; window.closeModal('editModal', true); renderApp(); }); };
-        function copyToClipboard(t) { const d = document.createElement("input"); document.body.appendChild(d); d.value = t; d.select(); document.execCommand("copy"); document.body.removeChild(d); }
-        function showCopySuccess(t) { const m = document.getElementById('copySuccessMsg'); m.textContent = t; m.classList.remove('opacity-0'); setTimeout(() => m.classList.add('opacity-0'), 2000); }
-        window.customAlert = (msg) => { document.getElementById('dialogMessage').textContent = msg; document.getElementById('dialogButtons').innerHTML = `<button onclick="window.closeDialog()" class="px-6 py-2 bg-blue-600 rounded text-white text-sm font-bold">OK</button>`; document.getElementById('dialogModal').classList.remove('opacity-0', 'pointer-events-none'); };
-        window.customConfirm = (msg, onC) => { document.getElementById('dialogMessage').textContent = msg; window._cC = onC; document.getElementById('dialogButtons').innerHTML = `<button onclick="window.closeDialog()" class="px-4 py-2 bg-gray-800 rounded text-gray-300 text-xs">Abbrechen</button><button onclick="window.exC()" class="px-4 py-2 bg-red-600 rounded text-white text-xs font-bold">Bestätigen</button>`; document.getElementById('dialogModal').classList.remove('opacity-0', 'pointer-events-none'); };
-        window.closeDialog = () => { document.getElementById('dialogModal').classList.add('opacity-0', 'pointer-events-none'); };
-        window.exC = () => { if(window._cC) window._cC(); window.closeDialog(); };
-        document.getElementById('modalNotes').addEventListener('input', e => { if(currentOpenEventId) eventNotes[currentOpenEventId] = e.target.value; });
-        
-        // Swipe Event Listeners
-        const slideCard = document.getElementById('slideCard');
-        slideCard.addEventListener('touchstart', e => { touchstartX = e.changedTouches[0].screenX; }, false);
-        slideCard.addEventListener('touchend', e => { touchendX = e.changedTouches[0].screenX; handleSwipe(); }, false);
-        slideCard.addEventListener('mousedown', e => { touchstartX = e.screenX; }, false);
-        slideCard.addEventListener('mouseup', e => { touchendX = e.screenX; handleSwipe(); }, false);
+        window.openEditModal = (id = null) => {
+            const e = events.find(ev => ev.id === id) || { act: "Akt I", title: "", icon: "Rocket", fluff: "", description: "" };
+            document.getElementById('editId').value = id || "";
+            document.getElementById('editAct').value = e.act;
+            document.getElementById('editTitle').value = e.title;
+            document.getElementById('editFluff').value = e.fluff;
+            document.getElementById('editDesc').value = e.description;
+            window.renderIconSelection(e.icon);
+            document.getElementById('editModal').classList.remove('opacity-0', 'pointer-events-none');
+        };
 
-        window.addEventListener('load', () => { const s = new URLSearchParams(window.location.search).get('scenario'); if(s) { const dec = decodeScenario(s); if(dec) applyImportedData(JSON.parse(dec)); window.history.replaceState({}, "", window.location.pathname); } });
-        applyFontsAndTheme(appFontHeading, appFontBody, themeSettings);
-        renderApp();
+        window.renderIconSelection = (s) => {
+            const c = document.getElementById('iconSelectionContainer');
+            const list = ["Rocket", "Zap", "Target", "MapPin", "Skull", "Radio", "Crosshair", "AlertCircle", "Eye", "Terminal", "Users", "Lock"];
+            c.innerHTML = list.map(i => `<button onclick="window.selectIcon('${i}')" class="p-3 border-2 rounded-theme ${s===i?'border-accent bg-accent/20 text-accent':'opacity-40 border-gray-700'}">${icons[i]}</button>`).join('');
+            document.getElementById('editIcon').value = s;
+        };
+
+        window.selectIcon = (i) => window.renderIconSelection(i);
+
+        window.closeModal = (id) => document.getElementById(id).classList.add('opacity-0', 'pointer-events-none');
+
+        // Import / Export Logic (Manual File Persistence)
+        window.exportToJSON = () => {
+            const data = { appTitle, events, factions, locationsData, checkedIds: Array.from(checkedIds), collapsedActs: Array.from(collapsedActs) };
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `scenario-log-${new Date().toISOString().slice(0,10)}.json`;
+            a.click();
+        };
+
+        window.handleImport = (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    appTitle = data.appTitle || "Scenario Log";
+                    events = data.events || [];
+                    factions = data.factions || {};
+                    locationsData = data.locationsData || {};
+                    checkedIds = new Set(data.checkedIds || []);
+                    collapsedActs = new Set(data.collapsedActs || []);
+                    renderApp();
+                } catch (err) { alert("Fehler beim Import der Datei."); }
+            };
+            reader.readAsText(file);
+        };
+
+        window.resetApp = () => { if(confirm("Sicher? Alle ungespeicherten Daten gehen verloren.")) { events=[]; renderApp(); } };
+
+        // Initial Start
+        window.onload = () => { renderApp(); };
+
+        // Slideshow logic (basic)
+        window.startSlideshow = () => {
+            if (events.length === 0) return;
+            slideshowIndex = 0;
+            document.getElementById('slideshowModal').classList.remove('opacity-0', 'pointer-events-none');
+            updateSlide();
+        };
+        function updateSlide() {
+            const e = events[slideshowIndex];
+            document.getElementById('slideEventTitle').textContent = e.title;
+            document.getElementById('slideFluff').innerHTML = marked.parse(e.fluff || "");
+            document.getElementById('slideDesc').innerHTML = marked.parse(e.description || "");
+            document.getElementById('slideCounter').textContent = `Ereignis ${slideshowIndex + 1} / ${events.length}`;
+            document.getElementById('slideEventIcon').innerHTML = icons[e.icon] || icons.Rocket;
+        }
+        window.nextSlide = () => { slideshowIndex = (slideshowIndex + 1) % events.length; updateSlide(); };
+        window.prevSlide = () => { slideshowIndex = (slideshowIndex - 1 + events.length) % events.length; updateSlide(); };
+
+        // Drag & Drop
+        window.handleDragStart = (e, id) => { draggedEventId = id; e.target.classList.add('dragging'); };
+        window.handleDragOver = (e) => { e.preventDefault(); e.target.closest('[data-drag-id], .act-drop-zone')?.classList.add('drag-over'); };
+        window.handleDragLeave = (e) => e.target.closest('[data-drag-id], .act-drop-zone')?.classList.remove('drag-over');
+        window.handleDragEnd = (e) => e.target.classList.remove('dragging');
+        window.handleDrop = (e, targetId, targetAct) => {
+            e.preventDefault();
+            const dIdx = events.findIndex(ev => ev.id === draggedEventId);
+            if (dIdx === -1) return;
+            const [item] = events.splice(dIdx, 1);
+            item.act = targetAct;
+            const tIdx = targetId ? events.findIndex(ev => ev.id === targetId) : -1;
+            if (tIdx > -1) events.splice(tIdx, 0, item); else events.push(item);
+            renderApp();
+        };
+        window.toggleAct = (a) => { collapsedActs.has(a) ? collapsedActs.delete(a) : collapsedActs.add(a); renderApp(); };
     </script>
-    
-    <!-- CHANGE LOG v1.17.0
-    - Hinzugefügt: Swipe-Gesten (Wischen) zur Navigation in der Diashow (Mobil & Desktop).
-    - Hinzugefügt: "Resume"-Logik. Beim Speichern eines Events aus der Diashow kehrt man direkt zum aktuellen Slide zurück.
-    - Verbessert: Diashow-Layout optimiert (kleinere Figuren-Chips, weniger Padding) für deutlich mehr Platz für Vorlesetexte.
-    -->
 </body>
 </html>
