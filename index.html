@@ -248,28 +248,10 @@
     
     <div id="dialogModal" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-300"><div class="bg-surface border border-gray-600 rounded-theme max-sm w-full mx-4 p-6 text-center shadow-2xl"><p id="dialogMessage" class="mb-6"></p><div class="flex justify-center gap-3" id="dialogButtons"></div></div></div>
 
-<<<<<<< HEAD
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, onAuthStateChanged, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, getDoc, collection } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-=======
-    <div id="locationManagerModal" class="fixed inset-0 z-[70] flex items-center justify-center bg-black/90 backdrop-blur-md opacity-0 pointer-events-none transition-opacity duration-300">
-        <div class="bg-surface border border-emerald-500/50 rounded-theme max-w-3xl w-full mx-4 shadow-2xl flex flex-col max-h-[90vh]">
-            <div class="p-4 border-b border-gray-800 flex justify-between items-center shrink-0">
-                <h3 class="text-xl font-bold text-emerald-400 uppercase tracking-wider">Schauplatz-Verwaltung</h3>
-                <button onclick="window.closeModal('locationManagerModal')" class="text-gray-500 hover:text-red-500 p-1"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-width="2"></path></svg></button>
-            </div>
-            <div class="p-6 overflow-y-auto flex-1 space-y-6">
-                <p class="text-xs text-gray-400 italic">Hier kannst du Beschreibungen für alle Schauplätze hinterlegen. Diese erscheinen, wenn du auf einen Orts-Tag klickst.</p>
-                <div id="locationManagerList" class="space-y-4"></div>
-            </div>
-            <div class="p-4 border-t border-gray-800 flex justify-end gap-3 shrink-0">
-                <button onclick="window.closeModal('locationManagerModal')" class="px-6 py-2 bg-emerald-600 rounded font-bold text-white">Fertig</button>
-            </div>
-        </div>
-    </div>
->>>>>>> 7d35c37814fe491406b4357621b89e68f2ff55aa
 
         const firebaseConfig = JSON.parse(__firebase_config);
         const app = initializeApp(firebaseConfig);
@@ -281,175 +263,6 @@
         let isInitialLoad = true;
         let dataLoadedFromURL = false;
 
-<<<<<<< HEAD
-=======
-                <div class="h-px bg-gray-800"></div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <label class="block text-gray-400 uppercase text-[10px] mb-1 font-bold">Terminal Titel</label>
-                        <div class="input-container">
-                            <input type="text" id="editAppTitle" placeholder="Titel..." class="w-full bg-black/20 border border-gray-700 rounded-theme p-2 focus:border-accent outline-none">
-                            <button class="clear-btn" onclick="window.clearInput('editAppTitle')">×</button>
-                        </div>
-                    </div>
-                    <div>
-                        <label class="block text-gray-400 uppercase text-[10px] mb-1 font-bold">Untertitel</label>
-                        <div class="input-container">
-                            <input type="text" id="editAppSubtitle" placeholder="Untertitel..." class="w-full bg-black/20 border border-gray-700 rounded-theme p-2 focus:border-accent outline-none">
-                            <button class="clear-btn" onclick="window.clearInput('editAppSubtitle')">×</button>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <label class="block text-gray-400 uppercase text-[10px] mb-1 font-bold">Überschriften-Font</label>
-                        <select id="selectFontHeading" onchange="window.updateCustomTheme()" class="w-full bg-black/20 border border-gray-700 rounded-theme p-2 outline-none text-sm">
-                            <option value="Orbitron">Orbitron (Cyber)</option>
-                            <option value="Bebas Neue">Bebas Neue (Impact)</option>
-                            <option value="Rajdhani">Rajdhani (Tech)</option>
-                            <option value="Space Grotesk">Space Grotesk (Modern)</option>
-                            <option value="JetBrains Mono">JetBrains Mono (Code)</option>
-                            <option value="Montserrat">Montserrat (Standard)</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-gray-400 uppercase text-[10px] mb-1 font-bold">Text-Font</label>
-                        <select id="selectFontBody" onchange="window.updateCustomTheme()" class="w-full bg-black/20 border border-gray-700 rounded-theme p-2 outline-none text-sm">
-                            <option value="Inter">Inter (Clean)</option>
-                            <option value="Roboto">Roboto (Classic)</option>
-                            <option value="Lexend">Lexend (Readable)</option>
-                            <option value="JetBrains Mono">JetBrains Mono (Monospace)</option>
-                            <option value="Fira Code">Fira Code (Terminal)</option>
-                            <option value="Open Sans">Open Sans (Sans)</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="h-px bg-gray-800"></div>
-
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div><label class="block text-gray-400 text-[10px] mb-1 uppercase">Hintergrund</label><input type="color" id="themeColorBg" oninput="window.updateCustomTheme()" class="color-preview"></div>
-                    <div><label class="block text-gray-400 text-[10px] mb-1 uppercase">Oberfläche</label><input type="color" id="themeColorSurface" oninput="window.updateCustomTheme()" class="color-preview"></div>
-                    <div><label class="block text-gray-400 text-[10px] mb-1 uppercase">Schrift</label><input type="color" id="themeColorText" oninput="window.updateCustomTheme()" class="color-preview"></div>
-                    <div><label class="block text-gray-400 text-[10px] mb-1 uppercase">Akzent</label><input type="color" id="themeColorAccent" oninput="window.updateCustomTheme()" class="color-preview"></div>
-                </div>
-                <div><label class="block text-gray-400 text-[10px] mb-1 uppercase font-bold tracking-widest">Radius: <span id="radiusLabel">8px</span></label><input type="range" id="themeRadius" min="0" max="24" step="2" oninput="window.updateCustomTheme()" class="w-full accent-blue-600"></div>
-            </div>
-            <div class="p-4 border-t border-gray-800 bg-black/20 flex justify-end gap-3 shrink-0"><button onclick="window.closeModal('headerModal', true)" class="px-4 py-2 bg-gray-800 text-gray-300 rounded text-sm">Abbrechen</button><button onclick="window.saveHeader(); window.closeModal('headerModal')" class="px-6 py-2 bg-accent hover:opacity-90 rounded-theme font-bold text-white transition-opacity">Design Speichern</button></div>
-        </div>
-    </div>
-
-    <div id="exportModal" class="fixed inset-0 z-[60] flex items-center justify-center bg-black/90 backdrop-blur-md opacity-0 pointer-events-none transition-opacity duration-300">
-        <div class="bg-surface border border-gray-500/50 rounded-theme max-w-2xl w-full mx-4 shadow-2xl flex flex-col max-h-[90vh]">
-            <div class="p-4 border-b border-gray-800 flex justify-between items-center shrink-0"><h3 class="text-xl font-bold text-gray-300 uppercase tracking-wider">Export</h3><button onclick="window.closeModal('exportModal')" class="text-gray-500 hover:text-red-500 p-1"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-width="2"></path></svg></button></div>
-            <div class="p-6 flex-1 flex flex-col gap-4"><textarea id="exportTextarea" readonly class="w-full h-32 bg-black/20 border border-gray-700 rounded p-3 text-xs text-accent/80 font-mono outline-none resize-none"></textarea><div id="copySuccessMsg" class="text-accent text-sm font-bold opacity-0 transition-opacity text-center">Kopiert!</div></div>
-            <div class="p-4 border-t border-gray-800 flex flex-wrap justify-end gap-2"><button onclick="window.closeModal('exportModal')" class="px-4 py-2 bg-gray-800 text-gray-300 text-xs rounded">Schließen</button><button onclick="window.generateAndCopyShareLink()" class="px-4 py-2 bg-purple-600 rounded text-white text-xs">Link</button><button onclick="window.copySeedToClipboard()" class="px-4 py-2 bg-purple-900/40 text-purple-300 text-xs rounded">Seed</button><button onclick="window.copyExportToClipboard()" class="px-4 py-2 bg-gray-700 text-white text-xs rounded">JSON</button><button onclick="window.triggerDownloadFile()" class="px-4 py-2 bg-accent rounded text-white text-xs">Download</button></div>
-        </div>
-    </div>
-
-    <div id="importModal" class="fixed inset-0 z-[60] flex items-center justify-center bg-black/90 backdrop-blur-md opacity-0 pointer-events-none transition-opacity duration-300">
-        <div class="bg-surface border border-blue-500/50 rounded-theme max-xl w-full mx-4 shadow-2xl flex flex-col max-h-[90vh]">
-            <div class="p-4 border-b border-gray-800 flex justify-between items-center shrink-0"><h3 class="text-xl font-bold text-gray-300 uppercase tracking-wider">Import</h3><button onclick="window.closeModal('importModal')" class="text-gray-500 hover:text-red-500 p-1"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-width="2"></path></svg></button></div>
-            <div class="p-6 space-y-6 flex-1 overflow-y-auto"><button onclick="document.getElementById('importFile').click()" class="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded text-gray-200">JSON Datei auswählen</button><div class="flex gap-2"><input type="text" id="importUrlInput" class="flex-1 bg-black/20 border border-gray-700 rounded p-2 text-sm" placeholder="URL..."><button onclick="window.importFromUrl()" class="px-4 bg-blue-900/40 rounded text-blue-400 font-bold text-xs uppercase">Laden</button></div><div class="space-y-3"><div class="flex gap-2"><input type="text" id="importSeedInput" class="flex-1 bg-black/20 border border-gray-700 rounded p-2 text-xs text-purple-400" placeholder="Seed..."><button onclick="window.importFromSeedText()" class="px-4 bg-purple-900/40 rounded text-purple-300 font-bold text-xs uppercase">OK</button></div><textarea id="importJsonInput" class="w-full h-24 bg-black/20 border border-gray-700 rounded p-2 text-xs text-green-500/70 font-mono" placeholder='JSON Text...'></textarea><button onclick="window.importFromJsonText()" class="w-full py-2 bg-gray-800 rounded text-gray-300 font-bold text-xs">JSON laden</button></div></div>
-        </div>
-    </div>
-
-    <div id="editModal" class="fixed inset-0 z-[60] flex items-center justify-center bg-black/90 backdrop-blur-md opacity-0 pointer-events-none transition-opacity duration-300">
-        <div class="bg-surface border border-blue-500/50 rounded-theme max-w-3xl w-full mx-4 shadow-2xl flex flex-col max-h-[95vh]">
-            <div class="p-4 border-b border-gray-800 flex justify-between items-center shrink-0"><h3 class="text-xl font-bold text-blue-400 uppercase tracking-wider">Bearbeiten</h3><button onclick="window.closeModal('editModal', true)" class="text-gray-500 hover:text-red-500 p-1"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-width="2"></path></svg></button></div>
-            <div class="p-6 overflow-y-auto space-y-5 flex-1 text-sm"><input type="hidden" id="editId">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                    <div>
-                        <label class="block text-gray-400 text-xs mb-1 uppercase font-bold">Akt</label>
-                        <div class="input-container">
-                            <input type="text" id="editAct" list="actDatalist" placeholder="Akt Name..." class="w-full bg-black/20 border border-gray-700 rounded p-2 outline-none">
-                            <button class="clear-btn" onclick="window.clearInput('editAct')">×</button>
-                        </div>
-                    </div>
-                    <div>
-                        <label class="block text-gray-400 text-xs mb-1 uppercase font-bold">Titel</label>
-                        <div class="input-container">
-                            <input type="text" id="editTitle" placeholder="Event Titel..." class="w-full bg-black/20 border border-gray-700 rounded p-2 outline-none">
-                            <button class="clear-btn" onclick="window.clearInput('editTitle')">×</button>
-                        </div>
-                    </div>
-                </div>
-                <div class="flex items-center gap-3"><input type="checkbox" id="editTypeCheckbox" class="w-5 h-5 rounded bg-black/20 border-gray-700 text-blue-600"><span class="text-gray-400 font-bold uppercase text-xs">Notwendig</span></div>
-                <div><label class="block text-gray-400 text-xs mb-2 uppercase font-bold tracking-wider">Symbol auswählen</label><div id="iconSelectionContainer" class="flex flex-wrap gap-2 p-2 bg-black/20 rounded-theme border border-gray-800"></div><input type="hidden" id="editIcon"></div>
-                
-                <div>
-                    <label class="block text-blue-400/80 text-xs mb-1 uppercase font-bold">Vorlesetext (MD)</label>
-                    <div id="tb_fluff" class="md-toolbar"></div>
-                    <textarea id="editFluff" class="w-full bg-black/20 border border-gray-700 rounded-b p-2 text-blue-200 italic min-h-[100px]"></textarea>
-                </div>
-                
-                <div>
-                    <label class="block text-gray-400 text-xs mb-1 uppercase font-bold">GM Info (MD)</label>
-                    <div id="tb_desc" class="md-toolbar"></div>
-                    <textarea id="editDesc" class="w-full bg-black/20 border border-gray-700 rounded-b p-2 min-h-[150px]"></textarea>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                    <div>
-                        <label class="block text-gray-400 text-xs mb-1 uppercase">Schauplätze (Klick zum Editieren)</label>
-                        <div class="flex gap-2 mb-2">
-                            <div class="input-container">
-                                <input type="text" id="tagInputLocations" list="locationsDatalist" placeholder="Ort..." class="flex-1 bg-black/20 border border-gray-700 rounded p-2 w-full">
-                                <button class="clear-btn" onclick="window.clearInput('tagInputLocations')">×</button>
-                            </div>
-                            <button onclick="window.addTag('Locations')" class="px-3 bg-gray-800 rounded">+</button>
-                        </div>
-                        <div id="tagListLocations" class="flex flex-wrap gap-2"></div>
-                    </div>
-                    <div>
-                        <label class="block text-gray-400 text-xs mb-1 uppercase">Figuren</label>
-                        <div class="flex gap-2 mb-2">
-                            <div class="input-container">
-                                <input type="text" id="tagInputFigures" list="factionsDatalist" placeholder="Figur..." class="flex-1 bg-black/20 border border-gray-700 rounded p-2 w-full">
-                                <button class="clear-btn" onclick="window.clearInput('tagInputFigures')">×</button>
-                            </div>
-                            <button onclick="window.addTag('Figures')" class="px-3 bg-gray-800 rounded">+</button>
-                        </div>
-                        <div id="tagListFigures" class="flex flex-wrap gap-2"></div>
-                    </div>
-                </div>
-            </div>
-            <div class="p-4 border-t border-gray-800 flex justify-between items-center"><button id="btnDeleteEvent" onclick="window.confirmDeleteEvent()" class="px-4 py-2 bg-red-900/30 text-red-400 rounded hover:bg-red-800/60 transition-colors">Löschen</button><div class="flex gap-3"><button onclick="window.closeModal('editModal', true)" class="px-4 py-2 bg-gray-800 text-gray-300 rounded">Abbrechen</button><button onclick="window.saveEvent(); window.closeModal('editModal', true)" class="px-6 py-2 bg-blue-600 font-bold text-white rounded">Speichern</button></div></div>
-        </div>
-    </div>
-
-    <div id="factionModal" class="fixed inset-0 z-[60] flex items-center justify-center bg-black/90 backdrop-blur-md opacity-0 pointer-events-none transition-opacity duration-300">
-        <div class="bg-surface border border-orange-500/50 rounded-theme max-w-2xl w-full mx-4 shadow-2xl flex flex-col max-h-[90vh]">
-            <div class="p-4 border-b border-gray-800 flex justify-between items-center shrink-0"><h3 class="text-xl font-bold text-orange-400 uppercase tracking-wider">Figuren</h3><button onclick="window.closeModal('factionModal')" class="text-gray-500 hover:text-red-500 p-1"><svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-width="2"></path></svg></button></div>
-            <div class="p-6 overflow-y-auto flex-1"><div id="factionList" class="space-y-2"></div><button onclick="window.addFactionRow()" class="mt-5 px-4 py-2 bg-gray-800 border border-gray-600 text-sm rounded">+ Neue Figur</button></div>
-            <div class="p-4 border-t border-gray-800 flex justify-end gap-3"><button onclick="window.closeModal('factionModal', true)" class="px-4 py-2 bg-gray-800 text-gray-300 rounded">Abbrechen</button><button onclick="window.saveFactions(); window.closeModal('factionModal')" class="px-6 py-2 bg-orange-600 rounded font-bold text-white">Speichern</button></div>
-        </div>
-    </div>
-
-    <div id="dialogModal" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-300">
-        <div class="bg-surface border border-gray-600 rounded-theme max-sm w-full mx-4 p-6 text-center shadow-2xl"><p id="dialogMessage" class="mb-6"></p><div class="flex justify-center gap-3" id="dialogButtons"></div></div>
-    </div>
-
-    <!-- Firebase SDK Imports -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        // Firebase Configuration
-        const firebaseConfig = JSON.parse(__firebase_config);
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-
-        // State Tracking for Persistence
-        let currentUser = null;
-        let isInitialLoad = true;
-
->>>>>>> 7d35c37814fe491406b4357621b89e68f2ff55aa
         marked.setOptions({ breaks: true, gfm: true });
 
         const icons = {
@@ -514,7 +327,6 @@
         let scrollDirection = 1; 
         let scrollPause = 0;
 
-<<<<<<< HEAD
         const saveToCloud = async () => {
             if (!currentUser || isInitialLoad) return;
             const data = JSON.parse(getExportData());
@@ -522,12 +334,7 @@
                 await setDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'settings', 'state'), data);
             } catch (error) { console.error("Cloud Save Error:", error); }
         };
-=======
-        let touchstartX = 0;
-        let touchendX = 0;
->>>>>>> 7d35c37814fe491406b4357621b89e68f2ff55aa
 
-<<<<<<< HEAD
         const initAuth = async () => {
             if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
                 await signInWithCustomToken(auth, __initial_auth_token);
@@ -544,42 +351,6 @@
             finally { isInitialLoad = false; }
         };
 
-=======
-        // Persistence Logic (Firestore)
-        const saveToCloud = async () => {
-            if (!currentUser || isInitialLoad) return;
-            const data = JSON.parse(getExportData());
-            try {
-                await setDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'settings', 'state'), data);
-            } catch (error) {
-                console.error("Fehler beim Speichern:", error);
-            }
-        };
-
-        const initAuth = async () => {
-            if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                await signInWithCustomToken(auth, __initial_auth_token);
-            } else {
-                await signInAnonymously(auth);
-            }
-        };
-
-        const loadFromCloud = async (user) => {
-            if (!user) return;
-            try {
-                const docRef = doc(db, 'artifacts', appId, 'users', user.uid, 'settings', 'state');
-                const docSnap = await getDoc(docRef);
-                if (docSnap.exists()) {
-                    applyImportedData(docSnap.data());
-                }
-            } catch (error) {
-                console.error("Fehler beim Laden:", error);
-            } finally {
-                isInitialLoad = false;
-            }
-        };
-
->>>>>>> 7d35c37814fe491406b4357621b89e68f2ff55aa
         function hexToRgb(hex) {
             const r = parseInt(hex.slice(1, 3), 16);
             const g = parseInt(hex.slice(3, 5), 16);
@@ -683,11 +454,7 @@
                 html += `<div class="act-drop-zone" ondragover="window.handleDragOver(event)" ondragleave="window.handleDragLeave(event)" ondrop="window.handleDrop(event, null, '${actName}')"></div></div></div>`;
             }
             app.innerHTML = html + `</div>`;
-<<<<<<< HEAD
             saveToCloud();
-=======
-            saveToCloud(); // Auto-Save
->>>>>>> 7d35c37814fe491406b4357621b89e68f2ff55aa
         }
 
         // Slideshow
@@ -728,19 +495,7 @@
             window.openEditModal(e.id);
         };
 
-<<<<<<< HEAD
         function updateSlideshowView() {
-=======
-        function handleSwipe() {
-            const diffX = touchstartX - touchendX;
-            if (Math.abs(diffX) > 50) {
-                if (diffX > 0) window.nextSlide();
-                else window.prevSlide();
-            }
-        }
-
-        function updateSlideshowView() {
->>>>>>> 7d35c37814fe491406b4357621b89e68f2ff55aa
             const e = flatEvents[slideshowIndex]; if (!e) return;
             document.getElementById('slideActTitle').textContent = e.actName.toUpperCase();
             document.getElementById('slideEventTitle').textContent = e.title;
@@ -791,81 +546,11 @@
         window.nextSlide = () => { slideshowIndex = (slideshowIndex < flatEvents.length - 1) ? slideshowIndex + 1 : 0; updateSlideshowView(); };
         window.prevSlide = () => { slideshowIndex = (slideshowIndex > 0) ? slideshowIndex - 1 : flatEvents.length - 1; updateSlideshowView(); };
 
-<<<<<<< HEAD
         // Interaction Logic
         window.toggleAct = (a) => { collapsedActs.has(a) ? collapsedActs.delete(a) : collapsedActs.add(a); renderApp(); };
         window.toggleCheckbox = (ev, id) => { ev.stopPropagation(); checkedIds.has(id) ? checkedIds.delete(id) : checkedIds.add(id); renderApp(); };
         window.expandAllEvents = () => { events.forEach(e => expandedIds.add(e.id)); renderApp(); };
         window.collapseAllEvents = () => { expandedIds.clear(); renderApp(); };
-=======
-        window.clearInput = (id) => { const el = document.getElementById(id); if(el) { el.value = ""; el.focus(); } };
-
-        window.openLocationManager = (targetLoc = null) => {
-            const l = document.getElementById('locationManagerList'); l.innerHTML = "";
-            const allUsedLocations = [...new Set(events.flatMap(e => e.locations || []))];
-            const editModalOpen = !document.getElementById('editModal').classList.contains('opacity-0');
-            const currentEditingLocs = editModalOpen ? currentEditingTags.Locations : [];
-            const uniqueLocs = [...new Set([...allUsedLocations, ...currentEditingLocs])];
-            uniqueLocs.forEach(loc => { if(!locationsData[loc]) locationsData[loc] = ""; });
-            
-            uniqueLocs.sort().forEach(locName => {
-                const desc = locationsData[locName] || "";
-                l.insertAdjacentHTML('beforeend', `
-                    <div id="loc-editor-${locName.replace(/\s+/g, '-')}" class="bg-black/20 p-4 border border-gray-800 rounded-theme">
-                        <div class="flex justify-between items-center mb-2">
-                            <span class="text-emerald-400 font-bold uppercase text-xs tracking-widest">📍 ${locName}</span>
-                            <button onclick="window.deleteLocation('${locName}')" class="text-red-500/50 hover:text-red-500 text-xs">Entfernen</button>
-                        </div>
-                        <textarea placeholder="Schreibe hier Infos über diesen Ort..." 
-                            oninput="window.updateLocationDesc('${locName}', this.value)"
-                            class="w-full bg-surface border border-gray-700 rounded p-2 text-sm text-gray-300 min-h-[80px] outline-none focus:border-emerald-500">${desc}</textarea>
-                    </div>
-                `);
-            });
-            document.getElementById('locationManagerModal').classList.remove('opacity-0', 'pointer-events-none');
-            
-            if (targetLoc) {
-                setTimeout(() => {
-                    const el = document.getElementById(`loc-editor-${targetLoc.replace(/\s+/g, '-')}`);
-                    if (el) { el.scrollIntoView({ behavior: 'smooth', block: 'center' }); el.classList.add('ring-2', 'ring-emerald-500'); setTimeout(() => el.classList.remove('ring-2', 'ring-emerald-500'), 2000); }
-                }, 100);
-            }
-        };
-
-        window.updateLocationDesc = (name, val) => { 
-            locationsData[name] = val; 
-            if(!document.getElementById('editModal').classList.contains('opacity-0')) window.renderEditTags('Locations');
-            saveToCloud();
-        };
-        window.deleteLocation = (name) => { window.customConfirm(`Beschreibung für "${name}" löschen?`, () => { delete locationsData[name]; window.openLocationManager(); saveToCloud(); }); };
-        
-        window.viewLocationDetails = (ev, name) => {
-            if(ev) ev.stopPropagation();
-            const desc = locationsData[name] || "*Keine Beschreibung hinterlegt.*";
-            document.getElementById('locViewTitle').textContent = name;
-            document.getElementById('locViewDesc').innerHTML = marked.parse(desc);
-            const btnEdit = document.getElementById('btnEditLocationShortcut');
-            btnEdit.onclick = () => { window.closeModal('locationViewModal'); window.openLocationManager(name); };
-            document.getElementById('locationViewModal').classList.remove('opacity-0', 'pointer-events-none');
-        };
-
-        window.closeModal = (id, skipSave = false) => { 
-            if(!skipSave) {
-                if(id === 'factionModal') window.saveFactions();
-                if(id === 'headerModal') window.saveHeader();
-            }
-            if(id === 'slideshowModal') {
-                clearInterval(slideshowInterval); 
-                clearInterval(autoScrollInterval);
-            }
-            document.getElementById(id).classList.add('opacity-0', 'pointer-events-none'); 
-        };
-        
-        window.toggleAct = (a) => { collapsedActs.has(a) ? collapsedActs.delete(a) : collapsedActs.add(a); renderApp(); };
-        window.toggleCheckbox = (ev, id) => { ev.stopPropagation(); checkedIds.has(id) ? checkedIds.delete(id) : checkedIds.add(id); renderApp(); };
-        window.expandAllEvents = () => { events.forEach(e => expandedIds.add(e.id)); renderApp(); };
-        window.collapseAllEvents = () => { expandedIds.clear(); renderApp(); };
->>>>>>> 7d35c37814fe491406b4357621b89e68f2ff55aa
         window.handleInteraction = (ev, id) => { 
             const t = Date.now(); 
             if(t - (clickTimers[id] || 0) < 300) { clearTimeout(clickTimers['t'+id]); window.openEventModal(id); } 
@@ -895,17 +580,9 @@
             const data = { id, act: document.getElementById('editAct').value, title: document.getElementById('editTitle').value, type: document.getElementById('editTypeCheckbox').checked ? "Notwendig" : "Optional", icon: document.getElementById('editIcon').value, fluff: document.getElementById('editFluff').value, description: document.getElementById('editDesc').value, locations: currentEditingTags.Locations, figures: currentEditingTags.Figures }; 
             const idx = events.findIndex(e => e.id === id); if(idx > -1) events[idx] = data; else events.push(data); 
             renderApp(); 
-<<<<<<< HEAD
             if(isEditingFromSlideshow) { isEditingFromSlideshow = false; window.startSlideshow(slideshowIndex); }
-=======
-            if(isEditingFromSlideshow) {
-                isEditingFromSlideshow = false;
-                window.startSlideshow(slideshowIndex);
-            }
->>>>>>> 7d35c37814fe491406b4357621b89e68f2ff55aa
         };
 
-<<<<<<< HEAD
         window.addTag = (t) => { const i = document.getElementById(`tagInput${t}`); const v = i.value.trim(); if(v && !currentEditingTags[t].includes(v)){ currentEditingTags[t].push(v); i.value=""; window.renderEditTags(t); if(t === 'Locations' && !locationsData[v]) locationsData[v] = ""; } };
         window.removeTag = (t, idx) => { currentEditingTags[t].splice(idx,1); window.renderEditTags(t); };
         window.renderEditTags = (t) => { 
@@ -922,12 +599,6 @@
                 l.insertAdjacentHTML('beforeend', `<div class="bg-black/20 p-4 border border-gray-800 rounded-theme"><div class="flex justify-between items-center mb-2"><span class="text-emerald-400 font-bold uppercase text-xs tracking-widest">📍 ${locName}</span><button onclick="window.deleteLocation('${locName}')" class="text-red-500/50 hover:text-red-500 text-xs">Löschen</button></div><textarea oninput="window.updateLocationDesc('${locName}', this.value)" class="w-full bg-surface border border-gray-700 rounded p-2 text-sm text-gray-300 min-h-[80px] outline-none focus:border-emerald-500">${desc}</textarea></div>`);
             });
             document.getElementById('locationManagerModal').classList.remove('opacity-0', 'pointer-events-none');
-=======
-        window.saveHeader = () => { appTitle = document.getElementById('editAppTitle').value; appSubtitle = document.getElementById('editAppSubtitle').value; window.updateCustomTheme(); renderApp(); };
-        window.openHeaderModal = () => { 
-            document.getElementById('editAppTitle').value = appTitle; document.getElementById('editAppSubtitle').value = appSubtitle; document.getElementById('themeColorBg').value = themeSettings.bg; document.getElementById('themeColorSurface').value = themeSettings.surface; document.getElementById('themeColorText').value = themeSettings.text; document.getElementById('themeColorAccent').value = themeSettings.accent; document.getElementById('themeRadius').value = themeSettings.radius; document.getElementById('selectFontHeading').value = appFontHeading; document.getElementById('selectFontBody').value = appFontBody;
-            document.getElementById('headerModal').classList.remove('opacity-0', 'pointer-events-none'); 
->>>>>>> 7d35c37814fe491406b4357621b89e68f2ff55aa
         };
 
         window.updateLocationDesc = (name, val) => { locationsData[name] = val; saveToCloud(); };
@@ -972,15 +643,10 @@
         window.handleDragLeave = (e) => { const t = e.target.closest('[data-drag-id], .act-drop-zone'); if (t) t.classList.remove('drag-over'); };
         window.handleDrop = (e, targetId, targetAct) => { 
             e.preventDefault(); document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over')); if (draggedEventId === null) return; 
-<<<<<<< HEAD
             const dIdx = events.findIndex(ev => ev.id === draggedEventId); const [item] = events.splice(dIdx, 1); if (targetAct) item.act = targetAct; 
             if (targetId) { const nIdx = events.findIndex(ev => ev.id === targetId); events.splice(nIdx, 0, item); } else events.push(item); renderApp(); 
-=======
-            const dIdx = events.findIndex(ev => ev.id === draggedEventId); const tIdx = targetId ? events.findIndex(ev => ev.id === targetId) : -1; if (dIdx === -1) return; const [item] = events.splice(dIdx, 1); if (targetAct) item.act = targetAct; if (tIdx !== -1) { const nIdx = events.findIndex(ev => ev.id === targetId); events.splice(nIdx, 0, item); } else events.push(item); draggedEventId = null; renderApp(); 
->>>>>>> 7d35c37814fe491406b4357621b89e68f2ff55aa
         };
 
-<<<<<<< HEAD
         // Imports
         window.importFromJsonText = () => { 
             try { 
@@ -1037,82 +703,24 @@
         window.generateAndCopyShareLink = () => { copyToClipboard(window.location.origin + window.location.pathname + '?scenario=' + encodeScenario(getExportData())); window.showCopySuccess("Link kopiert!"); };
         window.triggerDownloadFile = () => { const blob = new Blob([getExportData()], { type: 'application/json' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `${appTitle.replace(/\s+/g,'_')}_save.json`; a.click(); URL.revokeObjectURL(url); };
 
-=======
-        window.openExportModal = () => { document.getElementById('exportTextarea').value = getExportData(); document.getElementById('exportModal').classList.remove('opacity-0', 'pointer-events-none'); };
-        window.copyExportToClipboard = () => { const tx = document.getElementById('exportTextarea'); tx.select(); document.execCommand('copy'); showCopySuccess("In Zwischenablage kopiert!"); };
-        window.copySeedToClipboard = () => { copyToClipboard(encodeScenario(getExportData())); showCopySuccess("Seed kopiert!"); };
-        window.generateAndCopyShareLink = () => { copyToClipboard(window.location.origin + window.location.pathname + '?scenario=' + encodeScenario(getExportData())); showCopySuccess("Link kopiert!"); };
-        window.importFromUrl = async () => { const url = document.getElementById('importUrlInput').value.trim(); if(!url) return; try { const res = await fetch(url); if(!res.ok) throw new Error(); applyImportedData(await res.json()); window.closeModal('importModal'); } catch(e){ window.customAlert("Fehler."); } };
-        window.importFromSeedText = () => { const dec = decodeScenario(document.getElementById('importSeedInput').value.trim()); if(dec) { applyImportedData(JSON.parse(dec)); window.closeModal('importModal'); } };
-        window.importFromJsonText = () => { try { applyImportedData(JSON.parse(document.getElementById('importJsonInput').value)); window.closeModal('importModal'); } catch(e){} };
-        window.handleImport = (e) => { const f = e.target.files[0]; if(f) { const r = new FileReader(); r.onload = (ev) => { try { applyImportedData(JSON.parse(ev.target.result)); window.closeModal('importModal'); } catch(ex){} }; r.readAsText(f); } };
-        window.triggerDownloadFile = function() { const blob = new Blob([getExportData()], { type: 'application/json' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `${appTitle.replace(/\s+/g, '_')}_Save.json`; a.click(); URL.revokeObjectURL(url); };
-        window.addTag = (t) => { const i = document.getElementById(`tagInput${t}`); const v = i.value.trim(); if(v && !currentEditingTags[t].includes(v)){ currentEditingTags[t].push(v); i.value=""; window.renderEditTags(t); if(t === 'Locations' && !locationsData[v]) locationsData[v] = ""; } };
-        window.removeTag = (t, idx) => { currentEditingTags[t].splice(idx,1); window.renderEditTags(t); };
-        window.renderEditTags = (t) => { document.getElementById(`tagList${t}`).innerHTML = currentEditingTags[t].map((tag, i) => { const isLoc = t === 'Locations'; const info = isLoc ? (locationsData[tag] || "Keine Information hinterlegt.") : ""; const clickAttr = isLoc ? `onclick="window.openLocationManager('${tag}')"` : ''; const styleAttr = isLoc ? 'cursor: pointer; text-decoration: underline; text-underline-offset: 2px;' : ''; return `<span class="bg-accent/10 border border-accent/20 text-accent px-2 py-1 rounded text-[10px] flex items-center gap-2" style="${styleAttr}" ${clickAttr} title="${info}">${tag}<button onclick="event.stopPropagation(); window.removeTag('${t}', ${i})" class="hover:text-red-400 font-bold ml-1">×</button></span>`; }).join(''); };
-        window.selectIcon = (i) => { document.getElementById('editIcon').value = i; window.renderIconSelection(i); };
-        window.openFactionModal = () => { const l = document.getElementById('factionList'); l.innerHTML = ""; Object.entries(factions).forEach(([n, f]) => l.insertAdjacentHTML('beforeend', window.createFactionRow(n, f))); document.getElementById('factionModal').classList.remove('opacity-0', 'pointer-events-none'); };
-        window.createFactionRow = (n='', f='') => `<div class="faction-row grid grid-cols-12 gap-2 mb-2"><div class="col-span-5 input-container"><input type="text" placeholder="Name" class="faction-name w-full bg-black/20 border border-gray-700 rounded p-1 text-xs outline-none" value="${n}"></div><div class="col-span-6 input-container"><input type="text" placeholder="Fraktion" class="faction-value w-full bg-black/20 border border-gray-700 rounded p-1 text-xs outline-none" value="${f}"></div><button onclick="this.parentElement.remove()" class="text-red-500 font-bold">×</button></div>`;
-        window.addFactionRow = () => document.getElementById('factionList').insertAdjacentHTML('beforeend', window.createFactionRow());
-        window.saveFactions = () => { factions = {}; document.querySelectorAll('.faction-row').forEach(r => { const n = r.querySelector('.faction-name').value; if(n) factions[n] = r.querySelector('.faction-value').value; }); renderApp(); };
-        window.resetApp = () => { window.customConfirm("Alles löschen?", () => { events = []; factions = {}; locationsData = {}; renderApp(); }); };
-        window.confirmDeleteEvent = () => { const id = parseInt(document.getElementById('editId').value); window.customConfirm("Löschen?", () => { events = events.filter(e => e.id !== id); document.getElementById('editId').value = ""; window.closeModal('editModal', true); renderApp(); }); };
->>>>>>> 7d35c37814fe491406b4357621b89e68f2ff55aa
         function copyToClipboard(t) { const d = document.createElement("input"); document.body.appendChild(d); d.value = t; d.select(); document.execCommand("copy"); document.body.removeChild(d); }
         window.showCopySuccess = (msg) => { const m = document.getElementById('copySuccessMsg'); m.textContent = msg; m.classList.remove('opacity-0'); setTimeout(() => m.classList.add('opacity-0'), 2000); };
         window.customAlert = (m) => { document.getElementById('dialogMessage').textContent = m; document.getElementById('dialogButtons').innerHTML = '<button onclick="window.closeDialog()" class="px-6 py-2 bg-blue-600 rounded text-white font-bold">OK</button>'; document.getElementById('dialogModal').classList.remove('opacity-0', 'pointer-events-none'); };
         window.customConfirm = (msg, onC) => { document.getElementById('dialogMessage').textContent = msg; window._cC = onC; document.getElementById('dialogButtons').innerHTML = `<button onclick="window.closeDialog()" class="px-4 py-2 bg-gray-800 rounded text-gray-300 text-xs">Abbrechen</button><button onclick="window.exC()" class="px-4 py-2 bg-red-600 rounded text-white text-xs font-bold">Bestätigen</button>`; document.getElementById('dialogModal').classList.remove('opacity-0', 'pointer-events-none'); };
         window.closeDialog = () => { document.getElementById('dialogModal').classList.add('opacity-0', 'pointer-events-none'); };
         window.exC = () => { if(window._cC) window._cC(); window.closeDialog(); };
-<<<<<<< HEAD
-=======
-        document.getElementById('modalNotes').addEventListener('input', e => { if(currentOpenEventId) { eventNotes[currentOpenEventId] = e.target.value; saveToCloud(); } });
-        
-        const slideCard = document.getElementById('slideCard');
-        slideCard.addEventListener('touchstart', e => { touchstartX = e.changedTouches[0].screenX; }, false);
-        slideCard.addEventListener('touchend', e => { touchendX = e.changedTouches[0].screenX; handleSwipe(); }, false);
-        slideCard.addEventListener('mousedown', e => { touchstartX = e.screenX; }, false);
-        slideCard.addEventListener('mouseup', e => { touchendX = e.screenX; handleSwipe(); }, false);
->>>>>>> 7d35c37814fe491406b4357621b89e68f2ff55aa
 
-<<<<<<< HEAD
         // Lifecycle
         window.addEventListener('load', async () => { 
             await initAuth();
-=======
-        window.addEventListener('load', async () => { 
-            await initAuth();
-            onAuthStateChanged(auth, (user) => {
-                currentUser = user;
-                if (user) loadFromCloud(user);
-            });
-
->>>>>>> 7d35c37814fe491406b4357621b89e68f2ff55aa
             const s = new URLSearchParams(window.location.search).get('scenario'); 
-<<<<<<< HEAD
             if(s) { const dec = decodeScenario(s); if(dec) { dataLoadedFromURL = true; applyImportedData(JSON.parse(dec)); } window.history.replaceState({}, "", window.location.pathname); } 
             onAuthStateChanged(auth, (user) => { currentUser = user; if (user && !dataLoadedFromURL) loadFromCloud(user); else if (user && dataLoadedFromURL) { isInitialLoad = false; saveToCloud(); } });
             setTimeout(() => { if(isInitialLoad) isInitialLoad = false; }, 3000);
-=======
-            if(s) { 
-                const dec = decodeScenario(s); 
-                if(dec) applyImportedData(JSON.parse(dec)); 
-                window.history.replaceState({}, "", window.location.pathname); 
-            } 
->>>>>>> 7d35c37814fe491406b4357621b89e68f2ff55aa
         });
 
         applyFontsAndTheme(appFontHeading, appFontBody, themeSettings);
         renderApp();
     </script>
-<<<<<<< HEAD
-=======
-    
-    <!-- CHANGE LOG v1.18.0
-    - Hinzugefügt: Automatisches Speichern deines Fortschritts (Persistenz).
-    - Hinzugefügt: Automatisches Laden des letzten Stands beim App-Start.
-    - Hinzugefügt: Cloud-Anbindung zur sicheren Datenspeicherung.
-    -->
->>>>>>> 7d35c37814fe491406b4357621b89e68f2ff55aa
 </body>
 </html>
