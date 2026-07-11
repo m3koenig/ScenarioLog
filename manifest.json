@@ -1,0 +1,90 @@
+{
+  "name": "Scenario Log",
+  "short_name": "ScenarioLog",
+  "description": "Eine professionelle Anwendung zur Verwaltung und Präsentation von Spielszenarien mit Drag-and-Drop, Diashow und Offline-Support",
+  "start_url": "/ScenarioLog/",
+  "scope": "/ScenarioLog/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "theme_color": "#030712",
+  "background_color": "#030712",
+  "categories": ["productivity", "utilities"],
+  "screenshots": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 540 720'><rect fill='%23030712' width='540' height='720'/><text x='50%' y='50%' font-size='48' fill='%2322c55e' text-anchor='middle' dominant-baseline='middle' font-family='Orbitron, monospace'>ScenarioLog</text></svg>",
+      "sizes": "540x720",
+      "type": "image/svg+xml",
+      "form_factor": "narrow"
+    },
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1280 720'><rect fill='%23030712' width='1280' height='720'/><text x='50%' y='50%' font-size='64' fill='%2322c55e' text-anchor='middle' dominant-baseline='middle' font-family='Orbitron, monospace'>ScenarioLog</text></svg>",
+      "sizes": "1280x720",
+      "type": "image/svg+xml",
+      "form_factor": "wide"
+    }
+  ],
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><defs><linearGradient id='grad' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' style='stop-color:%2322c55e;stop-opacity:1' /><stop offset='100%' style='stop-color:%231f2937;stop-opacity:1' /></linearGradient></defs><rect fill='url(%23grad)' width='192' height='192' rx='45'/><path d='M96 48L72 62v60l24 14 24-14V62Z' fill='%23030712' stroke='%23f3f4f6' stroke-width='2'/><path d='M96 122v30' stroke='%23f3f4f6' stroke-width='2'/><path d='M72 122h48' stroke='%23f3f4f6' stroke-width='2'/></svg>",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><defs><linearGradient id='grad2' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' style='stop-color:%2322c55e;stop-opacity:1' /><stop offset='100%' style='stop-color:%231f2937;stop-opacity:1' /></linearGradient></defs><rect fill='url(%23grad2)' width='192' height='192' rx='45'/><circle cx='96' cy='96' r='80' fill='none' stroke='%23f3f4f6' stroke-width='3'/><path d='M96 48L72 62v60l24 14 24-14V62Z' fill='%23f3f4f6'/></svg>",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    },
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><defs><linearGradient id='grad3' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' style='stop-color:%2322c55e;stop-opacity:1' /><stop offset='100%' style='stop-color:%231f2937;stop-opacity:1' /></linearGradient></defs><rect fill='url(%23grad3)' width='512' height='512' rx='120'/><path d='M256 128L192 165v160l64 37 64-37V165Z' fill='%23030712' stroke='%23f3f4f6' stroke-width='4'/><path d='M256 325v80' stroke='%23f3f4f6' stroke-width='4'/><path d='M192 325h128' stroke='%23f3f4f6' stroke-width='4'/></svg>",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Neue Szene",
+      "short_name": "Szene hinzufügen",
+      "description": "Füge eine neue Szene zum Szenario hinzu",
+      "url": "/ScenarioLog/?action=new-event",
+      "icons": [
+        {
+          "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 96'><rect fill='%2322c55e' width='96' height='96' rx='22'/><path d='M48 30v36M30 48h36' stroke='%23030712' stroke-width='3' stroke-linecap='round'/></svg>",
+          "sizes": "96x96",
+          "type": "image/svg+xml"
+        }
+      ]
+    },
+    {
+      "name": "Diashow starten",
+      "short_name": "Diashow",
+      "description": "Starte die Szenen-Diashow",
+      "url": "/ScenarioLog/?action=slideshow",
+      "icons": [
+        {
+          "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 96'><rect fill='%2322c55e' width='96' height='96' rx='22'/><path d='M35 25v46l35-23Z' fill='%23030712'/></svg>",
+          "sizes": "96x96",
+          "type": "image/svg+xml"
+        }
+      ]
+    }
+  ],
+  "share_target": {
+    "action": "/ScenarioLog/",
+    "method": "POST",
+    "enctype": "multipart/form-data",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url",
+      "files": [
+        {
+          "name": "scenario",
+          "accept": ["application/json", ".json"]
+        }
+      ]
+    }
+  }
+}
